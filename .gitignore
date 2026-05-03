@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.vite/
+*.cjs
+FULL_SOURCE.html
+_parts.json
