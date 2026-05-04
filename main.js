@@ -685,11 +685,63 @@ function initCheckout() {
       summary.innerHTML = CART.items.map(i => `<div class="checkout-item"><img src="${i.img}" alt=""/><div><strong>${i.name}</strong><p>${i.size ? 'Size: '+i.size : ''} × ${i.qty}</p><p>Rp ${(i.price*i.qty).toLocaleString('id-ID')}</p></div></div>`).join('') + `<div class="checkout-total"><strong>Total: Rp ${CART.total().toLocaleString('id-ID')}</strong></div>`;
     }
   }
-  form.addEventListener('submit', (e) => {
+  
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    CART.items = []; CART.save();
-    showToast('Pesanan berhasil! Terima kasih 🎉');
-    setTimeout(() => { window.location.href = '/'; }, 2000);
+    
+    if (CART.items.length === 0) {
+      alert("Keranjang belanja kosong!");
+      return;
+    }
+
+    const submitBtn = document.getElementById('btn-submit-checkout');
+    const errorEl = document.getElementById('checkout-error');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'MEMPROSES...';
+    errorEl.style.display = 'none';
+
+    try {
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+      
+      // Add cart items
+      payload.items = CART.items.map(item => ({
+        product_id: item.id, // backend expects the slug
+        quantity: item.qty,
+        size: item.size || null
+      }));
+
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Terjadi kesalahan saat memproses pesanan.');
+      }
+
+      // Success
+      CART.items = []; 
+      CART.save();
+      
+      showToast('Pesanan berhasil dibuat! 🎉');
+      
+      // Redirect to tracking page
+      setTimeout(() => { 
+        window.location.href = `/track-order.html?order_id=${data.order.order_number}&phone=${payload.customer_phone}`; 
+      }, 1500);
+
+    } catch (err) {
+      console.error(err);
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'BUAT PESANAN';
+    }
   });
 }
 

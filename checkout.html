@@ -214,33 +214,45 @@
           <div class="checkout-section">
             <h3>Informasi Pengiriman</h3>
             <div class="checkout-form-row">
-              <div class="checkout-form-group"><label>Nama Lengkap *</label><input type="text" required placeholder="Nama lengkap"/></div>
-              <div class="checkout-form-group"><label>Nomor HP *</label><input type="tel" required placeholder="08xxxxxxxxxx"/></div>
+              <div class="checkout-form-group"><label>Nama Lengkap *</label><input type="text" name="customer_name" required placeholder="Nama lengkap"/></div>
+              <div class="checkout-form-group"><label>Nomor HP *</label><input type="tel" name="customer_phone" required placeholder="08xxxxxxxxxx"/></div>
             </div>
-            <div class="checkout-form-group"><label>Email</label><input type="email" placeholder="email@example.com"/></div>
-            <div class="checkout-form-group"><label>Alamat Lengkap *</label><textarea rows="3" required placeholder="Jl. Nama Jalan No. XX, RT/RW, Kelurahan, Kecamatan"></textarea></div>
+            <div class="checkout-form-group"><label>Email</label><input type="email" name="customer_email" placeholder="email@example.com"/></div>
+            <div class="checkout-form-group"><label>Alamat Lengkap *</label><textarea rows="3" name="shipping_address" required placeholder="Jl. Nama Jalan No. XX, RT/RW, Kelurahan, Kecamatan"></textarea></div>
             <div class="checkout-form-row">
-              <div class="checkout-form-group"><label>Kota *</label><input type="text" required placeholder="Kota"/></div>
-              <div class="checkout-form-group"><label>Kode Pos *</label><input type="text" required placeholder="Kode pos"/></div>
+              <div class="checkout-form-group"><label>Kota *</label><input type="text" name="city" required placeholder="Kota"/></div>
+              <div class="checkout-form-group"><label>Kode Pos *</label><input type="text" name="postal_code" required placeholder="Kode pos"/></div>
             </div>
             <div class="checkout-form-group"><label>Provinsi *</label>
-              <select required>
+              <select name="province" required>
                 <option value="">Pilih Provinsi</option>
-                <option>DKI Jakarta</option><option>Jawa Barat</option><option>Jawa Tengah</option><option>Jawa Timur</option><option>Banten</option><option>DI Yogyakarta</option><option>Sumatera Utara</option><option>Sumatera Selatan</option><option>Sulawesi Selatan</option><option>Bali</option><option>Kalimantan Timur</option><option>Lainnya</option>
+                <option value="DKI Jakarta">DKI Jakarta</option>
+                <option value="Jawa Barat">Jawa Barat</option>
+                <option value="Jawa Tengah">Jawa Tengah</option>
+                <option value="Jawa Timur">Jawa Timur</option>
+                <option value="Banten">Banten</option>
+                <option value="DI Yogyakarta">DI Yogyakarta</option>
+                <option value="Sumatera Utara">Sumatera Utara</option>
+                <option value="Sumatera Selatan">Sumatera Selatan</option>
+                <option value="Sulawesi Selatan">Sulawesi Selatan</option>
+                <option value="Bali">Bali</option>
+                <option value="Kalimantan Timur">Kalimantan Timur</option>
+                <option value="Lainnya">Lainnya</option>
               </select>
             </div>
-            <div class="checkout-form-group"><label>Catatan (opsional)</label><textarea rows="2" placeholder="Catatan untuk pesanan..."></textarea></div>
+            <div class="checkout-form-group"><label>Catatan (opsional)</label><textarea rows="2" name="notes" placeholder="Catatan untuk pesanan..."></textarea></div>
           </div>
           <div class="checkout-section">
             <h3>Metode Pembayaran</h3>
             <div class="checkout-payment-opt">
-              <label><input type="radio" name="payment" value="transfer" checked/><span>Transfer Bank (BCA/Mandiri/BNI)</span></label>
-              <label><input type="radio" name="payment" value="ewallet"/><span>E-Wallet (OVO/GoPay/DANA)</span></label>
-              <label><input type="radio" name="payment" value="cod"/><span>COD (Bayar di Tempat)</span></label>
-              <label><input type="radio" name="payment" value="qris"/><span>QRIS</span></label>
+              <label><input type="radio" name="payment_method" value="transfer" checked/><span>Transfer Bank (BCA/Mandiri/BNI)</span></label>
+              <label><input type="radio" name="payment_method" value="ewallet"/><span>E-Wallet (OVO/GoPay/DANA)</span></label>
+              <label><input type="radio" name="payment_method" value="cod"/><span>COD (Bayar di Tempat)</span></label>
+              <label><input type="radio" name="payment_method" value="qris"/><span>QRIS</span></label>
             </div>
           </div>
-          <button type="submit" class="checkout-submit">BUAT PESANAN</button>
+          <button type="submit" id="btn-submit-checkout" class="checkout-submit">BUAT PESANAN</button>
+          <div id="checkout-error" style="color: #e74c3c; margin-top: 10px; font-size: 0.9rem; text-align: center; display: none;"></div>
         </div>
         <div>
           <div class="checkout-section">

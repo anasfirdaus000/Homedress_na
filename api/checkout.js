@@ -42,18 +42,18 @@ export default async function handler(req, res) {
     }
 
     // 3. GET REAL PRICES FROM DATABASE
-    const productIds = sanitized.items.map(i => i.product_id);
+    const productSlugs = sanitized.items.map(i => i.product_id); // frontend sends slug as product_id
     const { data: dbProducts, error: prodError } = await supabaseAdmin
       .from('products')
       .select('id, slug, name, price, images, is_active')
-      .in('id', productIds);
+      .in('slug', productSlugs);
 
     if (prodError) throw new Error('Gagal mengambil data produk: ' + prodError.message);
 
     // Check all products exist and are active
     const productMap = {};
     for (const p of (dbProducts || [])) {
-      productMap[p.id] = p;
+      productMap[p.slug] = p; // Map by slug
     }
 
     for (const item of sanitized.items) {
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
       const lineTotal = dbProd.price * item.quantity;
       subtotal += lineTotal;
       return {
-        product_id: item.product_id,
+        product_id: dbProd.id, // Use actual DB UUID
         product_name: dbProd.name,
         product_image: dbProd.images?.[0] || null,
         size: item.size,
