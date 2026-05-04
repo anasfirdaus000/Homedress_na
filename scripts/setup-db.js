@@ -207,6 +207,63 @@ const PRODUCTS = [
     ],
     social_proof: '🔥 Flash Sale — 120+ terjual minggu ini',
     related_ids: ['setelan-santai-mint-premium','setelan-hitam-olahraga-santai','dress-kasual-navy-blue','atasan-piyama-lengan-panjang']
+  },
+  {
+    slug: 'naila-set-vol2',
+    name: 'NAILA SET vol.2 - Setelan Kulot Rayon',
+    brand: 'HOMEDRESS_NA',
+    category: ['setelan', 'new-in', 'viral'],
+    price: 135000,
+    original_price: 199000,
+    discount: 32,
+    description: 'Perkenalkan Naila Set LD 120cm Setelan Wanita Atasan dan Celana Panjang Kulot Rayon Motif Bisa Busui. Sangat nyaman untuk beraktivitas seharian.',
+    details: ['Bahan: Rayon Adem', 'Ukuran: LD 120cm', 'Ramah Busui', 'Setelan Atasan + Celana Kulot'],
+    sizes: ['All Size (S-XL)'],
+    disabled_sizes: [],
+    images: [
+      'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/b69e2e45c80e4be488d6a0dda8df0f43~tplv-aphluv4xwc-origin-jpeg.jpeg',
+      'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/09ac24f1de41443f88010e698b60b8b1~tplv-aphluv4xwc-crop-webp:1000:1000.webp'
+    ],
+    social_proof: 'Best Seller — Ramah Busui',
+    related_ids: ['tasya-set-cargo', 'fuji-oneset-blaster', 'setelan-santai-mint-premium']
+  },
+  {
+    slug: 'tasya-set-cargo',
+    name: 'Tasya Setelan Kekinian OneSet Cargo',
+    brand: 'HOMEDRESS_NA',
+    category: ['setelan', 'best-seller'],
+    price: 145000,
+    original_price: 210000,
+    discount: 30,
+    description: 'HN-Tasya Setelan Wanita Kekinian Ld 120cm One Set Cargo Terbaru Outfit Daily Celana Panjang Lengan 3/4 Bahan Crinkle. Berbahan adem tidak mudah kusut nyaman dipakai.',
+    details: ['Bahan: Crinkle Airflow', 'Lingkar Dada: 120cm', 'Panjang Baju: 65cm, Lengan 40cm', 'Saku Celana Cargo (Kiri Kanan)'],
+    sizes: ['All Size (Fit 40-85kg)'],
+    disabled_sizes: [],
+    images: [
+      'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/93eed30ade39457cbba91443be7d10e8~tplv-aphluv4xwc-origin-jpeg.jpeg',
+      'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/79de53a9df1342bbad69b9554d15e192~tplv-aphluv4xwc-crop-webp:1280:1280.webp'
+    ],
+    social_proof: 'Hot Item 🔥 Outfit Daily',
+    related_ids: ['naila-set-vol2', 'fuji-oneset-blaster', 'setelan-hitam-olahraga-santai']
+  },
+  {
+    slug: 'fuji-oneset-blaster',
+    name: 'HN - Fuji OneSet Blaster Hotpants',
+    brand: 'HOMEDRESS_NA',
+    category: ['setelan', 'viral'],
+    price: 120000,
+    original_price: 180000,
+    discount: 33,
+    description: 'Fuji OneSet Blaster setelan Wanita Daily Hotpants Baju Santai dan Celana Pendek Crinkle Airflow. Memiliki bahan yang Flowly dan nyaman dipakai harian.',
+    details: ['Bahan: Crinkle Airflow', 'Lingkar Dada: 120cm', 'Celana Hotpants 50cm', 'Sangat nyaman dan flowly'],
+    sizes: ['All Size (S-XL)'],
+    disabled_sizes: [],
+    images: [
+      'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/c54f033c4c82499490a7e659249eb350~tplv-aphluv4xwc-origin-jpeg.jpeg',
+      'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/43fa4e7e0e78488fa275fe0d9bc4e538~tplv-aphluv4xwc-crop-webp:1600:1600.webp'
+    ],
+    social_proof: 'Viral di TikTok ✨',
+    related_ids: ['tasya-set-cargo', 'naila-set-vol2', 'celana-pendek-santai']
   }
 ];
 

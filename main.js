@@ -255,14 +255,36 @@ function initAnnouncementBar() {
 }
 
 // ========== PROMO POPUP ==========
-function initPromoPopup() {
+async function initPromoPopup() {
   const popup = document.getElementById('promo-popup');
   const closeBtn = document.getElementById('promo-close');
   if (!popup || !closeBtn) return;
   
-  setTimeout(() => {
-    popup.classList.add('is-visible');
-  }, 2000);
+  try {
+    const res = await fetch('/api/admin/settings');
+    if (res.ok) {
+      const data = await res.json();
+      const popupSettings = data.settings?.promo_popup;
+      
+      if (popupSettings && popupSettings.is_active !== false) {
+        const imgEl = popup.querySelector('.promo-popup__img img');
+        const titleEl = popup.querySelector('.promo-popup__content h4');
+        const textEl = popup.querySelector('.promo-popup__content p');
+        const btnEl = popup.querySelector('.promo-popup__btn');
+        
+        if (popupSettings.image && imgEl) imgEl.src = popupSettings.image;
+        if (popupSettings.title && titleEl) titleEl.textContent = popupSettings.title;
+        if (popupSettings.text && textEl) textEl.innerHTML = popupSettings.text;
+        if (popupSettings.link && btnEl) btnEl.href = popupSettings.link;
+        
+        setTimeout(() => {
+          popup.classList.add('is-visible');
+        }, 2000);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load promo popup settings', err);
+  }
   
   closeBtn.addEventListener('click', () => {
     popup.classList.remove('is-visible');

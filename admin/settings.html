@@ -102,6 +102,10 @@
           <label class="admin-form__label">URL Gambar</label>
           <input class="admin-form__input" id="set-popup-image" />
         </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Link / URL Tujuan</label>
+          <input class="admin-form__input" id="set-popup-link" placeholder="/product.html?id=... atau URL lengkap" />
+        </div>
         <button class="admin-btn admin-btn--primary" onclick="saveSection('promo_popup')">Simpan</button>
       </div>
 
@@ -170,6 +174,7 @@
       document.getElementById('set-popup-title').value = popup.title || '';
       document.getElementById('set-popup-text').value = popup.text || '';
       document.getElementById('set-popup-image').value = popup.image || '';
+      document.getElementById('set-popup-link').value = popup.link || '';
 
       // Social
       const social = settings.social_links || {};
@@ -188,7 +193,13 @@
       } else if (key === 'flash_sale') {
         value = { is_active: document.getElementById('set-flash-active').checked, end_date: document.getElementById('set-flash-end').value, discount_text: document.getElementById('set-flash-text').value };
       } else if (key === 'promo_popup') {
-        value = { is_active: document.getElementById('set-popup-active').checked, title: document.getElementById('set-popup-title').value, text: document.getElementById('set-popup-text').value, image: document.getElementById('set-popup-image').value };
+        value = { 
+          is_active: document.getElementById('set-popup-active').checked, 
+          title: document.getElementById('set-popup-title').value, 
+          text: document.getElementById('set-popup-text').value, 
+          image: document.getElementById('set-popup-image').value,
+          link: document.getElementById('set-popup-link').value 
+        };
       } else if (key === 'social_links') {
         value = { tiktok: document.getElementById('set-social-tiktok').value, instagram: document.getElementById('set-social-instagram').value, whatsapp: document.getElementById('set-social-whatsapp').value };
       }
