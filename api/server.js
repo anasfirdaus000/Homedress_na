@@ -47,7 +47,7 @@ const server = createServer(async (req, res) => {
   }
 
   // Parse URL
-  const url = new URL(req.url, `http://localhost:3001`);
+  const url = new URL(req.url, `http://localhost:3002`);
   const path = url.pathname;
 
   // Helper to send JSON
@@ -99,7 +99,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const PORT = 3001;
+const PORT = 3002;
 server.listen(PORT, () => {
   console.log(`\n🚀 API Server running at http://localhost:${PORT}`);
   console.log('   Routes:');

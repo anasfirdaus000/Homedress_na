@@ -893,9 +893,9 @@ async function initDynamicHome() {
 }
 
 // ========== INITIALIZE ==========
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   injectCartDrawer();
-  initDynamicHome();
+  await initDynamicHome();
   initScrollAnimations();
   initParallax();
   initHeaderScroll();
