@@ -152,3 +152,36 @@ BEGIN
   RETURN 'HDN-' || today_str || '-' || LPAD(today_count::TEXT, 3, '0');
 END;
 $$ LANGUAGE plpgsql;
+
+-- =============================================
+-- 6. USER PROFILES TABLE (Customers)
+-- =============================================
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  province TEXT,
+  postal_code TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- User profiles: user can read their own profile
+CREATE POLICY "Users can read own profile" ON user_profiles
+  FOR SELECT USING (auth.uid() = id);
+
+-- User profiles: user can update their own profile
+CREATE POLICY "Users can update own profile" ON user_profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- User profiles: user can insert their own profile
+CREATE POLICY "Users can insert own profile" ON user_profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- Service role manages all
+CREATE POLICY "Service role manages user profiles" ON user_profiles
+  FOR ALL USING (auth.role() = 'service_role');

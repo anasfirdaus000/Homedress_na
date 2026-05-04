@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 /* ===============================================
    HOMEDRESS_NA — Main JavaScript
    Scroll animations, parallax, and interactivity
@@ -624,7 +626,7 @@ function initMobileMenu() {
 // ========== ACCOUNT POPUP ==========
 function initAccount() {
   document.querySelectorAll('[aria-label="Account"]').forEach(btn => {
-    btn.addEventListener('click', () => { showToast('Fitur login akan segera hadir!'); });
+    btn.addEventListener('click', () => { window.location.href = '/account.html'; });
   });
 }
 
@@ -696,7 +698,7 @@ function injectCartDrawer() {
 }
 
 // ========== CHECKOUT PAGE ==========
-function initCheckout() {
+async function initCheckout() {
   const form = document.getElementById('checkout-form');
   if (!form) return;
   const summary = document.getElementById('checkout-summary');
@@ -704,8 +706,33 @@ function initCheckout() {
     if (CART.items.length === 0) {
       summary.innerHTML = '<p>Keranjang kosong. <a href="/category.html">Belanja dulu</a></p>';
     } else {
-      summary.innerHTML = CART.items.map(i => `<div class="checkout-item"><img src="${i.img}" alt=""/><div><strong>${i.name}</strong><p>${i.size ? 'Size: '+i.size : ''} × ${i.qty}</p><p>Rp ${(i.price*i.qty).toLocaleString('id-ID')}</p></div></div>`).join('') + `<div class="checkout-total"><strong>Total: Rp ${CART.total().toLocaleString('id-ID')}</strong></div>`;
+      summary.innerHTML = CART.items.map(i => `<div class="checkout-item"><img src="${i.img}" alt=""/><div><strong>${i.name}</strong><p>${i.size ? 'Size: '+i.size : ''} | Qty: ${i.qty}</p><p>Rp ${(i.price*i.qty).toLocaleString('id-ID')}</p></div></div>`).join('') + `<div class="checkout-total"><strong>Total: Rp ${CART.total().toLocaleString('id-ID')}</strong></div>`;
     }
+  }
+
+  // AUTO-FILL PROFILE
+  try {
+    const supabaseUrl = import.meta.env ? import.meta.env.VITE_SUPABASE_URL : 'https://owajvfwhhdhvhrwjbkmd.supabase.co';
+    const supabaseKey = import.meta.env ? import.meta.env.VITE_SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const user = session.user;
+      const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', user.id).single();
+      
+      if (profile) {
+        if(form.elements['customer_name']) form.elements['customer_name'].value = profile.full_name || '';
+        if(form.elements['customer_email']) form.elements['customer_email'].value = user.email || '';
+        if(form.elements['customer_phone']) form.elements['customer_phone'].value = profile.phone || '';
+        if(form.elements['shipping_address']) form.elements['shipping_address'].value = profile.address || '';
+        if(form.elements['city']) form.elements['city'].value = profile.city || '';
+        if(form.elements['province']) form.elements['province'].value = profile.province || '';
+        if(form.elements['postal_code']) form.elements['postal_code'].value = profile.postal_code || '';
+      }
+    }
+  } catch (err) {
+    console.error('Failed to auto-fill checkout:', err);
   }
   
   form.addEventListener('submit', async (e) => {
@@ -785,9 +812,90 @@ function initTilt() {
   });
 }
 
+// ========== DYNAMIC HOME RENDER ==========
+async function initDynamicHome() {
+  const newInGrid = document.getElementById('new-in-grid');
+  const flashSaleGrid = document.getElementById('flash-sale-grid');
+  const megaNewIn = document.getElementById('megamenu-new-in-grid');
+  const megaPromo = document.getElementById('megamenu-promo-grid');
+  
+  if (!newInGrid && !flashSaleGrid && !megaNewIn && !megaPromo) return;
+
+  try {
+    // If we're not on index.html, we might not need this, but checking elements covers it.
+    const res = await fetch('/api/products');
+    if (!res.ok) throw new Error('Failed to load products');
+    const data = await res.json();
+    const products = data.products || [];
+
+    // Helper to generate Card HTML
+    const createCard = (p) => {
+      const priceHtml = p.discount > 0 && p.original_price
+        ? `<span class="product-card__price--sale">Rp ${p.price.toLocaleString('id-ID')}</span> <span class="product-card__price--original">Rp ${p.original_price.toLocaleString('id-ID')}</span>`
+        : `Rp ${p.price.toLocaleString('id-ID')}`;
+      const badgeHtml = p.discount > 0 ? `<div class="product-card__badge product-card__badge--sale">-${p.discount}% OFF</div>` : '';
+      const socialBadge = p.social_proof ? `<div class="product-card__badge product-card__badge--social">${p.social_proof}</div>` : '';
+
+      return `
+        <div class="product-card" onclick="window.location.href='/product.html?id=${p.slug}'" style="cursor:pointer;" data-animate>
+          <div class="product-card__image-wrapper">
+            <img src="${p.images?.[0] || ''}" alt="${p.name}" class="product-card__image" loading="lazy" />
+            ${badgeHtml}
+            ${socialBadge}
+          </div>
+          <div class="product-card__info">
+            <p class="product-card__brand">${p.brand || 'HOMEDRESS_NA'}</p>
+            <p class="product-card__name">${p.name}</p>
+            <p class="product-card__price">${priceHtml}</p>
+          </div>
+        </div>
+      `;
+    };
+
+    // Helper to generate Megamenu HTML
+    const createMegaCard = (p) => {
+      return `
+        <a href="/product.html?id=${p.slug}" class="megamenu__card">
+          <div class="megamenu__img-wrap"><img src="${p.images?.[0] || ''}" alt="${p.name}" /></div>
+          <span>${p.name.split('-')[0].trim()}</span>
+        </a>
+      `;
+    };
+
+    // 1. Populate New In (Take latest 5 products, or viral category)
+    if (newInGrid) {
+      const newProducts = products.slice(0, 5);
+      newInGrid.innerHTML = newProducts.map(createCard).join('');
+    }
+
+    // 2. Populate Flash Sale (Take products with discount)
+    if (flashSaleGrid) {
+      const saleProducts = products.filter(p => p.discount > 0).slice(0, 5);
+      flashSaleGrid.innerHTML = saleProducts.length ? saleProducts.map(createCard).join('') : '<p>Belum ada promo saat ini.</p>';
+    }
+
+    // 3. Populate Mega Menu New In (Take 4)
+    if (megaNewIn) {
+      const megaNew = products.slice(0, 4);
+      megaNewIn.innerHTML = megaNew.map(createMegaCard).join('');
+    }
+
+    // 4. Populate Mega Menu Promo (Take 4 with discount)
+    if (megaPromo) {
+      const megaSale = products.filter(p => p.discount > 0).slice(0, 4);
+      megaPromo.innerHTML = megaSale.map(createMegaCard).join('');
+    }
+
+  } catch (err) {
+    console.error('Dynamic Home Error:', err);
+    if (newInGrid) newInGrid.innerHTML = '<p>Gagal memuat produk.</p>';
+  }
+}
+
 // ========== INITIALIZE ==========
 document.addEventListener('DOMContentLoaded', () => {
   injectCartDrawer();
+  initDynamicHome();
   initScrollAnimations();
   initParallax();
   initHeaderScroll();

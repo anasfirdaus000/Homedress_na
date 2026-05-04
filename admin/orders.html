@@ -59,6 +59,18 @@
           </table>
         </div>
       </div>
+      <!-- Order Details Modal -->
+      <div id="order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:600px;margin:0 auto;background:#1a1a1a;border-radius:16px;padding:32px;border:1px solid #333;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <h2 id="modal-order-number">Detail Pesanan</h2>
+            <button class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('order-modal').style.display='none'">✕</button>
+          </div>
+          <div id="modal-order-content" style="color:#ddd;line-height:1.6;font-size:0.95rem;">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -105,6 +117,8 @@
              <button class="admin-btn admin-btn--danger admin-btn--small" onclick="updateStatus('${o.id}','cancelled')">❌</button>`
           : '<span style="color:#888;font-size:0.8rem;">Final</span>';
 
+        const detailBtn = `<button class="admin-btn admin-btn--outline admin-btn--small" onclick="viewOrderDetails('${o.id}')" style="margin-top:4px;">👁️ Detail</button>`;
+
         return `<tr>
           <td><strong>${o.order_number}</strong><br><small style="color:#888;">${new Date(o.created_at).toLocaleDateString('id-ID')}</small></td>
           <td>${o.customer_name}<br><small style="color:#888;">${o.customer_phone}</small></td>
@@ -112,7 +126,7 @@
           <td>Rp ${o.total.toLocaleString('id-ID')}</td>
           <td>${o.payment_method}</td>
           <td><span class="status-badge status-badge--${o.status}">${statusMap[o.status] || o.status}</span></td>
-          <td>${actionBtns}</td>
+          <td>${actionBtns}<br>${detailBtn}</td>
         </tr>`;
       }).join('');
     }
@@ -128,6 +142,51 @@
         loadOrders();
         showToast('Status berhasil diupdate!');
       }
+    };
+
+    window.viewOrderDetails = function(orderId) {
+      const o = allOrders.find(x => x.id === orderId);
+      if (!o) return;
+
+      document.getElementById('modal-order-number').textContent = `Pesanan: ${o.order_number}`;
+      
+      const itemsHtml = (o.order_items || []).map(i => `
+        <div style="display:flex;gap:12px;margin-bottom:12px;border-bottom:1px solid #333;padding-bottom:12px;">
+          <img src="${i.product_image || '/images/featured_images.png'}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;" />
+          <div>
+            <div style="font-weight:600;">${i.product_name}</div>
+            <div style="font-size:0.85rem;color:#888;">Size: ${i.size || '-'} | Qty: ${i.quantity} | Rp ${i.price_at_time.toLocaleString('id-ID')}</div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('modal-order-content').innerHTML = `
+        <div style="margin-bottom:20px;padding:16px;background:#222;border-radius:8px;">
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#fff;">Informasi Pelanggan</h3>
+          <p style="margin:4px 0;"><strong>Nama:</strong> ${o.customer_name}</p>
+          <p style="margin:4px 0;"><strong>Telepon:</strong> <a href="https://wa.me/${o.customer_phone.replace(/\D/g,'')}" target="_blank" style="color:var(--color-accent);">${o.customer_phone}</a></p>
+          <p style="margin:4px 0;"><strong>Email:</strong> ${o.customer_email || '-'}</p>
+        </div>
+
+        <div style="margin-bottom:20px;padding:16px;background:#222;border-radius:8px;">
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#fff;">Alamat Pengiriman</h3>
+          <p style="margin:4px 0;">${o.shipping_address}</p>
+          <p style="margin:4px 0;">${o.city || ''}, ${o.province || ''} ${o.postal_code || ''}</p>
+          <p style="margin:12px 0 4px 0;border-top:1px dashed #444;padding-top:12px;"><strong>Catatan:</strong> ${o.notes || '-'}</p>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#fff;">Rincian Produk</h3>
+          ${itemsHtml}
+        </div>
+
+        <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;border-top:1px solid #444;padding-top:16px;color:#fff;">
+          <span>Total Akhir</span>
+          <span>Rp ${o.total.toLocaleString('id-ID')}</span>
+        </div>
+      `;
+
+      document.getElementById('order-modal').style.display = 'block';
     };
 
     function showToast(msg) {

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .auth-container { max-width: 400px; margin: 100px auto; padding: 40px 20px; text-align: center; }
+    .auth-title { font-size: 2rem; margin-bottom: 8px; font-weight: 700; }
+    .auth-subtitle { color: #666; margin-bottom: 32px; font-size: 0.9rem; }
+    .auth-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+    .auth-label { font-size: 0.85rem; font-weight: 600; color: #333; }
+    .auth-input { padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-family: inherit; }
+    .auth-btn { background: var(--color-accent); color: #fff; border: none; padding: 16px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 8px; }
+    .auth-btn:hover { background: #000; }
+    .auth-link { color: var(--color-accent); text-decoration: underline; font-weight: 600; }
+    .auth-error { color: #e74c3c; font-size: 0.85rem; display: none; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header id="header" class="header" style="background:#fff;border-bottom:1px solid #eee;">
+    <div class="header__inner">
+      <a href="/" class="header__logo">HOMEDRESS_NA</a>
+    </div>
+  </header>
+
+  <main class="auth-container">
+    <h1 class="auth-title">Welcome Back</h1>
+    <p class="auth-subtitle">Login untuk mempermudah checkout Anda.</p>
+
+    <form id="login-form" class="auth-form">
+      <div>
+        <label class="auth-label">Email</label><br>
+        <input type="email" id="email" class="auth-input" style="width:100%;margin-top:8px;" required />
+      </div>
+      <div>
+        <label class="auth-label">Password</label><br>
+        <input type="password" id="password" class="auth-input" style="width:100%;margin-top:8px;" required />
+      </div>
+      <div id="error-msg" class="auth-error"></div>
+      <button type="submit" class="auth-btn" id="btn-submit">LOGIN</button>
+    </form>
+
+    <p style="margin-top: 24px; font-size: 0.9rem; color: #666;">
+      Belum punya akun? <a href="/register.html" class="auth-link">Daftar sekarang</a>
+    </p>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    // Using process.env vars injected by Vite
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('error-msg');
+      const btn = document.getElementById('btn-submit');
+
+      btn.disabled = true;
+      btn.textContent = 'MOHON TUNGGU...';
+      errorMsg.style.display = 'none';
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorMsg.textContent = error.message === 'Invalid login credentials' ? 'Email atau password salah.' : error.message;
+        errorMsg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'LOGIN';
+      } else {
+        // Redirect to account or checkout based on referrer
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect') || '/account.html';
+        window.location.href = redirect;
+      }
+    });
+  </script>
+</body>
+</html>
