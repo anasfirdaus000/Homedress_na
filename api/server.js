@@ -83,6 +83,11 @@ const server = createServer(async (req, res) => {
       if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
     }
 
+    if (path === '/api/hero') {
+      const handler = await loadHandler('hero');
+      if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
+    }
+
     // Admin API routes
     const adminMatch = path.match(/^\/api\/admin\/(.+)$/);
     if (adminMatch) {
@@ -106,7 +111,9 @@ server.listen(PORT, () => {
   console.log('   POST /api/checkout');
   console.log('   POST /api/track');
   console.log('   GET  /api/products');
+  console.log('   GET  /api/hero');
   console.log('   GET  /api/admin/orders');
   console.log('   GET  /api/admin/products');
-  console.log('   GET  /api/admin/settings\n');
+  console.log('   GET  /api/admin/hero');
+  console.log('   GET  /api/admin/settings');
 });

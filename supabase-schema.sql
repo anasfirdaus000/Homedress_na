@@ -185,3 +185,33 @@ CREATE POLICY "Users can insert own profile" ON user_profiles
 -- Service role manages all
 CREATE POLICY "Service role manages user profiles" ON user_profiles
   FOR ALL USING (auth.role() = 'service_role');
+
+-- ==========================================
+-- TABLE: hero_slides
+-- ==========================================
+CREATE TABLE IF NOT EXISTS hero_slides (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  link_url TEXT,
+  image_url TEXT,
+  video_url TEXT,
+  slide_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Turn on RLS for hero_slides
+ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Public can read active hero slides
+CREATE POLICY "Public can read active hero slides" 
+ON hero_slides FOR SELECT 
+USING (is_active = true);
+
+-- Policy: Service role has full access (for Admin API)
+CREATE POLICY "Service role full access hero slides" 
+ON hero_slides FOR ALL 
+USING (true)
+WITH CHECK (true);

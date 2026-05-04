@@ -106,10 +106,44 @@ function initPinnedSections() {
 }
 
 // ========== HERO SLIDER ==========
-function initHeroSlider() {
+async function initHeroSlider() {
   const slider = document.getElementById('hero-slider');
+  const dotsContainer = document.getElementById('hero-dots');
+  if (!slider || !dotsContainer) return;
+
+  try {
+    const res = await fetch('/api/hero');
+    if (res.ok) {
+      const data = await res.json();
+      const slides = data.slides || [];
+      if (slides.length > 0) {
+        slider.innerHTML = slides.map(s => `
+          <div class="hero__slide">
+            <div class="hero__image-wrapper">
+              ${s.video_url 
+                ? `<video class="hero__image" autoplay loop muted playsinline style="object-fit:cover;width:100%;height:100%;"><source src="${s.video_url}" type="video/mp4"></video>` 
+                : `<img src="${s.image_url}" alt="${s.title}" class="hero__image" loading="eager" draggable="false" style="object-position: center;" />`
+              }
+            </div>
+            <div class="hero__content">
+              <h1 class="hero__title">${s.title.replace(/\n/g, '<br/>')}</h1>
+              ${s.subtitle ? `<p class="hero__subtitle">${s.subtitle.replace(/\n/g, '<br/>')}</p>` : ''}
+              ${s.link_url ? `<a href="${s.link_url}" class="hero__cta">SHOP NOW</a>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        dotsContainer.innerHTML = slides.map((s, i) => `
+          <span class="hero__dot ${i===0 ? 'hero__dot--active' : ''}" data-index="${i}"></span>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load hero slides:', err);
+  }
+
   const dots = document.querySelectorAll('#hero-dots .hero__dot');
-  if (!slider || dots.length === 0) return;
+  if (dots.length === 0) return;
 
   let isDown = false;
   let startX;
@@ -630,6 +664,148 @@ function initAccount() {
   });
 }
 
+// ========== CATEGORY PAGINATION & RENDERING ==========
+async function initCategoryPagination() {
+  const grid = document.getElementById('category-product-grid');
+  const paginationContainer = document.getElementById('pagination-container');
+  if (!grid) return;
+
+  const ITEMS_PER_PAGE = 10;
+  let currentPage = 1;
+  let allProducts = [];
+  let filteredProducts = [];
+
+  // Parse category filter from URL (e.g. ?filter=setelan)
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeFilter = urlParams.get('filter') || 'semua';
+
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) throw new Error('Failed to load products');
+    const data = await res.json();
+    allProducts = data.products || [];
+  } catch (err) {
+    grid.innerHTML = '<div style="padding:40px;text-align:center;width:100%;grid-column:1/-1;color:#888;">Gagal memuat produk.</div>';
+    return;
+  }
+
+  // Handle filtering
+  const applyFilters = () => {
+    // 1. Sidebar checkboxes
+    const checkedFilters = Array.from(document.querySelectorAll('.filter-checkbox:checked')).map(cb => cb.value);
+    
+    // 2. Combine with URL filter if sidebar is not used yet, or just rely on checkboxes
+    // If checkboxes are used, they override URL. If not, URL applies.
+    let targetFilters = checkedFilters;
+    if (targetFilters.length === 0 && activeFilter !== 'semua') {
+      targetFilters = [activeFilter];
+      // Auto-check the corresponding checkbox
+      const cb = document.querySelector(`.filter-checkbox[value="${activeFilter}"]`);
+      if (cb) cb.checked = true;
+    }
+
+    if (targetFilters.length === 0) {
+      filteredProducts = allProducts;
+    } else {
+      filteredProducts = allProducts.filter(p => {
+        const pCats = p.category || [];
+        return targetFilters.some(f => pCats.includes(f));
+      });
+    }
+
+    // Sort: Newest (already sorted by API)
+    currentPage = 1;
+    renderPage();
+  };
+
+  const renderPage = () => {
+    if (filteredProducts.length === 0) {
+      grid.innerHTML = '<div style="padding:40px;text-align:center;width:100%;grid-column:1/-1;color:#888;">Tidak ada produk yang cocok dengan filter.</div>';
+      if (paginationContainer) paginationContainer.innerHTML = '';
+      return;
+    }
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const pageItems = filteredProducts.slice(startIndex, endIndex);
+
+    grid.innerHTML = pageItems.map(p => {
+      const priceHtml = p.discount > 0 && p.original_price
+        ? `<span class="product-card__price--sale">Rp ${p.price.toLocaleString('id-ID')}</span> <span class="product-card__price--original">Rp ${p.original_price.toLocaleString('id-ID')}</span>`
+        : `Rp ${p.price.toLocaleString('id-ID')}`;
+      const badgeHtml = p.discount > 0 ? `<div class="product-card__badge product-card__badge--sale">-${p.discount}% OFF</div>` : '';
+      const socialBadge = p.social_proof ? `<div class="product-card__badge product-card__badge--social">${p.social_proof}</div>` : '';
+
+      return `
+        <a href="/product.html?id=${p.slug}" class="product-card" data-animate>
+          <div class="product-card__image-wrapper">
+            <img src="${p.images?.[0] || ''}" alt="${p.name}" class="product-card__image" loading="lazy" />
+            ${badgeHtml}
+            ${socialBadge}
+          </div>
+          <div class="product-card__info">
+            <p class="product-card__brand">${p.brand || 'HOMEDRESS_NA'}</p>
+            <p class="product-card__name">${p.name}</p>
+            <p class="product-card__price">${priceHtml}</p>
+          </div>
+        </a>
+      `;
+    }).join('');
+
+    renderPaginationControls();
+    initScrollAnimations(); // Re-trigger animations for new elements
+    
+    // Scroll to top of grid
+    if (currentPage > 1) {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const renderPaginationControls = () => {
+    if (!paginationContainer) return;
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+    
+    if (totalPages <= 1) {
+      paginationContainer.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    
+    // Prev button
+    if (currentPage > 1) {
+      html += `<button class="pagination-btn" data-page="${currentPage - 1}">← Prev</button>`;
+    }
+
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="pagination-btn ${i === currentPage ? 'pagination-btn--active' : ''}" data-page="${i}">${i}</button>`;
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+      html += `<button class="pagination-btn" data-page="${currentPage + 1}">Next →</button>`;
+    }
+
+    paginationContainer.innerHTML = html;
+
+    // Attach events
+    paginationContainer.querySelectorAll('.pagination-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        currentPage = parseInt(e.target.dataset.page);
+        renderPage();
+      });
+    });
+  };
+
+  // Add listeners to sidebar filters
+  document.querySelectorAll('.filter-checkbox').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+  });
+
+  // Initial render
+  applyFilters();
+}
+
 // ========== PRODUCT COUNT & SORT ==========
 function initSortAndCount() {
   const grid = document.getElementById('category-product-grid');
@@ -896,10 +1072,11 @@ async function initDynamicHome() {
 document.addEventListener('DOMContentLoaded', async () => {
   injectCartDrawer();
   await initDynamicHome();
+  await initHeroSlider();
+  await initCategoryPagination();
   initScrollAnimations();
   initParallax();
   initHeaderScroll();
-  initHeroSlider();
   initNewsletter();
   initProductCards();
   initAnnouncementBar();

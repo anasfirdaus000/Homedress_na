@@ -66,8 +66,17 @@
               <textarea class="admin-form__textarea" id="prod-description"></textarea>
             </div>
             <div class="admin-form__group">
-              <label class="admin-form__label">Kategori (pisahkan dengan koma)</label>
-              <input class="admin-form__input" id="prod-category" placeholder="setelan, flash-sale, new-in" />
+              <label class="admin-form__label">Kategori / Menu</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#222;padding:12px;border-radius:8px;border:1.5px solid #333;">
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="atasan" /> Atasan</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="bawahan" /> Bawahan</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="dress" /> Dress</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="setelan" /> Setelan</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="new-in" /> New In ✨</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="flash-sale" /> Flash Sale 🔥</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="bundling" /> Bundling Hemat</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="clearance" /> Clearance</label>
+              </div>
             </div>
             <div class="admin-form__group">
               <label class="admin-form__label">Ukuran (pisahkan dengan koma)</label>
@@ -176,7 +185,11 @@
       document.getElementById('prod-price').value = p.price;
       document.getElementById('prod-original-price').value = p.original_price || '';
       document.getElementById('prod-description').value = p.description || '';
-      document.getElementById('prod-category').value = (p.category || []).join(', ');
+      // Set checkboxes
+      const catCheckboxes = document.querySelectorAll('input[name="prod-category"]');
+      const cats = p.category || [];
+      catCheckboxes.forEach(cb => { cb.checked = cats.includes(cb.value); });
+
       document.getElementById('prod-sizes').value = (p.sizes || []).join(', ');
       document.getElementById('prod-images').value = (p.images || []).join('\n');
       document.getElementById('prod-video').value = p.video_embed_url || '';
@@ -265,13 +278,16 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      // Get selected categories
+      const selectedCats = Array.from(document.querySelectorAll('input[name="prod-category"]:checked')).map(cb => cb.value);
+
       const productData = {
         name: document.getElementById('prod-name').value.trim(),
         slug: document.getElementById('prod-slug').value.trim(),
         price: parseInt(document.getElementById('prod-price').value),
         original_price: parseInt(document.getElementById('prod-original-price').value) || null,
         description: document.getElementById('prod-description').value.trim(),
-        category: document.getElementById('prod-category').value.split(',').map(s => s.trim()).filter(Boolean),
+        category: selectedCats,
         sizes: document.getElementById('prod-sizes').value.split(',').map(s => s.trim()).filter(Boolean),
         images: document.getElementById('prod-images').value.split('\n').map(s => s.trim()).filter(Boolean),
         video_embed_url: document.getElementById('prod-video').value.trim() || null,

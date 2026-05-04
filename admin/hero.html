@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelola Hero Slider | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+  <style>
+    .slide-card { background: #222; border: 1px solid #333; border-radius: 12px; padding: 16px; display: flex; gap: 16px; margin-bottom: 16px; align-items: center; }
+    .slide-card__img { width: 120px; height: 120px; border-radius: 8px; object-fit: cover; background: #111; }
+    .slide-card__info { flex: 1; }
+    .slide-card__title { font-size: 1.2rem; font-weight: bold; margin-bottom: 4px; }
+    .slide-card__subtitle { font-size: 0.9rem; color: #888; margin-bottom: 8px; }
+    .slide-card__actions { display: flex; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/hero.html" class="sidebar__link sidebar__link--active">🖼️ Hero Slider</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>🖼️ Kelola Hero Slider</h1>
+        <button class="admin-btn admin-btn--primary" id="add-slide-btn">+ Tambah Slide</button>
+      </div>
+
+      <div id="slide-list">
+        <p style="color:#888;">Memuat slide...</p>
+      </div>
+
+      <!-- Modal -->
+      <div id="slide-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:600px;margin:0 auto;background:#1a1a1a;border-radius:16px;padding:32px;border:1px solid #333;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <h2 id="modal-title">Tambah Slide</h2>
+            <button class="admin-btn admin-btn--outline admin-btn--small" id="close-modal">✕</button>
+          </div>
+          <form id="slide-form">
+            <input type="hidden" id="slide-id" />
+            <div class="admin-form__group">
+              <label class="admin-form__label">Judul Utama (Besar) *</label>
+              <input class="admin-form__input" id="slide-title" required placeholder="FUJI ONESET BLASTER" />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Subjudul (Kecil)</label>
+              <textarea class="admin-form__textarea" id="slide-subtitle" placeholder="Hotpants Setelan Wanita Daily..."></textarea>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Link Tombol</label>
+              <input class="admin-form__input" id="slide-link" placeholder="/product.html?id=fuji-oneset" />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Gambar Background</label>
+              <input class="admin-form__input" id="slide-image" placeholder="https://..." />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Video Overlay (Opsional TikTok/MP4)</label>
+              <input class="admin-form__input" id="slide-video" placeholder="https://..." />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Urutan (Angka)</label>
+              <input type="number" class="admin-form__input" id="slide-order" value="0" />
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button type="submit" class="admin-btn admin-btn--primary">Simpan</button>
+              <button type="button" class="admin-btn admin-btn--outline" id="close-modal-2">Batal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    const modal = document.getElementById('slide-modal');
+    const form = document.getElementById('slide-form');
+
+    document.getElementById('add-slide-btn').addEventListener('click', () => {
+      form.reset();
+      document.getElementById('slide-id').value = '';
+      document.getElementById('slide-order').value = '0';
+      document.getElementById('modal-title').textContent = 'Tambah Slide';
+      modal.style.display = 'block';
+    });
+
+    document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
+    document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
+
+    async function loadSlides() {
+      const res = await fetch('/api/admin/hero', { headers: { 'Authorization': `Bearer ${token}` }});
+      const data = await res.json();
+      const slides = data.slides || [];
+
+      const list = document.getElementById('slide-list');
+      if (slides.length === 0) { list.innerHTML = '<p style="color:#888;">Belum ada slide.</p>'; return; }
+
+      list.innerHTML = slides.map(s => `
+        <div class="slide-card" style="${!s.is_active ? 'opacity:0.5;' : ''}">
+          <img class="slide-card__img" src="${s.image_url || '/images/featured_images.png'}" alt="" />
+          <div class="slide-card__info">
+            <div class="slide-card__title">${s.title}</div>
+            <div class="slide-card__subtitle">${s.subtitle || ''}</div>
+            <div style="font-size:0.8rem;color:#888;margin-bottom:8px;">Urutan: ${s.slide_order}</div>
+            <div class="slide-card__actions">
+              <button class="admin-btn admin-btn--outline admin-btn--small" onclick="editSlide('${s.id}')">✏️ Edit</button>
+              <button class="admin-btn admin-btn--danger admin-btn--small" onclick="deleteSlide('${s.id}')">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      window._slides = slides;
+    }
+
+    window.editSlide = function(id) {
+      const s = window._slides.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('slide-id').value = s.id;
+      document.getElementById('slide-title').value = s.title;
+      document.getElementById('slide-subtitle').value = s.subtitle || '';
+      document.getElementById('slide-link').value = s.link_url || '';
+      document.getElementById('slide-image').value = s.image_url || '';
+      document.getElementById('slide-video').value = s.video_url || '';
+      document.getElementById('slide-order').value = s.slide_order || 0;
+      document.getElementById('modal-title').textContent = 'Edit Slide';
+      modal.style.display = 'block';
+    };
+
+    window.deleteSlide = async function(id) {
+      if (!confirm('Hapus slide ini?')) return;
+      const res = await fetch('/api/admin/hero', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slide_id: id })
+      });
+      if (res.ok) { loadSlides(); }
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        id: document.getElementById('slide-id').value || undefined,
+        title: document.getElementById('slide-title').value,
+        subtitle: document.getElementById('slide-subtitle').value,
+        link_url: document.getElementById('slide-link').value,
+        image_url: document.getElementById('slide-image').value,
+        video_url: document.getElementById('slide-video').value,
+        slide_order: parseInt(document.getElementById('slide-order').value) || 0
+      };
+
+      const res = await fetch('/api/admin/hero', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        modal.style.display = 'none';
+        loadSlides();
+      } else {
+        alert('Gagal menyimpan slide');
+      }
+    });
+
+    loadSlides();
+  </script>
+</body>
+</html>
