@@ -12,7 +12,8 @@
     "db:setup": "node scripts/setup-db.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.8"
+    "@supabase/supabase-js": "^2.49.8",
+    "cloudinary": "^2.10.0"
   },
   "devDependencies": {
     "vite": "^8.0.10"

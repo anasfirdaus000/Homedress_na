@@ -81,6 +81,8 @@ const server = createServer(async (req, res) => {
     // Admin API routes
     const adminMatch = path.match(/^\/api\/admin\/(.+)$/);
     if (adminMatch) {
+      // Handle the upload route which uses larger body payloads and different parsing sometimes,
+      // but our server.js already loads the entire body into memory, so it works.
       const handler = await loadHandler(`admin/${adminMatch[1]}`);
       if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
     }

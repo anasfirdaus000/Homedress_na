@@ -74,8 +74,16 @@
               <input class="admin-form__input" id="prod-sizes" placeholder="S, M, L, XL" />
             </div>
             <div class="admin-form__group">
-              <label class="admin-form__label">URL Gambar (satu per baris)</label>
-              <textarea class="admin-form__textarea" id="prod-images" placeholder="/images/foto1.png&#10;/images/foto2.png"></textarea>
+              <label class="admin-form__label">Upload Gambar (Otomatis ke Cloudinary)</label>
+              <div style="display:flex;gap:8px;">
+                <input type="file" id="prod-image-upload" accept="image/*" class="admin-form__input" style="flex:1;" />
+                <button type="button" id="btn-upload-image" class="admin-btn admin-btn--outline" style="white-space:nowrap;">Upload</button>
+              </div>
+              <small style="color:#888;display:block;margin-top:4px;" id="upload-status"></small>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Gambar (satu per baris) *</label>
+              <textarea class="admin-form__textarea" id="prod-images" placeholder="/images/foto1.png&#10;/images/foto2.png" required></textarea>
             </div>
             <div class="admin-form__group">
               <label class="admin-form__label">URL Video TikTok/YouTube (opsional)</label>
@@ -186,6 +194,74 @@
       });
       if (res.ok) { loadProducts(); showToast('Produk dinonaktifkan'); }
     };
+
+    // Cloudinary Upload Logic
+    document.getElementById('btn-upload-image').addEventListener('click', async () => {
+      const fileInput = document.getElementById('prod-image-upload');
+      const statusEl = document.getElementById('upload-status');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        statusEl.textContent = 'Pilih file terlebih dahulu';
+        statusEl.style.color = '#e74c3c';
+        return;
+      }
+
+      const file = fileInput.files[0];
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        statusEl.textContent = 'Ukuran file maksimal 5MB';
+        statusEl.style.color = '#e74c3c';
+        return;
+      }
+
+      statusEl.textContent = 'Mengupload ke Cloudinary...';
+      statusEl.style.color = '#f39c12';
+      document.getElementById('btn-upload-image').disabled = true;
+
+      try {
+        // Read file as Base64
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const base64Image = reader.result;
+
+          const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ 
+              file: base64Image,
+              folder: 'homedress_na/products'
+            })
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Upload gagal');
+          }
+
+          const data = await res.json();
+          
+          // Append URL to textarea
+          const textArea = document.getElementById('prod-images');
+          const currentVal = textArea.value.trim();
+          textArea.value = currentVal ? currentVal + '\n' + data.url : data.url;
+
+          statusEl.textContent = '✅ Berhasil upload!';
+          statusEl.style.color = '#27ae60';
+          fileInput.value = ''; // Reset input
+        };
+        reader.onerror = (error) => {
+          throw new Error('Gagal membaca file');
+        };
+      } catch (err) {
+        statusEl.textContent = '❌ ' + err.message;
+        statusEl.style.color = '#e74c3c';
+      } finally {
+        document.getElementById('btn-upload-image').disabled = false;
+      }
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
