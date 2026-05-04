@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pesanan Berhasil | HOMEDRESS_NA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .confirmation { max-width: 600px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+    .confirmation__icon { font-size: 4rem; margin-bottom: 16px; }
+    .confirmation__title { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .confirmation__subtitle { color: var(--color-fg-light); margin-bottom: 32px; }
+    .confirmation__card { background: var(--color-bg-alt, #f8f8f8); border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: left; }
+    .confirmation__row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .confirmation__row:last-child { border: none; }
+    .confirmation__label { color: var(--color-fg-light); font-size: 0.9rem; }
+    .confirmation__value { font-weight: 600; }
+    .confirmation__value--order { font-size: 1.3rem; color: var(--color-accent); letter-spacing: 1px; }
+    .confirmation__actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .confirmation__btn { display: inline-block; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 1rem; text-align: center; cursor: pointer; border: none; }
+    .confirmation__btn--primary { background: var(--color-fg); color: var(--color-bg); }
+    .confirmation__btn--outline { background: transparent; color: var(--color-fg); border: 2px solid var(--color-fg); }
+    .confirmation__btn:hover { opacity: 0.85; }
+    .confirmation__wa { background: #25d366; color: #fff; border-radius: 6px; padding: 12px 24px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div id="announcement-bar" class="announcement-bar">
+    <div class="announcement-bar__track"><div class="announcement-bar__items">
+      <span class="announcement-bar__item">GRATIS ONGKIR untuk pembelian di atas Rp 200.000 🚚</span>
+      <span class="announcement-bar__item">GRATIS ONGKIR untuk pembelian di atas Rp 200.000 🚚</span>
+    </div></div>
+  </div>
+
+  <header id="header" class="header header--transparent">
+    <div class="header__inner">
+      <div class="header__left"></div>
+      <div class="header__center"><a href="/" class="header__logo">HOMEDRESS_NA</a></div>
+      <div class="header__right"></div>
+    </div>
+  </header>
+
+  <main style="padding-top: 140px; padding-bottom: 60px; min-height: 80vh;">
+    <div class="confirmation">
+      <div class="confirmation__icon">🎉</div>
+      <h1 class="confirmation__title">Pesanan Berhasil!</h1>
+      <p class="confirmation__subtitle">Terima kasih telah berbelanja di HOMEDRESS_NA</p>
+
+      <div class="confirmation__card">
+        <div class="confirmation__row">
+          <span class="confirmation__label">Nomor Pesanan</span>
+          <span class="confirmation__value confirmation__value--order" id="conf-order-number">—</span>
+        </div>
+        <div class="confirmation__row">
+          <span class="confirmation__label">Total</span>
+          <span class="confirmation__value" id="conf-total">—</span>
+        </div>
+        <div class="confirmation__row">
+          <span class="confirmation__label">Status</span>
+          <span class="confirmation__value">⏳ Menunggu Pembayaran</span>
+        </div>
+        <div class="confirmation__row">
+          <span class="confirmation__label">Tanggal</span>
+          <span class="confirmation__value" id="conf-date">—</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.95rem; color: var(--color-fg-light); margin-bottom: 24px;">
+        Simpan nomor pesanan Anda. Kami akan mengirimkan konfirmasi via WhatsApp.
+        Silakan lakukan pembayaran sesuai metode yang dipilih.
+      </p>
+
+      <div class="confirmation__actions">
+        <a href="/track-order.html" class="confirmation__btn confirmation__btn--primary">CEK STATUS PESANAN</a>
+        <a href="/" class="confirmation__btn confirmation__btn--outline">LANJUT BELANJA</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Read order data from URL params (passed from checkout)
+    const params = new URLSearchParams(window.location.search);
+    const orderNumber = params.get('order');
+    const total = params.get('total');
+    const date = params.get('date');
+
+    if (orderNumber) {
+      document.getElementById('conf-order-number').textContent = orderNumber;
+    }
+    if (total) {
+      document.getElementById('conf-total').textContent = 'Rp ' + parseInt(total).toLocaleString('id-ID');
+    }
+    if (date) {
+      document.getElementById('conf-date').textContent = new Date(date).toLocaleString('id-ID');
+    }
+
+    // Clear cart after successful order
+    localStorage.removeItem('homedress_cart');
+  </script>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

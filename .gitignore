@@ -4,3 +4,12 @@ dist/
 *.cjs
 FULL_SOURCE.html
 _parts.json
+
+# Environment secrets - NEVER commit
+.env
+.env.local
+.env.production
+.env*.local
+
+# Vercel
+.vercel/

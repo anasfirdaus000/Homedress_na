@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelola Produk | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link sidebar__link--active">🛍️ Produk</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>🛍️ Kelola Produk</h1>
+        <button class="admin-btn admin-btn--primary" id="add-product-btn">+ Tambah Produk</button>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="product-admin-grid" id="product-grid">
+        <p style="color:#888;">Memuat produk...</p>
+      </div>
+
+      <!-- Edit/Add Modal -->
+      <div id="product-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:600px;margin:0 auto;background:#1a1a1a;border-radius:16px;padding:32px;border:1px solid #333;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <h2 id="modal-title">Tambah Produk</h2>
+            <button class="admin-btn admin-btn--outline admin-btn--small" id="close-modal">✕</button>
+          </div>
+          <form id="product-form">
+            <input type="hidden" id="prod-id" />
+            <div class="admin-form__group">
+              <label class="admin-form__label">Nama Produk *</label>
+              <input class="admin-form__input" id="prod-name" required />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Slug (URL-friendly) *</label>
+              <input class="admin-form__input" id="prod-slug" required />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">Harga (Rp) *</label>
+                <input type="number" class="admin-form__input" id="prod-price" required />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">Harga Asli (Rp)</label>
+                <input type="number" class="admin-form__input" id="prod-original-price" />
+              </div>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Deskripsi</label>
+              <textarea class="admin-form__textarea" id="prod-description"></textarea>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Kategori (pisahkan dengan koma)</label>
+              <input class="admin-form__input" id="prod-category" placeholder="setelan, flash-sale, new-in" />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Ukuran (pisahkan dengan koma)</label>
+              <input class="admin-form__input" id="prod-sizes" placeholder="S, M, L, XL" />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Gambar (satu per baris)</label>
+              <textarea class="admin-form__textarea" id="prod-images" placeholder="/images/foto1.png&#10;/images/foto2.png"></textarea>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Video TikTok/YouTube (opsional)</label>
+              <input class="admin-form__input" id="prod-video" placeholder="https://www.tiktok.com/@homedress_na/video/..." />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Social Proof</label>
+              <input class="admin-form__input" id="prod-social" placeholder="🔥 Best Seller — 200+ terjual" />
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button type="submit" class="admin-btn admin-btn--primary">Simpan</button>
+              <button type="button" class="admin-btn admin-btn--outline" id="close-modal-2">Batal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    const modal = document.getElementById('product-modal');
+    const form = document.getElementById('product-form');
+
+    // Auto-generate slug from name
+    document.getElementById('prod-name').addEventListener('input', (e) => {
+      const slugField = document.getElementById('prod-slug');
+      if (!slugField.dataset.manual) {
+        slugField.value = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      }
+    });
+    document.getElementById('prod-slug').addEventListener('input', function() { this.dataset.manual = '1'; });
+
+    document.getElementById('add-product-btn').addEventListener('click', () => {
+      form.reset();
+      document.getElementById('prod-id').value = '';
+      document.getElementById('prod-slug').dataset.manual = '';
+      document.getElementById('modal-title').textContent = 'Tambah Produk';
+      modal.style.display = 'block';
+    });
+
+    document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
+    document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
+
+    async function loadProducts() {
+      const res = await fetch('/api/admin/products', { headers: { 'Authorization': `Bearer ${token}` }});
+      const data = await res.json();
+      const products = data.products || [];
+
+      const grid = document.getElementById('product-grid');
+      if (products.length === 0) { grid.innerHTML = '<p style="color:#888;">Belum ada produk</p>'; return; }
+
+      grid.innerHTML = products.map(p => `
+        <div class="product-admin-card" style="${!p.is_active ? 'opacity:0.5;' : ''}">
+          <img class="product-admin-card__img" src="${p.images?.[0] || '/images/featured_images.png'}" alt="" loading="lazy" />
+          <div class="product-admin-card__body">
+            <div class="product-admin-card__name">${p.name}</div>
+            <div class="product-admin-card__price">Rp ${p.price.toLocaleString('id-ID')} ${p.original_price ? `<s style="color:#888;font-weight:400;font-size:0.85rem;">Rp ${p.original_price.toLocaleString('id-ID')}</s>` : ''}</div>
+            <div style="font-size:0.8rem;color:#888;margin-bottom:8px;">${(p.category || []).join(', ')}</div>
+            <div class="product-admin-card__actions">
+              <button class="admin-btn admin-btn--outline admin-btn--small" onclick="editProduct('${p.id}')">✏️ Edit</button>
+              <button class="admin-btn admin-btn--danger admin-btn--small" onclick="deleteProduct('${p.id}','${p.name}')">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      window._products = products;
+    }
+
+    window.editProduct = function(id) {
+      const p = window._products.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('prod-id').value = p.id;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-slug').value = p.slug;
+      document.getElementById('prod-slug').dataset.manual = '1';
+      document.getElementById('prod-price').value = p.price;
+      document.getElementById('prod-original-price').value = p.original_price || '';
+      document.getElementById('prod-description').value = p.description || '';
+      document.getElementById('prod-category').value = (p.category || []).join(', ');
+      document.getElementById('prod-sizes').value = (p.sizes || []).join(', ');
+      document.getElementById('prod-images').value = (p.images || []).join('\n');
+      document.getElementById('prod-video').value = p.video_embed_url || '';
+      document.getElementById('prod-social').value = p.social_proof || '';
+      document.getElementById('modal-title').textContent = 'Edit Produk';
+      modal.style.display = 'block';
+    };
+
+    window.deleteProduct = async function(id, name) {
+      if (!confirm(`Nonaktifkan produk "${name}"?`)) return;
+      const res = await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: id })
+      });
+      if (res.ok) { loadProducts(); showToast('Produk dinonaktifkan'); }
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const productData = {
+        name: document.getElementById('prod-name').value.trim(),
+        slug: document.getElementById('prod-slug').value.trim(),
+        price: parseInt(document.getElementById('prod-price').value),
+        original_price: parseInt(document.getElementById('prod-original-price').value) || null,
+        description: document.getElementById('prod-description').value.trim(),
+        category: document.getElementById('prod-category').value.split(',').map(s => s.trim()).filter(Boolean),
+        sizes: document.getElementById('prod-sizes').value.split(',').map(s => s.trim()).filter(Boolean),
+        images: document.getElementById('prod-images').value.split('\n').map(s => s.trim()).filter(Boolean),
+        video_embed_url: document.getElementById('prod-video').value.trim() || null,
+        social_proof: document.getElementById('prod-social').value.trim(),
+        is_active: true
+      };
+
+      const id = document.getElementById('prod-id').value;
+      if (id) productData.id = id;
+
+      // Calculate discount
+      if (productData.original_price && productData.original_price > productData.price) {
+        productData.discount = Math.round((1 - productData.price / productData.original_price) * 100);
+      }
+
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData)
+      });
+
+      if (res.ok) {
+        modal.style.display = 'none';
+        loadProducts();
+        showToast(id ? 'Produk diupdate!' : 'Produk ditambahkan!');
+      } else {
+        const err = await res.json();
+        alert('Error: ' + (err.error || 'Gagal menyimpan'));
+      }
+    });
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'admin-toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelola Pesanan | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link sidebar__link--active">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>📦 Kelola Pesanan</h1>
+        <div style="display:flex;gap:8px;">
+          <select id="filter-status" class="admin-form__select" style="width:auto;">
+            <option value="">Semua Status</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="confirmed">✅ Konfirmasi</option>
+            <option value="processing">📦 Proses</option>
+            <option value="shipped">🚚 Kirim</option>
+            <option value="completed">🎉 Selesai</option>
+            <option value="cancelled">❌ Batal</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>No. Order</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Pembayaran</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="orders-table">
+              <tr><td colspan="7" style="text-align:center;color:#888;">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    let allOrders = [];
+
+    const statusMap = { pending:'⏳ Pending', confirmed:'✅ Konfirmasi', processing:'📦 Proses', shipped:'🚚 Kirim', completed:'🎉 Selesai', cancelled:'❌ Batal' };
+    const nextStatus = { pending:'confirmed', confirmed:'processing', processing:'shipped', shipped:'completed' };
+
+    async function loadOrders() {
+      const res = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` }});
+      const data = await res.json();
+      allOrders = data.orders || [];
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const filterVal = document.getElementById('filter-status').value;
+      const filtered = filterVal ? allOrders.filter(o => o.status === filterVal) : allOrders;
+      const tbody = document.getElementById('orders-table');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;">Tidak ada pesanan</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(o => {
+        const items = (o.order_items || []).map(i => `${i.product_name} x${i.quantity}`).join(', ');
+        const next = nextStatus[o.status];
+        const actionBtns = o.status !== 'completed' && o.status !== 'cancelled'
+          ? `<button class="admin-btn admin-btn--success admin-btn--small" onclick="updateStatus('${o.id}','${next}')">${statusMap[next] || '→'}</button>
+             <button class="admin-btn admin-btn--danger admin-btn--small" onclick="updateStatus('${o.id}','cancelled')">❌</button>`
+          : '<span style="color:#888;font-size:0.8rem;">Final</span>';
+
+        return `<tr>
+          <td><strong>${o.order_number}</strong><br><small style="color:#888;">${new Date(o.created_at).toLocaleDateString('id-ID')}</small></td>
+          <td>${o.customer_name}<br><small style="color:#888;">${o.customer_phone}</small></td>
+          <td style="max-width:200px;font-size:0.8rem;">${items || '-'}</td>
+          <td>Rp ${o.total.toLocaleString('id-ID')}</td>
+          <td>${o.payment_method}</td>
+          <td><span class="status-badge status-badge--${o.status}">${statusMap[o.status] || o.status}</span></td>
+          <td>${actionBtns}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    window.updateStatus = async function(orderId, status) {
+      if (!confirm(`Ubah status ke "${statusMap[status]}"?`)) return;
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, status })
+      });
+      if (res.ok) {
+        loadOrders();
+        showToast('Status berhasil diupdate!');
+      }
+    };
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'admin-toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    document.getElementById('filter-status').addEventListener('change', renderOrders);
+    loadOrders();
+  </script>
+</body>
+</html>

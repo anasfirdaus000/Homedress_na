@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pengaturan Website | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/settings.html" class="sidebar__link sidebar__link--active">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>⚙️ Pengaturan Website</h1>
+      </div>
+
+      <!-- ANNOUNCEMENT BAR -->
+      <div class="admin-card">
+        <div class="admin-card__header"><h2>📢 Announcement Bar</h2></div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Teks Pengumuman</label>
+          <input class="admin-form__input" id="set-announcement-text" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label"><input type="checkbox" id="set-announcement-active" /> Aktif</label>
+        </div>
+        <button class="admin-btn admin-btn--primary" onclick="saveSection('announcement_bar')">Simpan</button>
+      </div>
+
+      <!-- HERO BANNER -->
+      <div class="admin-card">
+        <div class="admin-card__header"><h2>🎨 Hero Banner</h2></div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Judul</label>
+          <input class="admin-form__input" id="set-hero-title" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Subtitle</label>
+          <input class="admin-form__input" id="set-hero-subtitle" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">CTA Text</label>
+          <input class="admin-form__input" id="set-hero-cta-text" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">CTA Link</label>
+          <input class="admin-form__input" id="set-hero-cta-link" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Background Image URL</label>
+          <input class="admin-form__input" id="set-hero-bg" />
+        </div>
+        <button class="admin-btn admin-btn--primary" onclick="saveSection('hero_banner')">Simpan</button>
+      </div>
+
+      <!-- FLASH SALE -->
+      <div class="admin-card">
+        <div class="admin-card__header"><h2>⚡ Flash Sale</h2></div>
+        <div class="admin-form__group">
+          <label class="admin-form__label"><input type="checkbox" id="set-flash-active" /> Aktif</label>
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Tanggal Berakhir</label>
+          <input type="datetime-local" class="admin-form__input" id="set-flash-end" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Teks Diskon</label>
+          <input class="admin-form__input" id="set-flash-text" />
+        </div>
+        <button class="admin-btn admin-btn--primary" onclick="saveSection('flash_sale')">Simpan</button>
+      </div>
+
+      <!-- PROMO POPUP -->
+      <div class="admin-card">
+        <div class="admin-card__header"><h2>🎁 Promo Popup</h2></div>
+        <div class="admin-form__group">
+          <label class="admin-form__label"><input type="checkbox" id="set-popup-active" /> Aktif</label>
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Judul</label>
+          <input class="admin-form__input" id="set-popup-title" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Deskripsi</label>
+          <input class="admin-form__input" id="set-popup-text" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">URL Gambar</label>
+          <input class="admin-form__input" id="set-popup-image" />
+        </div>
+        <button class="admin-btn admin-btn--primary" onclick="saveSection('promo_popup')">Simpan</button>
+      </div>
+
+      <!-- SOCIAL LINKS -->
+      <div class="admin-card">
+        <div class="admin-card__header"><h2>🔗 Social Media</h2></div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">TikTok URL</label>
+          <input class="admin-form__input" id="set-social-tiktok" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Instagram URL</label>
+          <input class="admin-form__input" id="set-social-instagram" />
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">WhatsApp Number</label>
+          <input class="admin-form__input" id="set-social-whatsapp" />
+        </div>
+        <button class="admin-btn admin-btn--primary" onclick="saveSection('social_links')">Simpan</button>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    let settings = {};
+
+    async function loadSettings() {
+      const res = await fetch('/api/admin/settings');
+      const data = await res.json();
+      settings = data.settings || {};
+
+      // Announcement
+      const ann = settings.announcement_bar || {};
+      document.getElementById('set-announcement-text').value = ann.text || '';
+      document.getElementById('set-announcement-active').checked = ann.is_active !== false;
+
+      // Hero
+      const hero = settings.hero_banner || {};
+      document.getElementById('set-hero-title').value = hero.title || '';
+      document.getElementById('set-hero-subtitle').value = hero.subtitle || '';
+      document.getElementById('set-hero-cta-text').value = hero.cta_text || '';
+      document.getElementById('set-hero-cta-link').value = hero.cta_link || '';
+      document.getElementById('set-hero-bg').value = hero.bg_image || '';
+
+      // Flash sale
+      const flash = settings.flash_sale || {};
+      document.getElementById('set-flash-active').checked = flash.is_active !== false;
+      document.getElementById('set-flash-end').value = flash.end_date ? flash.end_date.substring(0, 16) : '';
+      document.getElementById('set-flash-text').value = flash.discount_text || '';
+
+      // Promo popup
+      const popup = settings.promo_popup || {};
+      document.getElementById('set-popup-active').checked = popup.is_active !== false;
+      document.getElementById('set-popup-title').value = popup.title || '';
+      document.getElementById('set-popup-text').value = popup.text || '';
+      document.getElementById('set-popup-image').value = popup.image || '';
+
+      // Social
+      const social = settings.social_links || {};
+      document.getElementById('set-social-tiktok').value = social.tiktok || '';
+      document.getElementById('set-social-instagram').value = social.instagram || '';
+      document.getElementById('set-social-whatsapp').value = social.whatsapp || '';
+    }
+
+    window.saveSection = async function(key) {
+      let value = {};
+
+      if (key === 'announcement_bar') {
+        value = { text: document.getElementById('set-announcement-text').value, is_active: document.getElementById('set-announcement-active').checked };
+      } else if (key === 'hero_banner') {
+        value = { title: document.getElementById('set-hero-title').value, subtitle: document.getElementById('set-hero-subtitle').value, cta_text: document.getElementById('set-hero-cta-text').value, cta_link: document.getElementById('set-hero-cta-link').value, bg_image: document.getElementById('set-hero-bg').value };
+      } else if (key === 'flash_sale') {
+        value = { is_active: document.getElementById('set-flash-active').checked, end_date: document.getElementById('set-flash-end').value, discount_text: document.getElementById('set-flash-text').value };
+      } else if (key === 'promo_popup') {
+        value = { is_active: document.getElementById('set-popup-active').checked, title: document.getElementById('set-popup-title').value, text: document.getElementById('set-popup-text').value, image: document.getElementById('set-popup-image').value };
+      } else if (key === 'social_links') {
+        value = { tiktok: document.getElementById('set-social-tiktok').value, instagram: document.getElementById('set-social-instagram').value, whatsapp: document.getElementById('set-social-whatsapp').value };
+      }
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value })
+      });
+
+      if (res.ok) { showToast('Pengaturan disimpan!'); }
+      else { const err = await res.json(); alert('Error: ' + err.error); }
+    };
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'admin-toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    loadSettings();
+  </script>
+</body>
+</html>

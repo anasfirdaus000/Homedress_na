@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin | HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link sidebar__link--active">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>Dashboard</h1>
+        <span class="admin-header__user" id="admin-email">—</span>
+      </div>
+
+      <!-- STATS CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__icon">📦</div>
+          <div class="stat-card__value" id="stat-total-orders">0</div>
+          <div class="stat-card__label">Total Pesanan</div>
+        </div>
+        <div class="stat-card stat-card--accent">
+          <div class="stat-card__icon">⏳</div>
+          <div class="stat-card__value" id="stat-pending">0</div>
+          <div class="stat-card__label">Menunggu Konfirmasi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">💰</div>
+          <div class="stat-card__value" id="stat-revenue">Rp 0</div>
+          <div class="stat-card__label">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">🛍️</div>
+          <div class="stat-card__value" id="stat-products">0</div>
+          <div class="stat-card__label">Produk Aktif</div>
+        </div>
+      </div>
+
+      <!-- RECENT ORDERS -->
+      <div class="admin-card">
+        <div class="admin-card__header">
+          <h2>Pesanan Terbaru</h2>
+          <a href="/admin/orders.html" class="admin-card__link">Lihat Semua →</a>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>No. Order</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody id="recent-orders">
+              <tr><td colspan="5" style="text-align:center;color:#888;">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NOTIFICATION ALERTS -->
+      <div class="admin-card" id="notif-card" style="display:none;">
+        <div class="admin-card__header">
+          <h2>⚠️ Notifikasi Gagal Kirim</h2>
+        </div>
+        <div id="failed-notifs"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const supabase = createClient(
+      'https://owajvfwhhdhvhrwjbkmd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4'
+    );
+
+    // Auth guard
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not authenticated'); }
+
+    const token = session.access_token;
+    document.getElementById('admin-email').textContent = session.user.email;
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    // Fetch dashboard data
+    async function loadDashboard() {
+      try {
+        // Orders
+        const ordersRes = await fetch('/api/admin/orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const ordersData = await ordersRes.json();
+        const orders = ordersData.orders || [];
+
+        // Products
+        const prodsRes = await fetch('/api/admin/products', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const prodsData = await prodsRes.json();
+        const products = prodsData.products || [];
+
+        // Stats
+        document.getElementById('stat-total-orders').textContent = orders.length;
+        document.getElementById('stat-pending').textContent = orders.filter(o => o.status === 'pending').length;
+        const revenue = orders.filter(o => !['cancelled'].includes(o.status)).reduce((sum, o) => sum + o.total, 0);
+        document.getElementById('stat-revenue').textContent = 'Rp ' + revenue.toLocaleString('id-ID');
+        document.getElementById('stat-products').textContent = products.filter(p => p.is_active).length;
+
+        // Recent orders table
+        const tbody = document.getElementById('recent-orders');
+        const statusBadge = (s) => {
+          const map = { pending:'⏳ Pending', confirmed:'✅ Konfirmasi', processing:'📦 Proses', shipped:'🚚 Kirim', completed:'🎉 Selesai', cancelled:'❌ Batal' };
+          return `<span class="status-badge status-badge--${s}">${map[s] || s}</span>`;
+        };
+
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;">Belum ada pesanan</td></tr>';
+        } else {
+          tbody.innerHTML = orders.slice(0, 10).map(o => `
+            <tr>
+              <td><strong>${o.order_number}</strong></td>
+              <td>${o.customer_name}<br><small style="color:#888">${o.customer_phone}</small></td>
+              <td>Rp ${o.total.toLocaleString('id-ID')}</td>
+              <td>${statusBadge(o.status)}</td>
+              <td>${new Date(o.created_at).toLocaleDateString('id-ID')}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Failed notifications
+        const failedNotifs = orders.flatMap(o => (o.notifications || []).filter(n => n.status === 'failed'));
+        if (failedNotifs.length > 0) {
+          document.getElementById('notif-card').style.display = 'block';
+          document.getElementById('failed-notifs').innerHTML = failedNotifs.map(n => `
+            <div style="padding:8px 12px;background:#2a1a1a;border-radius:8px;margin-bottom:8px;font-size:0.85rem;">
+              📍 ${n.recipient} — ${n.error_message || 'Unknown error'} <small style="color:#888">(${new Date(n.created_at).toLocaleString('id-ID')})</small>
+            </div>
+          `).join('');
+        }
+
+      } catch (err) {
+        console.error('Dashboard error:', err);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lacak Pesanan | HOMEDRESS_NA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .track { max-width: 640px; margin: 0 auto; padding: 40px 20px; }
+    .track__title { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .track__subtitle { color: var(--color-fg-light); margin-bottom: 32px; }
+    .track__form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+    .track__input { padding: 14px 16px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 1rem; font-family: inherit; }
+    .track__input:focus { border-color: var(--color-fg); outline: none; }
+    .track__btn { padding: 14px; background: var(--color-fg); color: var(--color-bg); border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .track__btn:hover { opacity: 0.85; }
+    .track__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .track__error { color: #e74c3c; font-size: 0.9rem; padding: 12px; background: #ffeaea; border-radius: 8px; }
+
+    /* Result */
+    .track-result { display: none; }
+    .track-result.is-visible { display: block; }
+    .track-result__card { background: var(--color-bg-alt, #f8f8f8); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .track-result__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .track-result__order { font-size: 1.2rem; font-weight: 700; color: var(--color-accent); }
+    .track-result__status { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .track-result__status--pending { background: #fff3cd; color: #856404; }
+    .track-result__status--confirmed { background: #d4edda; color: #155724; }
+    .track-result__status--processing { background: #cce5ff; color: #004085; }
+    .track-result__status--shipped { background: #d1ecf1; color: #0c5460; }
+    .track-result__status--completed { background: #d4edda; color: #155724; }
+    .track-result__status--cancelled { background: #f8d7da; color: #721c24; }
+
+    /* Progress steps */
+    .track-steps { display: flex; justify-content: space-between; margin: 24px 0; position: relative; }
+    .track-steps::before { content: ''; position: absolute; top: 16px; left: 10%; right: 10%; height: 3px; background: #e0e0e0; z-index: 0; }
+    .track-step { text-align: center; position: relative; z-index: 1; flex: 1; }
+    .track-step__circle { width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; margin-bottom: 6px; }
+    .track-step.is-active .track-step__circle { background: var(--color-fg); color: var(--color-bg); }
+    .track-step.is-done .track-step__circle { background: #28a745; color: #fff; }
+    .track-step__label { font-size: 0.7rem; color: var(--color-fg-light); }
+
+    /* Items */
+    .track-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .track-item:last-child { border: none; }
+    .track-item__img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; background: #f0f0f0; }
+    .track-item__info { flex: 1; }
+    .track-item__name { font-weight: 600; font-size: 0.95rem; }
+    .track-item__detail { font-size: 0.85rem; color: var(--color-fg-light); }
+
+    .track-result__row { display: flex; justify-content: space-between; padding: 8px 0; }
+    .track-result__total { font-weight: 700; font-size: 1.1rem; border-top: 2px solid var(--color-fg); padding-top: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div id="announcement-bar" class="announcement-bar">
+    <div class="announcement-bar__track"><div class="announcement-bar__items">
+      <span class="announcement-bar__item">GRATIS ONGKIR untuk pembelian di atas Rp 200.000 🚚</span>
+      <span class="announcement-bar__item">GRATIS ONGKIR untuk pembelian di atas Rp 200.000 🚚</span>
+    </div></div>
+  </div>
+
+  <header id="header" class="header header--transparent">
+    <div class="header__inner">
+      <div class="header__left"></div>
+      <div class="header__center"><a href="/" class="header__logo">HOMEDRESS_NA</a></div>
+      <div class="header__right"></div>
+    </div>
+  </header>
+
+  <main style="padding-top: 140px; padding-bottom: 60px; min-height: 80vh;">
+    <div class="track">
+      <h1 class="track__title">📦 Lacak Pesanan</h1>
+      <p class="track__subtitle">Masukkan nomor pesanan dan nomor HP untuk melihat status pesanan Anda.</p>
+
+      <form class="track__form" id="track-form">
+        <input type="text" class="track__input" id="track-order" placeholder="Nomor Pesanan (contoh: HDN-20260504-001)" required />
+        <input type="tel" class="track__input" id="track-phone" placeholder="Nomor HP (08xxxxxxxxxx)" required />
+        <button type="submit" class="track__btn" id="track-btn">LACAK PESANAN</button>
+        <div class="track__error" id="track-error" style="display:none;"></div>
+      </form>
+
+      <div class="track-result" id="track-result">
+        <div class="track-result__card">
+          <div class="track-result__header">
+            <span class="track-result__order" id="result-order">—</span>
+            <span class="track-result__status" id="result-status">—</span>
+          </div>
+
+          <div class="track-steps" id="track-steps">
+            <div class="track-step" data-step="1">
+              <div class="track-step__circle">⏳</div>
+              <div class="track-step__label">Pending</div>
+            </div>
+            <div class="track-step" data-step="2">
+              <div class="track-step__circle">✅</div>
+              <div class="track-step__label">Konfirmasi</div>
+            </div>
+            <div class="track-step" data-step="3">
+              <div class="track-step__circle">📦</div>
+              <div class="track-step__label">Proses</div>
+            </div>
+            <div class="track-step" data-step="4">
+              <div class="track-step__circle">🚚</div>
+              <div class="track-step__label">Kirim</div>
+            </div>
+            <div class="track-step" data-step="5">
+              <div class="track-step__circle">🎉</div>
+              <div class="track-step__label">Selesai</div>
+            </div>
+          </div>
+
+          <h3 style="margin-bottom:12px;">Detail Pesanan</h3>
+          <div id="result-items"></div>
+
+          <div class="track-result__row" style="margin-top:16px;">
+            <span>Subtotal</span><span id="result-subtotal">—</span>
+          </div>
+          <div class="track-result__row">
+            <span>Ongkir</span><span id="result-shipping">—</span>
+          </div>
+          <div class="track-result__row track-result__total">
+            <span>Total</span><span id="result-total">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('track-form');
+    const errorEl = document.getElementById('track-error');
+    const resultEl = document.getElementById('track-result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('track-btn');
+      const orderNum = document.getElementById('track-order').value.trim();
+      const phone = document.getElementById('track-phone').value.trim();
+
+      btn.disabled = true;
+      btn.textContent = 'Mencari...';
+      errorEl.style.display = 'none';
+      resultEl.classList.remove('is-visible');
+
+      try {
+        const res = await fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_number: orderNum, customer_phone: phone })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Pesanan tidak ditemukan');
+        }
+
+        const order = data.order;
+
+        // Fill order info
+        document.getElementById('result-order').textContent = order.order_number;
+        
+        const statusEl = document.getElementById('result-status');
+        statusEl.textContent = `${order.status_icon} ${order.status_label}`;
+        statusEl.className = `track-result__status track-result__status--${order.status}`;
+
+        // Progress steps
+        document.querySelectorAll('.track-step').forEach(step => {
+          const stepNum = parseInt(step.dataset.step);
+          step.classList.remove('is-active', 'is-done');
+          if (order.status_step === -1) return; // cancelled
+          if (stepNum < order.status_step) step.classList.add('is-done');
+          if (stepNum === order.status_step) step.classList.add('is-active');
+        });
+
+        // Items
+        const itemsHtml = (order.items || []).map(item => `
+          <div class="track-item">
+            <img class="track-item__img" src="${item.product_image || '/images/featured_images.png'}" alt="" loading="lazy" />
+            <div class="track-item__info">
+              <div class="track-item__name">${item.product_name}</div>
+              <div class="track-item__detail">${item.size ? `Ukuran: ${item.size} · ` : ''}${item.quantity}x Rp ${item.price_at_time.toLocaleString('id-ID')}</div>
+            </div>
+          </div>
+        `).join('');
+        document.getElementById('result-items').innerHTML = itemsHtml;
+
+        // Totals
+        document.getElementById('result-subtotal').textContent = 'Rp ' + order.subtotal.toLocaleString('id-ID');
+        document.getElementById('result-shipping').textContent = order.shipping_cost === 0 ? 'GRATIS' : 'Rp ' + order.shipping_cost.toLocaleString('id-ID');
+        document.getElementById('result-total').textContent = 'Rp ' + order.total.toLocaleString('id-ID');
+
+        resultEl.classList.add('is-visible');
+
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'LACAK PESANAN';
+      }
+    });
+  </script>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
