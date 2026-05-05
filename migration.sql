@@ -182,3 +182,75 @@ INSERT INTO menus (label, menu_group, order_index, custom_url) VALUES
 ('Contact Us', 'footer_care', 2, '/contact.html'),
 ('Shipping Policy', 'footer_care', 3, '/shipping-policy.html'),
 ('Delivery Information', 'footer_care', 4, '/shipping-policy.html');
+
+-- =============================================
+-- 7. CMS TABLES (BLOGS & FAQS)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS blogs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  content TEXT NOT NULL,
+  image_url TEXT,
+  author TEXT DEFAULT 'Admin',
+  tags TEXT[] DEFAULT '{}',
+  is_published BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS faqs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  category TEXT DEFAULT 'General',
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE blogs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE faqs ENABLE ROW LEVEL SECURITY;
+
+-- Public read
+CREATE POLICY "Public read blogs" ON blogs FOR SELECT USING (is_published = true);
+CREATE POLICY "Public read faqs" ON faqs FOR SELECT USING (true);
+
+-- Admin access
+CREATE POLICY "Admin full blogs" ON blogs FOR ALL USING (true);
+CREATE POLICY "Admin full faqs" ON faqs FOR ALL USING (true);
+
+-- Initial FAQ Data
+INSERT INTO faqs (question, answer, category, order_index) VALUES
+('Berapa lama waktu pengiriman?', 'Pengiriman biasanya memakan waktu 2-4 hari kerja tergantung lokasi Anda.', 'Pengiriman', 1),
+('Apakah bisa bayar di tempat (COD)?', 'Untuk saat ini kami hanya menerima pembayaran via QRIS dan Virtual Account untuk keamanan transaksi.', 'Pembayaran', 2),
+('Bagaimana jika barang yang diterima rusak?', 'Silakan hubungi admin via WhatsApp dalam 1x24 jam setelah barang diterima dengan melampirkan video unboxing.', 'Retur', 3)
+ON CONFLICT DO NOTHING;
+
+-- =============================================
+-- 8. USER PROFILES TABLE
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  province TEXT,
+  postal_code TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Users can read/write their own profile
+CREATE POLICY "Users can manage own profile" 
+ON user_profiles FOR ALL 
+USING (auth.uid() = id);
+
+-- Service role access
+CREATE POLICY "Service role full access user_profiles" 
+ON user_profiles FOR ALL 
+USING (auth.role() = 'service_role');
