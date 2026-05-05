@@ -16,16 +16,19 @@ export default async function handler(req, res) {
   const { event, data } = req.body;
   console.log(`[Louvin Webhook] Event: ${event} for Order: ${data?.order_id}`);
 
-  try {
-    if (!data || !data.order_id) {
-      return res.status(400).json({ error: 'Invalid payload' });
+    // Louvin usually sends the order number in 'reference' or 'external_id'
+    const orderRef = data.reference || data.order_id || data.external_id;
+
+    if (!orderRef) {
+      console.error('[Louvin Webhook] Missing order reference in payload:', data);
+      return res.status(400).json({ error: 'Missing order reference' });
     }
 
     // 1. Update Order Status
     let newStatus = null;
-    if (event === 'payment.settled') {
+    if (event === 'payment.settled' || event === 'payment.success') {
       newStatus = 'confirmed'; // Payment received
-    } else if (event === 'payment.failed') {
+    } else if (event === 'payment.failed' || event === 'payment.expired') {
       newStatus = 'cancelled'; // Payment expired or failed
     }
 
@@ -36,11 +39,11 @@ export default async function handler(req, res) {
           status: newStatus,
           updated_at: new Date().toISOString() 
         })
-        .eq('order_number', data.order_id);
+        .eq('order_number', orderRef);
 
       if (updateError) throw new Error('Failed to update order status: ' + updateError.message);
       
-      console.log(`[Louvin Webhook] Order ${data.order_id} updated to ${newStatus}`);
+      console.log(`[Louvin Webhook] Order ${orderRef} updated to ${newStatus}`);
 
       // 2. Notify Customer if settled
       if (event === 'payment.settled') {

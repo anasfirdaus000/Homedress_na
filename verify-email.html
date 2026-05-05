@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi Berhasil | HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .verify-container { max-width: 500px; margin: 100px auto; padding: 40px; text-align: center; background: #fff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+    .verify-icon { font-size: 5rem; margin-bottom: 24px; }
+    .verify-title { font-size: 2.2rem; margin-bottom: 16px; font-weight: 800; }
+    .verify-text { color: #666; margin-bottom: 32px; font-size: 1.1rem; line-height: 1.6; }
+    .verify-btn { background: #000; color: #fff; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 700; display: inline-block; transition: 0.3s; }
+    .verify-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div class="verify-container">
+    <div class="verify-icon">✅</div>
+    <h1 class="verify-title">Verifikasi Berhasil!</h1>
+    <p class="verify-text">Email Anda telah berhasil diverifikasi. Sekarang Anda bisa masuk ke akun dan mulai berbelanja.</p>
+    <a href="/login.html" class="verify-btn">MASUK KE AKUN</a>
+  </div>
+
+  <script type="module">
+    // Automatically redirect if token is present
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // If already logged in (verified and auto-logged in by supabase)
+        setTimeout(() => {
+          window.location.href = '/account.html';
+        }, 2000);
+      }
+    }
+    checkSession();
+  </script>
+</body>
+</html>

@@ -165,10 +165,45 @@
           </div>
           <div style="text-align:right;">
             <div class="order-item__status status--${o.status}" style="margin-bottom:8px;">${o.status.toUpperCase()}</div>
-            <a href="/track-order.html?order_id=${o.order_number}&phone=${o.customer_phone}" class="btn-track">LACAK</a>
+            <div style="display:flex; gap:8px;">
+              <a href="/track-order.html?order_id=${o.order_number}&phone=${o.customer_phone}" class="btn-track">LACAK</a>
+              <button onclick="viewOrderItems('${o.id}')" class="btn-track" style="background:#000;color:#fff;">DETAIL</button>
+            </div>
           </div>
         </div>
+        <div id="items-${o.id}" style="display:none; background:#f0f0f0; padding:12px; border-radius:8px; margin-top:8px; font-size:0.85rem;">
+          Memuat detail...
+        </div>
       `).join('');
+    }
+
+    window.viewOrderItems = async function(orderId) {
+      const el = document.getElementById(`items-${orderId}`);
+      if (el.style.display === 'block') {
+        el.style.display = 'none';
+        return;
+      }
+      
+      el.style.display = 'block';
+      if (el.dataset.loaded) return;
+
+      const { data: items, error } = await supabase
+        .from('order_items')
+        .select('*')
+        .eq('order_id', orderId);
+
+      if (error || !items) {
+        el.textContent = 'Gagal memuat detail.';
+        return;
+      }
+
+      el.innerHTML = items.map(i => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid #ddd;">
+          <span>${i.product_name} (${i.size || 'N/A'}) x${i.quantity}</span>
+          <strong>Rp ${(i.price_at_time * i.quantity).toLocaleString('id-ID')}</strong>
+        </div>
+      `).join('');
+      el.dataset.loaded = "true";
     }
 
     document.getElementById('profile-form').addEventListener('submit', async (e) => {

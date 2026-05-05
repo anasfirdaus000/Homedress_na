@@ -173,7 +173,7 @@ export default async function handler(req, res) {
             amount: total,
             payment_type: sanitized.payment_method,
             customer_name: sanitized.customer_name,
-            customer_email: sanitized.customer_email,
+            customer_email: sanitized.customer_email || 'customer@homedress-na.com',
             description: `Order ${orderNumber}`,
             reference: orderNumber
           })
@@ -225,7 +225,8 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Checkout error:', err);
     return res.status(500).json({
-      error: 'Terjadi kesalahan saat memproses pesanan. Silakan coba lagi atau pesan via WhatsApp.',
+      error: 'Terjadi kesalahan saat memproses pesanan: ' + err.message,
+      details: err.stack,
       fallback_wa: true
     });
   }
