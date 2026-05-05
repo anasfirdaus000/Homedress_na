@@ -16,12 +16,13 @@ export default async function handler(req, res) {
   const { event, data } = req.body;
   console.log(`[Louvin Webhook] Event: ${event} for Order: ${data?.order_id}`);
 
+  try {
     // Louvin usually sends the order number in 'reference' or 'external_id'
-    const orderRef = data.reference || data.order_id || data.external_id;
+    const orderRef = data?.reference || data?.order_id || data?.external_id;
 
     if (!orderRef) {
-      console.error('[Louvin Webhook] Missing order reference in payload:', data);
-      return res.status(400).json({ error: 'Missing order reference' });
+      console.warn('[Louvin Webhook] No order reference found in payload, but acknowledging event.');
+      return res.status(200).json({ success: true, message: 'Awaiting reference' });
     }
 
     // 1. Update Order Status
@@ -44,13 +45,8 @@ export default async function handler(req, res) {
       if (updateError) throw new Error('Failed to update order status: ' + updateError.message);
       
       console.log(`[Louvin Webhook] Order ${orderRef} updated to ${newStatus}`);
-
-      // 2. Notify Customer if settled
-      if (event === 'payment.settled') {
-        // We can fetch user email from orders if needed, or just use notify lib
-        console.log(`[Louvin Webhook] Sending confirmation for Order ${data.order_id}`);
-        // Logic for sending confirmation email/WA can go here
-      }
+    } else {
+      console.log(`[Louvin Webhook] Event ${event} ignored (not a final status).`);
     }
 
     // Always return 200 to Louvin
