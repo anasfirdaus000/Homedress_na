@@ -29,6 +29,9 @@ export default defineConfig({
         adminDashboard: 'admin/index.html',
         adminOrders: 'admin/orders.html',
         adminProducts: 'admin/products.html',
+        adminCategories: 'admin/categories.html',
+        adminFeatured: 'admin/featured.html',
+        adminMenus: 'admin/menus.html',
         adminSettings: 'admin/settings.html',
       }
     }
