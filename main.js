@@ -284,11 +284,6 @@ function renderCartDrawer() {
   total.textContent = 'Rp ' + CART.total().toLocaleString('id-ID');
 }
 
-function closeCartDrawer() { 
-  const d = document.getElementById('cart-drawer');
-  if (d) { d.classList.remove('is-open'); document.body.style.overflow = ''; }
-}
-
 function renderWishlistDrawer() {
   const list = document.getElementById('wishlist-drawer-list');
   if (!list) return;
