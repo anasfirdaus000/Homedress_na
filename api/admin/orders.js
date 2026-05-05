@@ -8,6 +8,7 @@
 import { supabaseAdmin } from '../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '../_lib/email.js';
+import { sendWhatsApp } from '../_lib/notify.js';
 
 async function verifyAdmin(req) {
   const token = req.headers.authorization?.replace('Bearer ', '');
@@ -85,7 +86,13 @@ export default async function handler(req, res) {
         }
       }
       
-      // 3. Send Email Notification
+      // 3. Send Notifications
+      const msg = `Halo kak *${order.customer_name}* 👋\n\nPembayaran untuk pesanan *#${order.order_number}* telah kami terima. Pesanan akan segera kami proses dan kirimkan.\n\nTerima kasih sudah belanja di *HOMEDRESS_NA*! 🙏`;
+      
+      if (order.customer_phone) {
+        await sendWhatsApp(order.customer_phone, msg);
+      }
+
       if (order.customer_email) {
         await sendEmail({
           to: order.customer_email,
