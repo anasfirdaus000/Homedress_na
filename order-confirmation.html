@@ -62,16 +62,23 @@
           <span class="confirmation__label">Status</span>
           <span class="confirmation__value" id="conf-status-text">⏳ Menunggu Pembayaran</span>
         </div>
-        <div class="confirmation__row">
-          <span class="confirmation__label">Tanggal</span>
-          <span class="confirmation__value" id="conf-date">—</span>
-        </div>
       </div>
 
-      <p style="font-size: 0.95rem; color: var(--color-fg-light); margin-bottom: 24px;">
-        Simpan nomor pesanan Anda. Kami akan mengirimkan konfirmasi via WhatsApp.
-        Silakan lakukan pembayaran sesuai metode yang dipilih.
-      </p>
+      <!-- PAYMENT INSTRUCTIONS (Dynamic) -->
+      <div id="payment-instructions" style="display:none; background: #fff; border: 2px solid var(--color-accent); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <h3 style="margin-bottom:16px; font-size:1.4rem;">Instruksi Pembayaran</h3>
+        <div id="qris-container" style="display:none; text-align:center;">
+          <p style="margin-bottom:12px;">Scan QRIS di bawah ini:</p>
+          <img id="qris-image" src="" style="width:200px; height:200px; margin:0 auto 12px; display:block;"/>
+          <p style="font-size:0.8rem; color:#888;">QRIS dapat digunakan untuk GoPay, OVO, Dana, LinkAja, dan Mobile Banking.</p>
+        </div>
+        <div id="va-container" style="display:none;">
+          <p style="margin-bottom:8px;">Silakan transfer ke Virtual Account:</p>
+          <div style="background:#f0f0f0; padding:16px; border-radius:8px; font-size:1.8rem; font-weight:800; text-align:center; letter-spacing:2px; margin-bottom:12px;" id="va-number"></div>
+          <p style="font-size:0.9rem; color:#666;">Bank: <strong id="va-bank-name">—</strong></p>
+          <p style="font-size:0.8rem; color:#888; margin-top:12px;">Batas waktu pembayaran: <span id="va-expiry">—</span></p>
+        </div>
+      </div>
 
       <div class="confirmation__actions">
         <a href="/track-order.html" class="confirmation__btn confirmation__btn--primary">CEK STATUS PESANAN</a>
@@ -81,21 +88,47 @@
   </main>
 
   <script>
-    // Read order data from URL params (passed from checkout)
     const params = new URLSearchParams(window.location.search);
     const orderNumber = params.get('order');
-    const total = params.get('total');
-    const date = params.get('date');
 
-    if (orderNumber) {
-      document.getElementById('conf-order-number').textContent = orderNumber;
+    async function loadOrderDetails() {
+      if (!orderNumber) return;
+      try {
+        const res = await fetch(`/api/track?order=${orderNumber}`);
+        const data = await res.json();
+        if (!data.success) return;
+
+        const order = data.order;
+        document.getElementById('conf-order-number').textContent = order.order_number;
+        document.getElementById('conf-total').textContent = 'Rp ' + order.total.toLocaleString('id-ID');
+        
+        if (order.status === 'paid') {
+          document.getElementById('conf-status-text').innerHTML = '✅ Pembayaran Berhasil';
+          document.getElementById('conf-status-icon').textContent = '🛍️';
+          document.getElementById('payment-instructions').style.display = 'none';
+        } else {
+          // Show instructions
+          const instr = document.getElementById('payment-instructions');
+          if (order.payment_qr) {
+            instr.style.display = 'block';
+            document.getElementById('qris-container').style.display = 'block';
+            document.getElementById('qris-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(order.payment_qr)}`;
+          } else if (order.payment_va) {
+            instr.style.display = 'block';
+            document.getElementById('va-container').style.display = 'block';
+            document.getElementById('va-number').textContent = order.payment_va;
+            document.getElementById('va-bank-name').textContent = order.payment_method.split('_')[0].toUpperCase();
+            if (order.payment_expiry) {
+              document.getElementById('va-expiry').textContent = new Date(order.payment_expiry).toLocaleString('id-ID');
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load order:', e);
+      }
     }
-    if (total) {
-      document.getElementById('conf-total').textContent = 'Rp ' + parseInt(total).toLocaleString('id-ID');
-    }
-    if (date) {
-      document.getElementById('conf-date').textContent = new Date(date).toLocaleString('id-ID');
-    }
+
+    loadOrderDetails();
 
     // Polling status
     if (orderNumber) {
@@ -106,14 +139,12 @@
           if (data.order && data.order.status === 'paid') {
             document.getElementById('conf-status-text').innerHTML = '✅ Pembayaran Berhasil';
             document.getElementById('conf-status-icon').textContent = '🛍️';
+            document.getElementById('payment-instructions').style.display = 'none';
             clearInterval(poll);
           }
         } catch (e) {}
-      }, 3000);
+      }, 5000);
     }
-
-    // Clear cart after successful order
-    localStorage.removeItem('homedress_cart');
   </script>
   <script type="module" src="/main.js"></script>
 </body>

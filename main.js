@@ -2,6 +2,11 @@
    HOMEDRESS_NA — Clean Main JavaScript
    Parallel Loading & Robust Error Handling
    =============================================== */
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SB_URL = 'https://owajvfwhhdhvhrwjbkmd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4';
+window.supabase = createClient(SB_URL, SB_KEY);
 
 // ========== HELPERS ==========
 function createCard(p) {
@@ -117,6 +122,63 @@ window.CART = {
       b.textContent = total;
       b.style.display = total > 0 ? 'flex' : 'none';
     });
+  }
+};
+
+// ========== WISHLIST SYSTEM ==========
+window.WISHLIST = {
+  items: JSON.parse(localStorage.getItem('hd_wishlist') || '[]'),
+  save() { 
+    localStorage.setItem('hd_wishlist', JSON.stringify(this.items));
+    this.updateUI();
+  },
+  toggle(product) {
+    const idx = this.items.findIndex(i => i.slug === product.slug);
+    if (idx > -1) {
+      this.items.splice(idx, 1);
+      showToast('Dihapus dari wishlist 🤍');
+    } else {
+      this.items.push(product);
+      showToast('Ditambah ke wishlist ❤️');
+    }
+    this.save();
+  },
+  has(slug) { return this.items.some(i => i.slug === slug); },
+  updateUI() {
+    document.querySelectorAll('.wishlist-btn').forEach(btn => {
+      const slug = btn.dataset.slug;
+      if (this.has(slug)) btn.classList.add('is-active');
+      else btn.classList.remove('is-active');
+    });
+  }
+};
+
+// ========== AUTH SYSTEM ==========
+window.AUTH = {
+  user: null,
+  async init() {
+    const { data: { session } } = await window.supabase.auth.getSession();
+    this.user = session?.user || null;
+    this.updateUI();
+    
+    window.supabase.auth.onAuthStateChange((_event, session) => {
+      this.user = session?.user || null;
+      this.updateUI();
+    });
+  },
+  updateUI() {
+    const accBtn = document.querySelector('[aria-label="Account"]');
+    if (accBtn) {
+      accBtn.onclick = () => {
+        window.location.href = this.user ? '/account.html' : '/login.html';
+      };
+      if (this.user) accBtn.classList.add('is-logged-in');
+      else accBtn.classList.remove('is-logged-in');
+    }
+  },
+  async logout() {
+    await window.supabase.auth.signOut();
+    window.location.href = '/';
   }
 };
 
@@ -322,18 +384,44 @@ async function initDynamicHome(products = [], featured = []) {
 
 async function initDynamicMenus(products = []) {
   const navs = document.querySelectorAll('#dynamic-nav, #main-nav');
-  if (navs.length === 0) return;
+  const footerLinks = document.getElementById('dynamic-footer-links');
+  
   try {
     const res = await fetch('/api/menus');
     if (res.ok) {
       const { menus } = await res.json();
-      const main = menus.filter(m => m.menu_group === 'main_nav' && !m.parent_id);
-      const html = main.map(m => `
-        <div class="header__nav-item">
-          <a href="${m.category_slug ? `/category.html?filter=${m.category_slug}` : (m.custom_url || '#')}" class="header__nav-link">${m.label}</a>
-        </div>
-      `).join('');
-      navs.forEach(nav => nav.innerHTML = html);
+      
+      // 1. Main Nav
+      if (navs.length > 0) {
+        const main = menus.filter(m => m.menu_group === 'main_nav' && !m.parent_id);
+        const html = main.map(m => `
+          <div class="header__nav-item">
+            <a href="${m.category_slug ? `/category.html?filter=${m.category_slug}` : (m.custom_url || '#')}" class="header__nav-link">${m.label}</a>
+          </div>
+        `).join('');
+        navs.forEach(nav => nav.innerHTML = html);
+      }
+
+      // 2. Footer Nav
+      if (footerLinks) {
+        const groups = [
+          { key: 'footer_shop', title: 'SHOP' },
+          { key: 'footer_explore', title: 'EXPLORE' },
+          { key: 'footer_care', title: 'CUSTOMER CARE' }
+        ];
+        footerLinks.innerHTML = groups.map(g => {
+          const groupMenus = menus.filter(m => m.menu_group === g.key);
+          if (groupMenus.length === 0) return '';
+          return `
+            <div class="footer__links-group">
+              <h4 class="footer__links-title">${g.title}</h4>
+              ${groupMenus.map(m => `
+                <a href="${m.category_slug ? `/category.html?filter=${m.category_slug}` : (m.custom_url || '#')}" class="footer__link">${m.label}</a>
+              `).join('')}
+            </div>
+          `;
+        }).join('');
+      }
     }
   } catch (e) {}
 }
@@ -425,6 +513,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.pathname.includes('checkout.html')) {
     initCheckoutPage();
   }
+  if (window.location.pathname.includes('faq.html')) {
+    initFAQPage();
+  }
+  if (window.location.pathname.includes('blog')) {
+    initBlogPage();
+  }
+
+  // Auth Init
+  AUTH.init();
+  WISHLIST.updateUI();
 
   // Animation triggers
   const observer = new IntersectionObserver((entries) => {
@@ -577,4 +675,63 @@ function initCheckoutPage() {
       btn.textContent = 'BUAT PESANAN';
     }
   };
+}
+
+// ========== CMS LOADERS ==========
+async function initFAQPage() {
+  const container = document.getElementById('faq-container');
+  if (!container) return;
+  try {
+    const { data, error } = await window.supabase.from('faqs').select('*').order('order_index');
+    if (error) throw error;
+    container.innerHTML = data.map(f => `
+      <details class="pdp-accordion" style="margin-bottom:12px; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+        <summary class="pdp-accordion__summary" style="padding: 16px; background: #fafafa; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+          ${f.question} <span style="font-size: 1.2rem;">+</span>
+        </summary>
+        <div class="pdp-accordion__content" style="padding: 20px; border-top: 1px solid #eee; line-height: 1.6; color: #555;">
+          ${f.answer}
+        </div>
+      </details>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<p>Gagal memuat FAQ.</p>';
+  }
+}
+
+async function initBlogPage() {
+  const grid = document.getElementById('blog-grid');
+  const detail = document.getElementById('blog-detail');
+  if (!grid && !detail) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const slug = urlParams.get('slug');
+
+  if (slug && detail) {
+    const { data } = await window.supabase.from('blogs').select('*').eq('slug', slug).single();
+    if (data) {
+      detail.innerHTML = `
+        <article class="blog-post" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+          <img src="${data.image_url}" class="blog-post__hero" style="width: 100%; height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 32px;"/>
+          <h1 style="font-size: 3.2rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px;">${data.title}</h1>
+          <div class="blog-post__meta" style="color: #888; font-size: 1.1rem; margin-bottom: 40px;">By ${data.author} • ${new Date(data.created_at).toLocaleDateString()}</div>
+          <div class="blog-post__content" style="font-size: 1.2rem; line-height: 1.8; color: #333;">${data.content}</div>
+        </article>
+      `;
+    }
+  } else if (grid) {
+    const { data } = await window.supabase.from('blogs').select('*').eq('is_published', true).order('created_at', { ascending: false });
+    if (data) {
+      grid.innerHTML = data.map(b => `
+        <a href="/blog.html?slug=${b.slug}" class="blog-card" style="display: block; text-decoration: none; color: inherit; transition: transform 0.3s ease;">
+          <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; margin-bottom: 16px;">
+            <img src="${b.image_url}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"/>
+          </div>
+          <h3 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 8px;">${b.title}</h3>
+          <p style="color: #666; margin-bottom: 12px;">${b.content.substring(0, 100)}...</p>
+          <span style="font-weight: 700; color: var(--color-accent);">Read More →</span>
+        </a>
+      `).join('');
+    }
+  }
 }
