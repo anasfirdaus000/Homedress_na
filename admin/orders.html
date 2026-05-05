@@ -16,7 +16,10 @@
         <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
         <a href="/admin/orders.html" class="sidebar__link sidebar__link--active">📦 Pesanan</a>
         <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
         <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
         <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
         <hr style="border-color:#333;margin:16px 0;" />
         <a href="/" class="sidebar__link">🌐 Lihat Website</a>
@@ -118,7 +121,7 @@
              <button class="admin-btn admin-btn--danger admin-btn--small" onclick="updateStatus('${o.id}','cancelled')">❌</button>`
           : '<span style="color:#888;font-size:0.8rem;">Final</span>';
 
-        const detailBtn = `<button class="admin-btn admin-btn--outline admin-btn--small" onclick="viewOrderDetails('${o.id}')" style="margin-top:4px;">👁️ Detail</button>`;
+        const waBtn = `<a href="https://wa.me/${o.customer_phone.replace(/\D/g,'')}" target="_blank" class="admin-btn admin-btn--outline admin-btn--small" style="margin-top:4px;display:inline-block;">💬 WA</a>`;
 
         return `<tr>
           <td><strong>${o.order_number}</strong><br><small style="color:#888;">${new Date(o.created_at).toLocaleDateString('id-ID')}</small></td>
@@ -127,7 +130,7 @@
           <td>Rp ${o.total.toLocaleString('id-ID')}</td>
           <td>${o.payment_method}</td>
           <td><span class="status-badge status-badge--${o.status}">${statusMap[o.status] || o.status}</span></td>
-          <td>${actionBtns}<br>${detailBtn}</td>
+          <td>${actionBtns}<br>${detailBtn} ${waBtn}</td>
         </tr>`;
       }).join('');
     }
@@ -175,6 +178,16 @@
           <p style="margin:4px 0;">${o.city || ''}, ${o.province || ''} ${o.postal_code || ''}</p>
           <p style="margin:12px 0 4px 0;border-top:1px dashed #444;padding-top:12px;"><strong>Catatan:</strong> ${o.notes || '-'}</p>
         </div>
+
+        ${o.louvin_transaction_id ? `
+        <div style="margin-bottom:20px;padding:16px;background:#1a2b1a;border-radius:8px;border:1px solid #2d4a2d;">
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#4caf50;">💳 Info Pembayaran Louvin</h3>
+          <p style="margin:4px 0;"><strong>Trans ID:</strong> ${o.louvin_transaction_id}</p>
+          <p style="margin:4px 0;"><strong>Metode:</strong> ${o.payment_method.toUpperCase()}</p>
+          ${o.payment_va_number ? `<p style="margin:4px 0;"><strong>VA:</strong> ${o.payment_va_number}</p>` : ''}
+          ${o.payment_qr_string ? `<p style="margin:4px 0; font-size:0.8rem; word-break:break-all;"><strong>QR String:</strong> ${o.payment_qr_string}</p>` : ''}
+        </div>
+        ` : ''}
 
         <div style="margin-bottom:20px;">
           <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#fff;">Rincian Produk</h3>

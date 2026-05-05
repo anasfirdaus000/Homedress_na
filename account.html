@@ -43,7 +43,7 @@
       <button class="btn-logout" id="btn-logout">Logout</button>
     </div>
 
-    <div class="profile-card">
+    <div class="profile-card" style="margin-bottom:32px;">
       <h2 style="font-size:1.2rem;margin-bottom:24px;">Informasi Pribadi & Alamat</h2>
       <form id="profile-form">
         <div class="form-group">
@@ -76,11 +76,33 @@
           <label class="form-label">Kode Pos</label>
           <input type="text" id="prof-postal" class="form-input" style="max-width:200px;" required />
         </div>
-        
         <button type="submit" class="btn-save" id="btn-save">Simpan Perubahan</button>
       </form>
     </div>
+
+    <div class="profile-card">
+      <h2 style="font-size:1.2rem;margin-bottom:24px;">Riwayat Pesanan</h2>
+      <div id="order-history-list">
+        <p style="color:#888;text-align:center;padding:20px;">Memuat riwayat pesanan...</p>
+      </div>
+    </div>
   </main>
+
+  <style>
+    .order-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #eee; }
+    .order-item:last-child { border-bottom: none; }
+    .order-item__info { flex: 1; }
+    .order-item__number { font-weight: 700; color: var(--color-black); margin-bottom: 4px; }
+    .order-item__date { font-size: 0.85rem; color: #888; }
+    .order-item__status { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .status--pending { background: #fff3cd; color: #856404; }
+    .status--confirmed { background: #d4edda; color: #155724; }
+    .status--processing { background: #cce5ff; color: #004085; }
+    .status--shipped { background: #d1ecf1; color: #0c5460; }
+    .status--completed { background: #d4edda; color: #155724; }
+    .status--cancelled { background: #f8d7da; color: #721c24; }
+    .btn-track { font-size: 0.85rem; color: var(--color-accent); font-weight: 600; text-decoration: none; border: 1px solid var(--color-accent); padding: 4px 12px; border-radius: 4px; }
+  </style>
 
   <div id="toast" class="toast">Profil berhasil diperbarui!</div>
 
@@ -116,6 +138,37 @@
         document.getElementById('prof-province').value = profile.province || '';
         document.getElementById('prof-postal').value = profile.postal_code || '';
       }
+
+      loadOrders();
+    }
+
+    async function loadOrders() {
+      const list = document.getElementById('order-history-list');
+      
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error || !orders || orders.length === 0) {
+        list.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Belum ada riwayat pesanan.</p>';
+        return;
+      }
+
+      list.innerHTML = orders.map(o => `
+        <div class="order-item">
+          <div class="order-item__info">
+            <div class="order-item__number">${o.order_number}</div>
+            <div class="order-item__date">${new Date(o.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })}</div>
+            <div style="font-size:0.9rem; margin-top:4px;">Total: <strong>Rp ${o.total.toLocaleString('id-ID')}</strong></div>
+          </div>
+          <div style="text-align:right;">
+            <div class="order-item__status status--${o.status}" style="margin-bottom:8px;">${o.status.toUpperCase()}</div>
+            <a href="/track-order.html?order_id=${o.order_number}&phone=${o.customer_phone}" class="btn-track">LACAK</a>
+          </div>
+        </div>
+      `).join('');
     }
 
     document.getElementById('profile-form').addEventListener('submit', async (e) => {

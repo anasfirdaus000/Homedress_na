@@ -53,164 +53,74 @@
         </button>
       </div>
     </div>
-    <nav id="main-nav" class="header__nav">
-  <div class="header__nav-item"><a href="/" class="header__nav-link">Beranda</a></div>
+    <nav id="dynamic-nav" class="header__nav">
+      <div class="header__nav-item"><a href="/" class="header__nav-link">Beranda</a></div>
+      <div class="header__nav-item"><a href="/category.html?filter=flash-sale" class="header__nav-link" style="color: var(--color-accent);">Flash Sale ⚡</a></div>
+      <div class="header__nav-item"><a href="/category.html?filter=best-seller" class="header__nav-link">Best Seller 🔥</a></div>
+      <div class="header__nav-item"><a href="/category.html?filter=new-in" class="header__nav-link">New Arrival</a></div>
 
-  <!-- FLASH SALE MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/flash-sale.html" class="header__nav-link" style="color: var(--color-accent);">Flash Sale ⚡ <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">SPESIAL FLASH SALE</h4>
-          <ul class="megamenu__list">
-            <li><a href="/flash-sale.html">Semua Item Flash Sale</a></li>
-            <li><a href="/setelan-wanita-batwing-rayon-salur.html" style="color: var(--color-accent); font-weight: bold;">↳ Cantika Set (Special)</a></li>
-            <li><a href="/setelan-wanita-korea-kekinian-terbaru.html" style="color: var(--color-accent); font-weight: bold;">↳ Jessy Set (Baru!)</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">FLASH SALE HIGHLIGHT</h4>
-          <div class="megamenu__grid megamenu__grid--4">
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="" /></div>
-              <span>Setelan Flash Sale</span>
-            </a>
+      <!-- KATEGORI MEGA MENU -->
+      <div class="header__nav-item">
+        <a href="/category.html" class="header__nav-link">Kategori <span class="nav-arrow">▼</span></a>
+        <div class="header__megamenu">
+          <div class="megamenu__inner">
+            <div class="megamenu__col" style="min-width: 200px;">
+              <h4 class="megamenu__title">Berdasarkan Produk</h4>
+              <ul class="megamenu__list">
+                <li><a href="/category.html?filter=homedress">Homedress</a></li>
+                <li><a href="/category.html?filter=gamis">Gamis</a></li>
+                <li><a href="/category.html?filter=one-set">One Set</a></li>
+                <li><a href="/category.html?filter=hijab">Hijab</a></li>
+                <li><a href="/category.html?filter=mukena">Mukena</a></li>
+              </ul>
+            </div>
+            <div class="megamenu__featured">
+              <h4 class="megamenu__title">Koleksi Terbaru</h4>
+              <div class="megamenu__grid megamenu__grid--4" id="megamenu-new-in-grid">
+                <!-- Populated by JS -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- BEST SELLER MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/best-seller.html" class="header__nav-link">Best Seller 🔥 <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">PALING DIMINATI</h4>
-          <ul class="megamenu__list">
-            <li><a href="/terlaris-minggu.html">Terlaris Minggu Ini</a></li>
-            <li><a href="/terlaris-bulan.html">Terlaris Bulan Ini</a></li>
-            <li><a href="/rating-tinggi.html">Produk Rating Tinggi ⭐</a></li>
-            <li><a href="/repeat-order.html">Repeat Order Terbanyak</a></li>
-            <li><a href="/viral.html">Lagi Viral 🔥</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">KAMI REKOMENDASIKAN</h4>
-          <div class="megamenu__grid megamenu__grid--4">
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-19_ecd62676-bd1a-4b2f-a5d3-ed2d838d8217.png" alt="" /></div>
-              <span>Setelan Viral</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png" alt="" /></div>
-              <span>Homedress Nyaman</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png" alt="" /></div>
-              <span>Top Rating</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/13_2a0325a5-7366-447c-b9f4-18f8ccb48248.png" alt="" /></div>
-              <span>Paling Laku</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+      <div class="header__nav-item"><a href="/category.html?filter=promo" class="header__nav-link" style="color: #2e7d32;">Promo Hari Ini 🥦</a></div>
 
-  <div class="header__nav-item"><a href="/new-in.html" class="header__nav-link">New Arrival</a></div>
-
-  <!-- SEMUA PRODUK MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/category.html" class="header__nav-link">Semua Produk <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">KATALOG</h4>
-          <ul class="megamenu__list">
-            <li><a href="/category.html">Semua Item</a></li>
-            <li><a href="/dress.html">Dress / Homedress</a></li>
-            <li><a href="/setelan.html">Setelan</a></li>
-            <li><a href="/atasan.html">Atasan</a></li>
-            <li><a href="/bawahan.html">Bawahan</a></li>
-            <li><a href="/new-in.html">New Arrival ✨</a></li>
-            <li><a href="/restock.html">Restock 🔄</a></li>
-            <li><a href="/viral.html">Lagi Viral 🔥</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">PILIHAN KAMI</h4>
-          <div class="megamenu__grid megamenu__grid--4" id="megamenu-new-in-grid">
-            <!-- Dynamically populated by JS -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROMO HARI INI MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/promo.html" class="header__nav-link header__nav-link--sale">Promo Hari Ini 💸 <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">PROMO & DISKON</h4>
-          <ul class="megamenu__list">
-            <li><a href="/flash-sale.html">Flash Sale ⚡</a></li>
-            <li><a href="/diskon-10-30.html">Diskon 10–30%</a></li>
-            <li><a href="/diskon-50.html">Diskon 50%++ 🔥</a></li>
-            <li><a href="/bundling.html">Bundling Hemat</a></li>
-            <li><a href="/clearance.html">Clearance Sale</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">SPESIAL DISKON</h4>
-          <div class="megamenu__grid megamenu__grid--4" id="megamenu-promo-grid">
-            <!-- Dynamically populated by JS -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="header__nav-item">
-    <a href="/category.html" class="header__nav-link">EXPLORE <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu" style="height: max-content;">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="border: none;">
-          <h4 class="megamenu__title">EXPLORE</h4>
-          <ul class="megamenu__list">
-            <li><a href="/about-us.html">About us</a></li>
-            <li><a href="/blog-rayon-vs-crinkle-airflow.html" style="color: var(--color-accent); font-weight: bold;">Blog: Rayon vs Crinkle</a></li>
-            <li><a href="/faq.html">FAQs</a></li>
-            <li><a href="/store-locator.html">Store Locator</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
+      <div class="header__nav-item"><a href="/about-us.html" class="header__nav-link">Explore</a></div>
+    </nav>
  </header>
 
   <!-- HERO BANNER -->
   <section id="hero" class="hero">
     <div class="hero__slider" id="hero-slider">
-      <!-- Dynamically populated by JS -->
+      <!-- Populated by JS:
+        const slidesHtml = slides.map(s => `
+          <div class="hero__slide">
+            <a href="${s.link_url || '/category.html'}" class="hero__link-wrapper" style="text-decoration:none; color:inherit;">
+              <div class="hero__image-wrapper">
+                ${s.video_url 
+                  ? `<video class="hero__image" autoplay loop muted playsinline style="object-fit:cover;object-position:${s.object_position || 'center'};width:100%;height:100%;"><source src="${s.video_url}" type="video/mp4"></video>` 
+                  : `<img src="${s.image_url}" alt="${s.title}" class="hero__image" loading="eager" draggable="false" style="object-position: ${s.object_position || 'center'};" />`
+                }
+              </div>
+              <div class="hero__content">
+                <h1 class="hero__title">${s.title.replace(/\n/g, '<br/>')}</h1>
+                ${s.subtitle ? `<p class="hero__subtitle">${s.subtitle.replace(/\n/g, '<br/>')}</p>` : ''}
+                ${s.link_url ? `<span class="hero__cta">SHOP NOW</span>` : ''}
+              </div>
+            </a>
+          </div>
+        `).join('');
+      -->
     </div>
-    <div class="hero__dots" id="hero-dots">
-      <!-- Dynamically populated by JS -->
-    </div>
+    <div class="hero__dots" id="hero-dots"></div>
   </section>
 
   <!-- NEW IN THIS WEEK -->
   <section id="new-in" class="section new-in">
     <div class="section__header">
       <h2 class="section__title">New In This Week</h2>
-      <a href="/new-in.html" class="section__link">SHOP SETS <span class="arrow">→</span></a>
+      <a href="/category.html?filter=new-in" class="section__link">SHOP SETS <span class="arrow">→</span></a>
     </div>
     <div class="product-grid product-grid--5" id="new-in-grid">
       <div style="padding:40px;text-align:center;width:100%;grid-column:1/-1;color:#888;">Memuat produk...</div>
@@ -224,7 +134,8 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         Promo Hari Ini
       </h2>
-      <a href="/promo.html" class="section__link" style="color: var(--color-accent);">VIEW ALL OFFERS <span class="arrow">→</span></a>
+      <div id="flash-sale-timer" class="flash-sale-timer"></div>
+      <a href="/category.html?filter=promo" class="section__link" style="color: var(--color-accent);">VIEW ALL OFFERS <span class="arrow">→</span></a>
     </div>
     <div class="product-grid product-grid--5" id="flash-sale-grid">
       <div style="padding:40px;text-align:center;width:100%;grid-column:1/-1;color:#888;">Memuat promo...</div>
@@ -234,46 +145,11 @@
   <!-- SHOP BY CATEGORY -->
   <section id="shop-category" class="section shop-category">
     <div class="section__header">
-      <h2 class="section__title">Shop by Category</h2>
-      <a href="/category.html" class="section__link">SHOP ALL <span class="arrow">→</span></a>
+      <h2 class="section__title">Belanja Berdasarkan Kategori</h2>
+      <a href="/category.html" class="section__link">LIHAT SEMUA <span class="arrow">→</span></a>
     </div>
     <div class="category-grid" id="category-grid">
-      <a href="/category.html?filter=setelan" class="category-card" data-animate>
-        <div class="category-card__image-wrapper">
-          <img src="/images/45964E36-0747-4AB6-8315-23B1C57EA16E.jpg" alt="Sets" class="category-card__image" loading="lazy" />
-        </div>
-        <span class="category-card__label">Sets</span>
-      </a>
-      <a href="/category.html" class="category-card" data-animate>
-        <div class="category-card__image-wrapper">
-          <img src="/images/629F5E92-479F-4E54-AE27-6D738460207B.jpg" alt="Footwear" class="category-card__image" loading="lazy" />
-        </div>
-        <span class="category-card__label">Footwear</span>
-      </a>
-      <a href="/category.html?filter=atasan" class="category-card" data-animate>
-        <div class="category-card__image-wrapper">
-          <img src="/images/7B439BBB-948E-41BF-B020-DE12C0DF956D.jpg" alt="T-Shirts" class="category-card__image" loading="lazy" />
-        </div>
-        <span class="category-card__label">T-Shirts</span>
-      </a>
-      <a href="/category.html?filter=bawahan" class="category-card" data-animate>
-        <div class="category-card__image-wrapper">
-          <img src="/images/D239A4C4-7E42-40D1-AFF4-687EF9947F48.jpg" alt="Pants" class="category-card__image" loading="lazy" />
-        </div>
-        <span class="category-card__label">Pants</span>
-      </a>
-      <a href="/category.html?filter=bawahan" class="category-card" data-animate>
-        <div class="category-card__image-wrapper">
-          <img src="/images/BDB699C6-5555-4650-A463-0FE7112241FD.jpg" alt="Shorts" class="category-card__image" loading="lazy" />
-        </div>
-        <span class="category-card__label">Shorts</span>
-      </a>
-      <a href="/category.html?filter=atasan" class="category-card" data-animate>
-        <div class="category-card__image-wrapper">
-          <img src="/images/EF98BC5E-3E05-40BC-A65D-BADFC2E66CB0.jpg" alt="Quarter Zips" class="category-card__image" loading="lazy" />
-        </div>
-        <span class="category-card__label">Quarter Zips</span>
-      </a>
+      <div style="padding:40px;text-align:center;width:100%;grid-column:1/-1;color:#888;">Memuat kategori...</div>
     </div>
   </section>
 
@@ -376,130 +252,78 @@
     </div>
   </section>
 
-  <!-- SHOP NEW IN FOOTWEAR -->
-  <section id="footwear" class="section new-in">
+  <!-- NEW ARRIVALS -->
+  <section id="new-arrivals" class="section new-in">
     <div class="section__header">
-      <h2 class="section__title">Shop New In Footwear</h2>
-      <a href="/category.html" class="section__link">SHOP FOOTWEAR <span class="arrow">→</span></a>
+      <h2 class="section__title">New Arrivals</h2>
+      <a href="/category.html" class="section__link">SHOP ALL <span class="arrow">→</span></a>
     </div>
-    <div class="product-grid product-grid--5" id="footwear-grid">
-      <!-- Footwear 1 -->
-      <div class="product-card" data-animate>
-        <div class="product-card__image-wrapper product-card__image-wrapper--shoe">
-          <img src="/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png" alt="Progrid Omni 9" class="product-card__image" loading="lazy" />
-          <div class="product-card__badge product-card__badge--sale">SALE</div>
-          <div class="product-card__badge product-card__badge--social">33 in carts now.</div>
-        </div>
-        <div class="product-card__info">
-          <p class="product-card__brand">SAUCONY</p>
-          <p class="product-card__name">Progrid Omni 9 - Black / Silver</p>
-          <p class="product-card__price">Rp 1.400.000</p>
-        </div>
-      </div>
-      <!-- Footwear 2 -->
-      <div class="product-card" data-animate>
-        <div class="product-card__image-wrapper product-card__image-wrapper--shoe">
-          <img src="/images/12_4c153cfc-80b6-4d22-8abe-0576d6ea0a01.png" alt="MOAB Speed 2 Sport" class="product-card__image" loading="lazy" />
-          <div class="product-card__badge product-card__badge--social">Only 4 left.</div>
-        </div>
-        <div class="product-card__info">
-          <p class="product-card__brand">MERRELL</p>
-          <p class="product-card__name">MOAB Speed 2 Sport - Craig / Igneous</p>
-          <p class="product-card__price"><span class="product-card__price--sale">Rp 1.020.000</span> <span class="product-card__price--original">Rp 1.100.000</span></p>
-        </div>
-      </div>
-      <!-- Footwear 3 -->
-      <div class="product-card" data-animate>
-        <div class="product-card__image-wrapper product-card__image-wrapper--shoe">
-          <img src="/images/13_2a0325a5-7366-447c-b9f4-18f8ccb48248.png" alt="Pulse Runner" class="product-card__image" loading="lazy" />
-        </div>
-        <div class="product-card__info">
-          <p class="product-card__brand">GUESS</p>
-          <p class="product-card__name">Pulse Runner - Marina</p>
-          <p class="product-card__price">Rp 1.900.000</p>
-        </div>
-      </div>
-      <!-- Footwear 4 -->
-      <div class="product-card" data-animate>
-        <div class="product-card__image-wrapper product-card__image-wrapper--shoe">
-          <img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="Progrid Guide 7 Trainers" class="product-card__image" loading="lazy" />
-          <div class="product-card__badge product-card__badge--social">67 viewed last 12 hours.</div>
-        </div>
-        <div class="product-card__info">
-          <p class="product-card__brand">SAUCONY</p>
-          <p class="product-card__name">Progrid Guide 7 Trainers - Blue</p>
-          <p class="product-card__price">Rp 1.200.000</p>
-        </div>
-      </div>
-      <!-- Footwear 5 -->
-      <div class="product-card" data-animate>
-        <div class="product-card__image-wrapper product-card__image-wrapper--shoe">
-          <img src="/images/22_6e595fa5-ddea-40b4-afd7-6fecbec4a0ee.png" alt="OneSixty Runner" class="product-card__image" loading="lazy" />
-        </div>
-        <div class="product-card__info">
-          <p class="product-card__brand">GUESS</p>
-          <p class="product-card__name">OneSixty Runner - Slate</p>
-          <p class="product-card__price">Rp 1.600.000</p>
-        </div>
-      </div>
+    <div class="product-grid product-grid--5" id="home-new-arrivals">
+      <div style="padding:40px;text-align:center;width:100%;grid-column:1/-1;color:#888;">Memuat produk terbaru...</div>
     </div>
   </section>
 
   <!-- PINNED SCROLL SECTIONS -->
   <div class="pinned-container">
-    <!-- NAILA SET BANNER -->
-    <section id="naila-set-banner" class="reprimo-banner pinned-section">
-      <div class="reprimo-banner__bg">
-        <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/b69e2e45c80e4be488d6a0dda8df0f43~tplv-aphluv4xwc-origin-jpeg.jpeg" alt="Naila Set" class="reprimo-banner__bg-img" loading="lazy" style="filter: brightness(0.6);" />
+    <!-- Pinned banners will be dynamically injected here by main.js -->
+  </div>
+
+  <!-- PINNED EDITORIAL SECTIONS (NEW POSITION) -->
+  <div class="editorial-pinned-wrapper">
+    <!-- Section 1 -->
+    <section class="editorial-pinned" id="pinned-1">
+      <div class="editorial-pinned__bg">
+        <img src="/images/hero_editorial.png" alt="Elegansi Harian" />
       </div>
-      <div class="reprimo-banner__model" style="display: flex; align-items: center; justify-content: center; height: 100%;">
-        <video class="reprimo-banner__model-img" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); max-height: 80%; width: auto;" autoplay loop muted playsinline>
-          <source src="https://v16m-default.tiktokcdn.com/0d8eaf23fffa44fe84c1af504a1ec5a5/69f878ff/video/tos/alisg/tos-alisg-v-f466fc-sg/o8fmLq6eRQgGEiD5oCJLPUOIItGgrjGMBAeV5s/?a=0&bti=PDM8QDI2M2A%3D&&bt=1784&ft=cApXJCz7ThWHaqB~1GZmo0P&mime_type=video_mp4&rc=N2Y3NGY8ZzxpNjdmNmVlOEBpamlnaHg5cmpvNTMzODRmNEAxMjI0LmFgNTAxNDI2NWE1YSNyM21hMmQ0MDZhLS1kLy1zcw%3D%3D&vvpl=1&l=20260504124608C88619BAB52E82CC9524&btag=e00078000" type="video/mp4" />
-        </video>
-      </div>
-      <div class="reprimo-banner__content">
-        <h2 class="reprimo-banner__title">NAILA SET VOL.2</h2>
-        <p class="reprimo-banner__text">Setelan Wanita Atasan dan Celana Panjang Kulot Rayon Motif.<br>Nyaman, adem, dan ramah Busui.</p>
-        <a href="/product.html?id=naila-set-vol2" class="reprimo-banner__cta">SHOP NAILA SET</a>
+      <div class="editorial-pinned__container">
+        <div class="editorial-pinned__content">
+          <h2 class="editorial-pinned__title">ELEGANSI<br/>HARIAN</h2>
+          <p class="editorial-pinned__desc">Homedress dirancang eksklusif dari bahan premium yang memberikan kilau sutra yang mewah di setiap helai. Nyaman namun tetap berkelas.</p>
+          <a href="/category.html?filter=homedress" class="editorial-pinned__cta">LIHAT PRODUK</a>
+        </div>
+        <div class="editorial-pinned__highlight">
+          <img src="/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png" alt="Detail" />
+        </div>
       </div>
     </section>
 
-    <!-- TASYA SET BANNER -->
-    <section id="tasya-set-banner" class="reprimo-banner pinned-section">
-      <div class="reprimo-banner__bg">
-        <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/93eed30ade39457cbba91443be7d10e8~tplv-aphluv4xwc-origin-jpeg.jpeg" alt="Tasya Set Cargo" class="reprimo-banner__bg-img" loading="lazy" style="filter: brightness(0.6);" />
+    <!-- Section 2 -->
+    <section class="editorial-pinned" id="pinned-2">
+      <div class="editorial-pinned__bg">
+        <img src="/images/editorial_bag.png" alt="Kenyamanan Maksimal" />
       </div>
-      <div class="reprimo-banner__model" style="display: flex; align-items: center; justify-content: center; height: 100%;">
-        <video class="reprimo-banner__model-img" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); max-height: 80%; width: auto;" autoplay loop muted playsinline>
-          <source src="https://v16m-default.tiktokcdn.com/48a08b4088492b573dd4f0cf8743107e/69f8798e/video/tos/alisg/tos-alisg-v-f466fc-sg/ooDBHQ9DGYXilAcffiuKAjDgWM5Sfy74IfFaGS/?a=0&bti=PDM8QDI2M2A%3D&&bt=542&ft=cApXJCz7ThWHzIB~1GZmo0P&mime_type=video_mp4&rc=ODg5Omg6OmU8O2c0OGU5OEBpM21zNnU5cmk3dDMzODRmNEBhYi1fMmA0NV4xMy4yYS8vYSNvXy5mMmRraGVgLS1kLy1zcw%3D%3D&vvpl=1&l=20260504124831303D67BC5A2C14C588E5&btag=e00078000" type="video/mp4" />
-        </video>
-      </div>
-      <div class="reprimo-banner__content">
-        <h2 class="reprimo-banner__title">TASYA SET CARGO</h2>
-        <p class="reprimo-banner__text">OneSet Cargo Terbaru Outfit Daily Celana Kulot.<br>Bahan Crinkle Airflow yang tidak mudah kusut.</p>
-        <a href="/product.html?id=tasya-set-cargo" class="reprimo-banner__cta">SHOP TASYA SET</a>
+      <div class="editorial-pinned__container">
+        <div class="editorial-pinned__content">
+          <h2 class="editorial-pinned__title">KENYAMANAN<br/>MAKSIMAL</h2>
+          <p class="editorial-pinned__desc">Koleksi One Set dengan bahan rayon organik yang adem dan lembut di kulit. Cocok untuk segala aktivitas di rumah maupun luar rumah.</p>
+          <a href="/category.html?filter=one-set" class="editorial-pinned__cta">LIHAT PRODUK</a>
+        </div>
+        <div class="editorial-pinned__highlight">
+          <img src="/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png" alt="Detail" />
+        </div>
       </div>
     </section>
 
-    <!-- FUJI ONESET BANNER -->
-    <section id="fuji-oneset-banner" class="reprimo-banner pinned-section">
-      <div class="reprimo-banner__bg">
-        <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/c54f033c4c82499490a7e659249eb350~tplv-aphluv4xwc-origin-jpeg.jpeg" alt="Fuji OneSet" class="reprimo-banner__bg-img" loading="lazy" style="filter: brightness(0.6);" />
+    <!-- Section 3 -->
+    <section class="editorial-pinned" id="pinned-3">
+      <div class="editorial-pinned__bg">
+        <img src="/images/editorial_modern.png" alt="Gaya Modern" />
       </div>
-      <div class="reprimo-banner__model" style="display: flex; align-items: center; justify-content: center; height: 100%;">
-        <video class="reprimo-banner__model-img" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); max-height: 80%; width: auto;" autoplay loop muted playsinline>
-          <source src="https://v16m-default.tiktokcdn.com/1d04d52919e8a363017e95eaef2eaf4a/69f879f8/video/tos/alisg/tos-alisg-v-f466fc-sg/okESCzIRgDAMp60e8fLgeKqOYTSmiEG0GCnLAy/?a=0&bti=PDM8QDI2M2A%3D&&bt=796&ft=cApXJCz7ThWHFlB~1GZmo0P&mime_type=video_mp4&rc=ZmlpZmYzZDw6Z2RpZDkzZ0BpMzM5bXY5cm9tczMzODRmNEAuMWEwYjI2NV4xY2IvYjUuYSNnNG1qMmQ0aGhgLS1kLy1zcw%3D%3D&vvpl=1&l=2026050412502153DC4781C5A4CF7B15B3&btag=e00070000" type="video/mp4" />
-        </video>
-      </div>
-      <div class="reprimo-banner__content">
-        <h2 class="reprimo-banner__title">FUJI ONESET BLASTER</h2>
-        <p class="reprimo-banner__text">Hotpants Setelan Wanita Daily Baju Santai.<br>Bahan flowly Crinkle Airflow yang sangat nyaman dipakai.</p>
-        <a href="/product.html?id=fuji-oneset-blaster" class="reprimo-banner__cta">SHOP FUJI ONESET</a>
+      <div class="editorial-pinned__container">
+        <div class="editorial-pinned__content">
+          <h2 class="editorial-pinned__title">GAYA<br/>MODERN</h2>
+          <p class="editorial-pinned__desc">Tampil stylish dengan motif modern yang memberikan kesan mewah namun tetap nyaman untuk dipakai seharian. Definisi fashion masa kini.</p>
+          <a href="/category.html?filter=gamis" class="editorial-pinned__cta">LIHAT PRODUK</a>
+        </div>
+        <div class="editorial-pinned__highlight">
+          <img src="/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png" alt="Detail" />
+        </div>
       </div>
     </section>
   </div>
 
   <!-- NEWSLETTER / FOOTER -->
+
   <footer id="footer" class="footer">
     <div class="footer__inner">
       <div class="footer__newsletter">
@@ -509,20 +333,10 @@
           <input type="email" placeholder="Email Address" class="footer__newsletter-input" required />
           <button type="submit" class="footer__newsletter-btn">Subscribe</button>
         </form>
-        <p class="footer__connect">Connect: <a href="https://www.tiktok.com/@homedress_na?_r=1&_t=ZS-95zilkA1J0m" class="footer__social-link" target="_blank">TikTok ↗</a> | <a href="#" class="footer__social-link">Instagram ↗</a></p>
+        <p class="footer__connect">Connect: <a href="https://www.tiktok.com/@homedress_na?_r=1&_t=ZS-95zilkA1J0m" class="footer__social-link" target="_blank">TikTok ↗</a> | <a href="https://instagram.com/homedress_na" class="footer__social-link" target="_blank">Instagram ↗</a></p>
       </div>
-      <div class="footer__links-group">
-        <h4 class="footer__links-title">EXPLORE</h4>
-        <a href="/about-us.html" class="footer__link">About Us</a>
-        <a href="/blog.html" class="footer__link">Blog</a>
-        <a href="/store-locator.html" class="footer__link">Store Locator</a>
-      </div>
-      <div class="footer__links-group">
-        <h4 class="footer__links-title">BEST SELLER 🔥</h4>
-        <a href="/product.html?id=naila-set-vol2" class="footer__link">Naila Set Vol.2</a>
-        <a href="/product.html?id=tasya-set-cargo" class="footer__link">Tasya Set Cargo</a>
-        <a href="/product.html?id=fuji-oneset-blaster" class="footer__link">Fuji OneSet Blaster</a>
-        <a href="/product.html?id=setelan-santai-mint-premium" class="footer__link">Setelan Santai Mint</a>
+      <div id="dynamic-footer-links" style="display: contents;">
+        <!-- Footer links will be dynamically injected here by main.js -->
       </div>
       <div class="footer__links-group" style="flex: 1.5;">
         <h4 class="footer__links-title">HUBUNGI KAMI</h4>
@@ -535,8 +349,8 @@
           <strong>WhatsApp:</strong><br>
           <a href="https://wa.me/6285216854492" target="_blank" style="color: var(--color-accent); text-decoration: none;">+62 852-1685-4492</a>
         </p>
-        <div style="margin-top: 15px; border-radius: 8px; overflow: hidden; height: 120px;">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.24009778263!2d106.749008!3d-6.2297465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x100c5e82dd4b820!2sJakarta%20Selatan%2C%20Kota%20Jakarta%20Selatan%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="footer__map-container">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.24009778263!2d106.749008!3d-6.2297465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x100c5e82dd4b820!2sJakarta%20Selatan%2C%20Kota%20Jakarta%20Selatan%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" class="footer__map-iframe" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
     </div>

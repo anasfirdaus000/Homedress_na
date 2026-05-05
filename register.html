@@ -29,28 +29,29 @@
   </header>
 
   <main class="auth-container">
+    <a href="/" class="auth-logo">HOMEDRESS_NA</a>
     <h1 class="auth-title">Buat Akun</h1>
     <p class="auth-subtitle">Simpan alamat Anda dan nikmati checkout lebih cepat.</p>
 
     <form id="register-form" class="auth-form">
-      <div>
-        <label class="auth-label">Nama Lengkap</label><br>
-        <input type="text" id="name" class="auth-input" style="width:100%;margin-top:8px;" required />
+      <div class="auth-group">
+        <label class="auth-label">Nama Lengkap</label>
+        <input type="text" id="name" class="auth-input" placeholder="Nama lengkap Anda" required />
       </div>
-      <div>
-        <label class="auth-label">Email</label><br>
-        <input type="email" id="email" class="auth-input" style="width:100%;margin-top:8px;" required />
+      <div class="auth-group">
+        <label class="auth-label">Email</label>
+        <input type="email" id="email" class="auth-input" placeholder="name@email.com" required />
       </div>
-      <div>
-        <label class="auth-label">Password (Min. 6 karakter)</label><br>
-        <input type="password" id="password" class="auth-input" style="width:100%;margin-top:8px;" minlength="6" required />
+      <div class="auth-group">
+        <label class="auth-label">Password</label>
+        <input type="password" id="password" class="auth-input" placeholder="Minimal 6 karakter" minlength="6" required />
       </div>
       <div id="error-msg" class="auth-error"></div>
       <div id="success-msg" class="auth-success"></div>
       <button type="submit" class="auth-btn" id="btn-submit">DAFTAR SEKARANG</button>
     </form>
 
-    <p style="margin-top: 24px; font-size: 0.9rem; color: #666;">
+    <p style="margin-top: 32px; font-size: 1rem; color: #666;">
       Sudah punya akun? <a href="/login.html" class="auth-link">Login di sini</a>
     </p>
   </main>

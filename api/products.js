@@ -11,7 +11,23 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'GET') {
+    const { slug } = req.query || {};
+
     try {
+      if (slug) {
+        // Fetch single product by slug
+        const { data: product, error } = await supabaseAdmin
+          .from('products')
+          .select('*')
+          .eq('slug', slug)
+          .eq('is_active', true)
+          .single();
+
+        if (error) throw error;
+        return res.status(200).json({ product });
+      }
+
+      // Default: List all active products
       const { data: products, error } = await supabaseAdmin
         .from('products')
         .select('*')
@@ -19,7 +35,6 @@ export default async function handler(req, res) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
       return res.status(200).json({ products: products || [] });
     } catch (error) {
       console.error('Products API error:', error);

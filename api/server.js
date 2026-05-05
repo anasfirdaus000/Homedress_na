@@ -1,29 +1,45 @@
-/**
- * Local Development API Server
- * Emulates Vercel Serverless Functions locally
- * Run: npm run dev:api (port 3001)
- * Vite proxies /api/* to this server
- */
 import { createServer } from 'http';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-// Load env
-try {
-  const envContent = readFileSync('.env.local', 'utf8');
-  envContent.split('\n').forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) return;
-    const eqIdx = trimmed.indexOf('=');
-    if (eqIdx === -1) return;
-    const key = trimmed.substring(0, eqIdx).trim();
-    const value = trimmed.substring(eqIdx + 1).trim();
-    if (!process.env[key]) process.env[key] = value;
-  });
-} catch (e) {
-  console.warn('⚠️  No .env.local found, using existing env vars');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Load env from .env.local (check both current and parent dir)
+const possibleEnvPaths = [
+  join(__dirname, '.env.local'),
+  join(__dirname, '../.env.local'),
+  join(process.cwd(), '.env.local'),
+  join(process.cwd(), '../.env.local')
+];
+
+let envLoaded = false;
+for (const envPath of possibleEnvPaths) {
+  if (existsSync(envPath)) {
+    try {
+      const envContent = readFileSync(envPath, 'utf8');
+      envContent.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) return;
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx === -1) return;
+        const key = trimmed.substring(0, eqIdx).trim();
+        const value = trimmed.substring(eqIdx + 1).trim();
+        if (!process.env[key]) process.env[key] = value;
+      });
+      console.log(`✅ Loaded env from ${envPath}`);
+      envLoaded = true;
+      break;
+    } catch (e) {
+      console.error(`Failed to read env from ${envPath}:`, e.message);
+    }
+  }
 }
 
-// Dynamic import of API handlers
+if (!envLoaded) {
+  console.warn('⚠️ No .env.local found. Ensure Supabase credentials are set in environment.');
+}
+
 const handlers = {};
 async function loadHandler(name) {
   if (!handlers[name]) {
@@ -39,20 +55,34 @@ async function loadHandler(name) {
 }
 
 const server = createServer(async (req, res) => {
-  // Parse body for POST requests
-  if (req.method === 'POST') {
+  const url = new URL(req.url, `http://localhost:3003`);
+  const path = url.pathname;
+  
+  // Attach query params to req.query (Vercel style)
+  req.query = Object.fromEntries(url.searchParams);
+
+  // Parse body for methods that might have one
+  const hasBody = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+  if (hasBody) {
     let body = '';
     for await (const chunk of req) body += chunk;
-    try { req.body = JSON.parse(body); } catch { req.body = {}; }
+    try { 
+      req.body = body ? JSON.parse(body) : {}; 
+    } catch { 
+      req.body = {}; 
+    }
+  } else {
+    req.body = {};
   }
-
-  // Parse URL
-  const url = new URL(req.url, `http://localhost:3002`);
-  const path = url.pathname;
 
   // Helper to send JSON
   const sendJSON = (statusCode, data) => {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.writeHead(statusCode, { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    });
     res.end(JSON.stringify(data));
   };
 
@@ -66,54 +96,61 @@ const server = createServer(async (req, res) => {
     return res.end();
   }
 
-  // Route to handler
+  // Routing
   try {
-    if (path === '/api/checkout') {
-      const handler = await loadHandler('checkout');
-      if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
-    }
+    // Basic mapping
+    const routes = {
+      '/api/checkout': 'checkout',
+      '/api/track': 'track',
+      '/api/products': 'products',
+      '/api/hero': 'hero',
+      '/api/categories': 'categories',
+      '/api/featured': 'featured',
+      '/api/menus': 'menus',
+      '/api/search': 'search'
+    };
+
+    let handlerName = routes[path];
     
-    if (path === '/api/track') {
-      const handler = await loadHandler('track');
-      if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
+    // Handle admin routes
+    if (!handlerName && path.startsWith('/api/admin/')) {
+      const adminSub = path.replace('/api/admin/', '');
+      handlerName = `admin/${adminSub}`;
     }
 
-    if (path === '/api/products') {
-      const handler = await loadHandler('products');
-      if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
+    if (handlerName) {
+      const handler = await loadHandler(handlerName);
+      if (handler) {
+        // Mock Vercel res object
+        const mockRes = {
+          ...res,
+          status: (code) => {
+            res.statusCode = code;
+            return {
+              json: (data) => sendJSON(code, data),
+              end: () => res.end(),
+              send: (data) => {
+                res.writeHead(code);
+                res.end(data);
+              }
+            };
+          },
+          setHeader: res.setHeader.bind(res),
+          json: (data) => sendJSON(res.statusCode || 200, data)
+        };
+        return handler(req, mockRes);
+      }
     }
 
-    if (path === '/api/hero') {
-      const handler = await loadHandler('hero');
-      if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
-    }
-
-    // Admin API routes
-    const adminMatch = path.match(/^\/api\/admin\/(.+)$/);
-    if (adminMatch) {
-      // Handle the upload route which uses larger body payloads and different parsing sometimes,
-      // but our server.js already loads the entire body into memory, so it works.
-      const handler = await loadHandler(`admin/${adminMatch[1]}`);
-      if (handler) return handler(req, { ...res, status: (code) => ({ json: (data) => sendJSON(code, data), end: () => res.end() }), setHeader: res.setHeader.bind(res) });
-    }
-
-    sendJSON(404, { error: 'API endpoint not found' });
+    sendJSON(404, { error: `API endpoint ${path} not found` });
   } catch (err) {
     console.error('Server error:', err);
     sendJSON(500, { error: 'Internal server error' });
   }
 });
 
-const PORT = 3002;
-server.listen(PORT, () => {
-  console.log(`\n🚀 API Server running at http://localhost:${PORT}`);
-  console.log('   Routes:');
-  console.log('   POST /api/checkout');
-  console.log('   POST /api/track');
-  console.log('   GET  /api/products');
-  console.log('   GET  /api/hero');
-  console.log('   GET  /api/admin/orders');
-  console.log('   GET  /api/admin/products');
-  console.log('   GET  /api/admin/hero');
-  console.log('   GET  /api/admin/settings');
+const PORT = 3003;
+const HOST = '127.0.0.1';
+server.listen(PORT, HOST, () => {
+  console.log(`\n🚀 API Server running at http://${HOST}:${PORT}`);
 });

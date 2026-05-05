@@ -96,6 +96,7 @@ export default async function handler(req, res) {
     const { data: newOrder, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
+        user_id: sanitized.user_id,
         order_number: orderNumber,
         customer_name: sanitized.customer_name,
         customer_phone: sanitized.customer_phone,
@@ -157,14 +158,67 @@ export default async function handler(req, res) {
       });
     }
 
-    // 9. RETURN SUCCESS
+    // 9. INITIALIZE LOUVIN TRANSACTION (Automatic Payment)
+    let louvinData = null;
+
+    if (process.env.LOUVIN_API_KEY && sanitized.payment_method !== 'cod') {
+      try {
+        const louvinRes = await fetch('https://api.louvin.dev/create-transaction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.LOUVIN_API_KEY
+          },
+          body: JSON.stringify({
+            amount: total,
+            payment_type: sanitized.payment_method,
+            customer_name: sanitized.customer_name,
+            customer_email: sanitized.customer_email,
+            description: `Order ${orderNumber}`,
+            reference: orderNumber
+          })
+        });
+
+        if (louvinRes.ok) {
+          louvinData = await louvinRes.json();
+          
+          if (louvinData.success) {
+            // Update order with Louvin details
+            await supabaseAdmin.from('orders')
+              .update({ 
+                louvin_transaction_id: louvinData.transaction.id,
+                payment_qr_string: louvinData.payment.qr_string || null,
+                payment_va_number: louvinData.payment.va_number || null,
+                payment_expiry: louvinData.payment.expired_at || null,
+                status: 'pending' // ensure status is pending
+              })
+              .eq('id', newOrder.id);
+          }
+        } else {
+          const errData = await louvinRes.json();
+          console.error('Louvin Error Details:', errData);
+        }
+      } catch (louError) {
+        console.error('Louvin Connection Error:', louError);
+      }
+    }
+
+    // 10. RETURN SUCCESS
     return res.status(200).json({
       success: true,
       order: {
         order_number: newOrder.order_number,
         total: newOrder.total,
         status: newOrder.status,
-        created_at: newOrder.created_at
+        created_at: newOrder.created_at,
+        payment_method: sanitized.payment_method,
+        louvin: louvinData ? {
+          transaction_id: louvinData.transaction.id,
+          qr_string: louvinData.payment.qr_string,
+          va_number: louvinData.payment.va_number,
+          total_payment: louvinData.payment.total_payment,
+          expired_at: louvinData.payment.expired_at
+        } : null
       }
     });
 

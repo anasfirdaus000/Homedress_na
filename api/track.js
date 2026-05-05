@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     // Find order by number + phone (double verification)
     const { data: order, error } = await supabaseAdmin
       .from('orders')
-      .select('order_number, customer_name, status, subtotal, shipping_cost, total, payment_method, created_at')
+      .select('id, order_number, customer_name, status, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry')
       .eq('order_number', order_number.toUpperCase().trim())
       .eq('customer_phone', phone)
       .single();
@@ -68,6 +68,9 @@ export default async function handler(req, res) {
         total: order.total,
         payment_method: order.payment_method,
         created_at: order.created_at,
+        payment_qr: order.payment_qr_string,
+        payment_va: order.payment_va_number,
+        payment_expiry: order.payment_expiry,
         items: items || []
       }
     });

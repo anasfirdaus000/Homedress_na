@@ -16,6 +16,10 @@
         <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
         <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
         <a href="/admin/products.html" class="sidebar__link sidebar__link--active">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
+        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
         <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
         <hr style="border-color:#333;margin:16px 0;" />
         <a href="/" class="sidebar__link">🌐 Lihat Website</a>
@@ -26,7 +30,10 @@
     <main class="admin-main">
       <div class="admin-header">
         <h1>🛍️ Kelola Produk</h1>
-        <button class="admin-btn admin-btn--primary" id="add-product-btn">+ Tambah Produk</button>
+        <div>
+          <button class="admin-btn admin-btn--outline" id="manage-category-btn" style="margin-right:8px;">⚙️ Kategori</button>
+          <button class="admin-btn admin-btn--primary" id="add-product-btn">+ Tambah Produk</button>
+        </div>
       </div>
 
       <!-- Product Grid -->
@@ -67,20 +74,33 @@
             </div>
             <div class="admin-form__group">
               <label class="admin-form__label">Kategori / Menu</label>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#222;padding:12px;border-radius:8px;border:1.5px solid #333;">
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="atasan" /> Atasan</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="bawahan" /> Bawahan</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="dress" /> Dress</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="setelan" /> Setelan</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="new-in" /> New In ✨</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="flash-sale" /> Flash Sale 🔥</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="bundling" /> Bundling Hemat</label>
-                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="clearance" /> Clearance</label>
+              <div id="dynamic-categories-container" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#222;padding:12px;border-radius:8px;border:1.5px solid #333;">
+                <p style="color:#888;">Memuat kategori...</p>
               </div>
             </div>
+            
             <div class="admin-form__group">
-              <label class="admin-form__label">Ukuran (pisahkan dengan koma)</label>
-              <input class="admin-form__input" id="prod-sizes" placeholder="S, M, L, XL" />
+              <label class="admin-form__label" style="display:flex; justify-content:space-between; align-items:center;">
+                Varian Produk (Warna, Ukuran, Harga)
+                <button type="button" class="admin-btn admin-btn--outline admin-btn--small" id="add-variant-btn">+ Tambah Varian</button>
+              </label>
+              <div style="overflow-x:auto; background:#222; border-radius:8px; border:1px solid #333;">
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                  <thead>
+                    <tr style="border-bottom:1px solid #444;">
+                      <th style="padding:12px; font-weight:500;">Warna / Tipe</th>
+                      <th style="padding:12px; font-weight:500;">Ukuran</th>
+                      <th style="padding:12px; font-weight:500;">Harga Khusus (Rp)</th>
+                      <th style="padding:12px; font-weight:500;">Stok</th>
+                      <th style="padding:12px; font-weight:500;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="variants-tbody">
+                    <!-- Dynamic variants rows -->
+                  </tbody>
+                </table>
+              </div>
+              <small style="color:#888; display:block; margin-top:8px;">Kosongkan varian jika produk ini tidak memiliki pilihan warna/ukuran. Harga dasar akan digunakan.</small>
             </div>
             <div class="admin-form__group">
               <label class="admin-form__label">Upload Gambar (Otomatis ke Cloudinary)</label>
@@ -102,11 +122,34 @@
               <label class="admin-form__label">Social Proof</label>
               <input class="admin-form__input" id="prod-social" placeholder="🔥 Best Seller — 200+ terjual" />
             </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Stok Produk *</label>
+              <input type="number" class="admin-form__input" id="prod-stock" value="0" required />
+            </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
               <button type="submit" class="admin-btn admin-btn--primary">Simpan</button>
               <button type="button" class="admin-btn admin-btn--outline" id="close-modal-2">Batal</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- Categories Management Modal -->
+      <div id="category-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:500px;margin:0 auto;background:#1a1a1a;border-radius:16px;padding:32px;border:1px solid #333;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <h2>Kelola Kategori</h2>
+            <button class="admin-btn admin-btn--outline admin-btn--small" id="close-cat-modal">✕</button>
+          </div>
+          
+          <form id="add-category-form" style="display:flex; gap:8px; margin-bottom:24px;">
+            <input class="admin-form__input" id="new-cat-name" placeholder="Nama Kategori Baru" required style="flex:1;" />
+            <button type="submit" class="admin-btn admin-btn--primary">Tambah</button>
+          </form>
+
+          <div id="category-list" style="background:#222; border-radius:8px; border:1px solid #333; padding:16px; display:flex; flex-direction:column; gap:8px;">
+            <p style="color:#888;">Memuat kategori...</p>
+          </div>
         </div>
       </div>
     </main>
@@ -147,6 +190,107 @@
 
     document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
     document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
+
+    // Category Modal Logic
+    const catModal = document.getElementById('category-modal');
+    document.getElementById('manage-category-btn').addEventListener('click', () => { catModal.style.display = 'block'; });
+    document.getElementById('close-cat-modal').addEventListener('click', () => { catModal.style.display = 'none'; });
+
+    let allCategories = [];
+    async function loadCategories() {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        allCategories = data.categories || [];
+        
+        // Render in Product Form Checkboxes
+        const catContainer = document.getElementById('dynamic-categories-container');
+        catContainer.innerHTML = allCategories.map(c => `
+          <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="prod-category" value="${c.slug}" /> ${c.name}</label>
+        `).join('');
+
+        // Render in Category Management List
+        const catList = document.getElementById('category-list');
+        catList.innerHTML = allCategories.map(c => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:#333; border-radius:4px;">
+            <span>${c.name} <small style="color:#888;">(${c.slug})</small></span>
+            <button class="admin-btn admin-btn--danger admin-btn--small" onclick="deleteCategory('${c.id}')">Hapus</button>
+          </div>
+        `).join('') || '<p style="color:#888;">Belum ada kategori</p>';
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
+    }
+
+    document.getElementById('add-category-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('new-cat-name').value.trim();
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug })
+      });
+      if (res.ok) {
+        document.getElementById('new-cat-name').value = '';
+        await loadCategories();
+        showToast('Kategori ditambahkan');
+      } else {
+        alert('Gagal menambah kategori');
+      }
+    });
+
+    window.deleteCategory = async function(id) {
+      if (!confirm('Hapus kategori ini?')) return;
+      const res = await fetch('/api/admin/categories', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        await loadCategories();
+        showToast('Kategori dihapus');
+      } else {
+        alert('Gagal menghapus');
+      }
+    };
+
+    // Variants Logic
+    const variantsTbody = document.getElementById('variants-tbody');
+    
+    function addVariantRow(color = '', size = '', price = '', stock = '') {
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid #333';
+      tr.innerHTML = `
+        <td style="padding:8px;"><input class="admin-form__input" placeholder="Misal: Hitam" value="${color}" style="min-width:120px;" /></td>
+        <td style="padding:8px;"><input class="admin-form__input" placeholder="S, M, L..." value="${size}" style="min-width:80px;" /></td>
+        <td style="padding:8px;"><input type="number" class="admin-form__input" placeholder="150000" value="${price}" style="min-width:100px;" /></td>
+        <td style="padding:8px;"><input type="number" class="admin-form__input" placeholder="10" value="${stock}" style="min-width:60px;" /></td>
+        <td style="padding:8px; text-align:center;"><button type="button" class="admin-btn admin-btn--danger admin-btn--small" onclick="this.closest('tr').remove()">✕</button></td>
+      `;
+      variantsTbody.appendChild(tr);
+    }
+
+    document.getElementById('add-variant-btn').addEventListener('click', () => {
+      addVariantRow();
+    });
+
+    function getVariantsData() {
+      const variants = [];
+      const rows = variantsTbody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const color = inputs[0].value.trim();
+        const size = inputs[1].value.trim();
+        const price = inputs[2].value ? parseInt(inputs[2].value) : null;
+        const stock = inputs[3].value ? parseInt(inputs[3].value) : 0;
+        
+        if (color || size) {
+          variants.push({ color, size, price, stock });
+        }
+      });
+      return variants;
+    }
 
     async function loadProducts() {
       const res = await fetch('/api/admin/products', { headers: { 'Authorization': `Bearer ${token}` }});
@@ -190,10 +334,17 @@
       const cats = p.category || [];
       catCheckboxes.forEach(cb => { cb.checked = cats.includes(cb.value); });
 
-      document.getElementById('prod-sizes').value = (p.sizes || []).join(', ');
+      // Set Variants
+      variantsTbody.innerHTML = '';
+      const variants = p.variants || [];
+      if (variants.length > 0) {
+        variants.forEach(v => addVariantRow(v.color, v.size, v.price, v.stock));
+      }
+
       document.getElementById('prod-images').value = (p.images || []).join('\n');
       document.getElementById('prod-video').value = p.video_embed_url || '';
       document.getElementById('prod-social').value = p.social_proof || '';
+      document.getElementById('prod-stock').value = p.stock || 0;
       document.getElementById('modal-title').textContent = 'Edit Produk';
       modal.style.display = 'block';
     };
@@ -288,10 +439,11 @@
         original_price: parseInt(document.getElementById('prod-original-price').value) || null,
         description: document.getElementById('prod-description').value.trim(),
         category: selectedCats,
-        sizes: document.getElementById('prod-sizes').value.split(',').map(s => s.trim()).filter(Boolean),
+        variants: getVariantsData(),
         images: document.getElementById('prod-images').value.split('\n').map(s => s.trim()).filter(Boolean),
         video_embed_url: document.getElementById('prod-video').value.trim() || null,
         social_proof: document.getElementById('prod-social').value.trim(),
+        stock: parseInt(document.getElementById('prod-stock').value) || 0,
         is_active: true
       };
 
@@ -324,10 +476,11 @@
       t.className = 'admin-toast';
       t.textContent = msg;
       document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
+      setTimeout(() => { t.style.opacity = '1'; }, 10);
+      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
-    loadProducts();
+    loadCategories().then(loadProducts);
   </script>
 </body>
 </html>

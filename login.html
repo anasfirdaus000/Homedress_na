@@ -7,16 +7,41 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <style>
-    .auth-container { max-width: 400px; margin: 100px auto; padding: 40px 20px; text-align: center; }
-    .auth-title { font-size: 2rem; margin-bottom: 8px; font-weight: 700; }
-    .auth-subtitle { color: #666; margin-bottom: 32px; font-size: 0.9rem; }
-    .auth-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
-    .auth-label { font-size: 0.85rem; font-weight: 600; color: #333; }
-    .auth-input { padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-family: inherit; }
-    .auth-btn { background: var(--color-accent); color: #fff; border: none; padding: 16px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 8px; }
-    .auth-btn:hover { background: #000; }
-    .auth-link { color: var(--color-accent); text-decoration: underline; font-weight: 600; }
-    .auth-error { color: #e74c3c; font-size: 0.85rem; display: none; margin-top: 8px; }
+    :root { --color-primary: #000; --color-accent: #ff4757; --color-bg: #f8f9fa; }
+    body { background: var(--color-bg); font-family: 'DM Sans', sans-serif; }
+    .auth-container { 
+      max-width: 440px; margin: 60px auto; padding: 48px 40px; 
+      background: #fff; border-radius: 20px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .auth-logo { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 32px; display: block; text-decoration: none; color: #000; }
+    .auth-title { font-size: 2.4rem; margin-bottom: 12px; font-weight: 700; letter-spacing: -0.5px; }
+    .auth-subtitle { color: #888; margin-bottom: 32px; font-size: 1.1rem; line-height: 1.5; }
+    .auth-form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
+    .auth-group { display: flex; flex-direction: column; gap: 8px; }
+    .auth-label { font-size: 0.95rem; font-weight: 600; color: #444; }
+    .auth-input { 
+      padding: 16px; border: 1.5px solid #eee; border-radius: 12px; font-size: 1.1rem; 
+      transition: all 0.3s; background: #fafafa;
+    }
+    .auth-input:focus { border-color: #000; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+    .auth-btn { 
+      background: #000; color: #fff; border: none; padding: 18px; border-radius: 12px; 
+      font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; 
+      margin-top: 12px; letter-spacing: 0.5px;
+    }
+    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .auth-link { color: #000; text-decoration: none; font-weight: 700; border-bottom: 2px solid #eee; transition: all 0.2s; }
+    .auth-link:hover { border-color: #000; }
+    .auth-error { 
+      background: #fff5f5; color: #e74c3c; padding: 12px; border-radius: 8px; 
+      font-size: 0.95rem; font-weight: 600; display: none; border: 1px solid #fed7d7;
+    }
+    .auth-success { 
+      background: #f0fff4; color: #27ae60; padding: 12px; border-radius: 8px; 
+      font-size: 0.95rem; font-weight: 600; display: none; border: 1px solid #c6f6d5;
+    }
   </style>
 </head>
 <body>
@@ -28,23 +53,24 @@
   </header>
 
   <main class="auth-container">
-    <h1 class="auth-title">Welcome Back</h1>
-    <p class="auth-subtitle">Login untuk mempermudah checkout Anda.</p>
+    <a href="/" class="auth-logo">HOMEDRESS_NA</a>
+    <h1 class="auth-title">Selamat Datang</h1>
+    <p class="auth-subtitle">Silakan login untuk mengakses riwayat pesanan dan checkout lebih cepat.</p>
 
     <form id="login-form" class="auth-form">
-      <div>
-        <label class="auth-label">Email</label><br>
-        <input type="email" id="email" class="auth-input" style="width:100%;margin-top:8px;" required />
+      <div class="auth-group">
+        <label class="auth-label">Email</label>
+        <input type="email" id="email" class="auth-input" placeholder="name@email.com" required />
       </div>
-      <div>
-        <label class="auth-label">Password</label><br>
-        <input type="password" id="password" class="auth-input" style="width:100%;margin-top:8px;" required />
+      <div class="auth-group">
+        <label class="auth-label">Password</label>
+        <input type="password" id="password" class="auth-input" placeholder="••••••••" required />
       </div>
       <div id="error-msg" class="auth-error"></div>
-      <button type="submit" class="auth-btn" id="btn-submit">LOGIN</button>
+      <button type="submit" class="auth-btn" id="btn-submit">MASUK KE AKUN</button>
     </form>
 
-    <p style="margin-top: 24px; font-size: 0.9rem; color: #666;">
+    <p style="margin-top: 32px; font-size: 1rem; color: #666;">
       Belum punya akun? <a href="/register.html" class="auth-link">Daftar sekarang</a>
     </p>
   </main>

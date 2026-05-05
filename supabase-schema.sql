@@ -3,7 +3,31 @@
 -- Run this SQL in Supabase Dashboard > SQL Editor
 -- =============================================
 
--- 1. PRODUCTS TABLE
+-- 1. CATEGORIES TABLE
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT UNIQUE NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can read categories" ON categories FOR SELECT USING (true);
+CREATE POLICY "Service role manages categories" ON categories FOR ALL USING (auth.role() = 'service_role');
+
+-- Insert default categories
+INSERT INTO categories (name, slug) VALUES 
+('Atasan', 'atasan'),
+('Bawahan', 'bawahan'),
+('Dress', 'dress'),
+('Setelan', 'setelan'),
+('New In ✨', 'new-in'),
+('Flash Sale 🔥', 'flash-sale'),
+('Bundling Hemat', 'bundling'),
+('Clearance', 'clearance')
+ON CONFLICT (slug) DO NOTHING;
+
+-- 2. PRODUCTS TABLE
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT UNIQUE NOT NULL,
@@ -17,6 +41,7 @@ CREATE TABLE IF NOT EXISTS products (
   details JSONB DEFAULT '[]',
   sizes JSONB DEFAULT '[]',
   disabled_sizes JSONB DEFAULT '[]',
+  variants JSONB DEFAULT '[]',
   images JSONB DEFAULT '[]',
   video_embed_url TEXT,
   social_proof TEXT,
@@ -29,6 +54,7 @@ CREATE TABLE IF NOT EXISTS products (
 -- 2. ORDERS TABLE
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
   order_number TEXT UNIQUE NOT NULL,
   customer_name TEXT NOT NULL,
   customer_phone TEXT NOT NULL,
@@ -43,6 +69,10 @@ CREATE TABLE IF NOT EXISTS orders (
   shipping_cost INTEGER DEFAULT 0,
   total INTEGER NOT NULL DEFAULT 0,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending','confirmed','processing','shipped','completed','cancelled')),
+  louvin_transaction_id TEXT,
+  payment_qr_string TEXT,
+  payment_va_number TEXT,
+  payment_expiry TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -198,6 +228,7 @@ CREATE TABLE IF NOT EXISTS hero_slides (
   video_url TEXT,
   slide_order INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  object_position TEXT DEFAULT 'center',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -215,3 +246,30 @@ CREATE POLICY "Service role full access hero slides"
 ON hero_slides FOR ALL 
 USING (true)
 WITH CHECK (true);
+
+-- =============================================
+-- 6. FEATURED SECTIONS TABLE (Banners & Promos)
+-- =============================================
+CREATE TABLE IF NOT EXISTS featured_sections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type TEXT NOT NULL, -- 'pinned_banner' or 'floating_promo'
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  image_url TEXT,
+  video_url TEXT,
+  product_slug TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE featured_sections ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read active featured sections" 
+ON featured_sections FOR SELECT 
+USING (is_active = true);
+
+CREATE POLICY "Service role full access featured sections" 
+ON featured_sections FOR ALL 
+USING (auth.role() = 'service_role');
+

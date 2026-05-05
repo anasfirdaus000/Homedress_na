@@ -45,7 +45,7 @@
 
   <main style="padding-top: 140px; padding-bottom: 60px; min-height: 80vh;">
     <div class="confirmation">
-      <div class="confirmation__icon">🎉</div>
+      <div class="confirmation__icon" id="conf-status-icon">🎉</div>
       <h1 class="confirmation__title">Pesanan Berhasil!</h1>
       <p class="confirmation__subtitle">Terima kasih telah berbelanja di HOMEDRESS_NA</p>
 
@@ -60,7 +60,7 @@
         </div>
         <div class="confirmation__row">
           <span class="confirmation__label">Status</span>
-          <span class="confirmation__value">⏳ Menunggu Pembayaran</span>
+          <span class="confirmation__value" id="conf-status-text">⏳ Menunggu Pembayaran</span>
         </div>
         <div class="confirmation__row">
           <span class="confirmation__label">Tanggal</span>
@@ -95,6 +95,21 @@
     }
     if (date) {
       document.getElementById('conf-date').textContent = new Date(date).toLocaleString('id-ID');
+    }
+
+    // Polling status
+    if (orderNumber) {
+      const poll = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/track?order=${orderNumber}`);
+          const data = await res.json();
+          if (data.order && data.order.status === 'paid') {
+            document.getElementById('conf-status-text').innerHTML = '✅ Pembayaran Berhasil';
+            document.getElementById('conf-status-icon').textContent = '🛍️';
+            clearInterval(poll);
+          }
+        } catch (e) {}
+      }, 3000);
     }
 
     // Clear cart after successful order

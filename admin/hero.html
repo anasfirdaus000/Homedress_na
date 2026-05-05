@@ -24,7 +24,10 @@
         <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
         <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
         <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
         <a href="/admin/hero.html" class="sidebar__link sidebar__link--active">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
         <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
         <hr style="border-color:#333;margin:16px 0;" />
         <a href="/" class="sidebar__link">🌐 Lihat Website</a>
@@ -70,6 +73,16 @@
             <div class="admin-form__group">
               <label class="admin-form__label">URL Video Overlay (Opsional TikTok/MP4)</label>
               <input class="admin-form__input" id="slide-video" placeholder="https://..." />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Posisi Gambar (Fokus)</label>
+              <select class="admin-form__input" id="slide-position" style="background:#222;color:#fff;">
+                <option value="center">Tengah (Center)</option>
+                <option value="top">Atas (Top)</option>
+                <option value="bottom">Bawah (Bottom)</option>
+                <option value="left">Kiri (Left)</option>
+                <option value="right">Kanan (Right)</option>
+              </select>
             </div>
             <div class="admin-form__group">
               <label class="admin-form__label">Urutan (Angka)</label>
@@ -147,6 +160,7 @@
       document.getElementById('slide-link').value = s.link_url || '';
       document.getElementById('slide-image').value = s.image_url || '';
       document.getElementById('slide-video').value = s.video_url || '';
+      document.getElementById('slide-position').value = s.object_position || 'center';
       document.getElementById('slide-order').value = s.slide_order || 0;
       document.getElementById('modal-title').textContent = 'Edit Slide';
       modal.style.display = 'block';
@@ -171,6 +185,7 @@
         link_url: document.getElementById('slide-link').value,
         image_url: document.getElementById('slide-image').value,
         video_url: document.getElementById('slide-video').value,
+        object_position: document.getElementById('slide-position').value,
         slide_order: parseInt(document.getElementById('slide-order').value) || 0
       };
 

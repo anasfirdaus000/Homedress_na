@@ -39,7 +39,7 @@ export function validateCheckoutInput(body) {
   }
 
   // Payment method
-  const validPayments = ['transfer', 'ewallet', 'cod', 'qris'];
+  const validPayments = ['transfer', 'ewallet', 'cod', 'qris', 'bni_va', 'bri_va', 'permata_va', 'gopay', 'shopeepay'];
   if (body.payment_method && !validPayments.includes(body.payment_method)) {
     errors.push('Metode pembayaran tidak valid');
   }
@@ -48,6 +48,7 @@ export function validateCheckoutInput(body) {
     valid: errors.length === 0,
     errors,
     sanitized: {
+      user_id: body.user_id || null,
       customer_name: (body.customer_name || '').trim().substring(0, 100),
       customer_phone: phone,
       customer_email: (body.customer_email || '').trim().substring(0, 100),

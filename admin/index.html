@@ -6,6 +6,7 @@
   <title>Dashboard Admin | HOMEDRESS_NA</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="admin">
@@ -17,7 +18,10 @@
         <a href="/admin/" class="sidebar__link sidebar__link--active">📊 Dashboard</a>
         <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
         <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
         <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
         <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
         <hr style="border-color:#333;margin:16px 0;" />
         <a href="/" class="sidebar__link">🌐 Lihat Website</a>
@@ -53,6 +57,31 @@
           <div class="stat-card__icon">🛍️</div>
           <div class="stat-card__value" id="stat-products">0</div>
           <div class="stat-card__label">Produk Aktif</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">📈</div>
+          <div class="stat-card__value" id="stat-conversion">0%</div>
+          <div class="stat-card__label">Conversion Rate</div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS CHARTS -->
+      <div class="stats-grid" style="grid-template-columns: 1.5fr 1fr; gap: 24px;">
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2>📈 Penjualan Harian</h2>
+          </div>
+          <div class="chart-container" style="position: relative; height:300px; width:100%">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2>🔥 Produk Terlaris</h2>
+          </div>
+          <div class="chart-container" style="position: relative; height:300px; width:100%">
+            <canvas id="bestSellerChart"></canvas>
+          </div>
         </div>
       </div>
 
@@ -105,6 +134,54 @@
     const token = session.access_token;
     document.getElementById('admin-email').textContent = session.user.email;
 
+    function renderSalesChart(labels, data) {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Penjualan (Rp)',
+            data: data,
+            borderColor: '#000',
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: (v) => 'Rp ' + v.toLocaleString('id-ID') } }
+          }
+        }
+      });
+    }
+
+    function renderBestSellerChart(labels, data) {
+      const ctx = document.getElementById('bestSellerChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Unit Terjual',
+            data: data,
+            backgroundColor: '#ff4757',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
     // Logout
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut();
@@ -134,6 +211,43 @@
         const revenue = orders.filter(o => !['cancelled'].includes(o.status)).reduce((sum, o) => sum + o.total, 0);
         document.getElementById('stat-revenue').textContent = 'Rp ' + revenue.toLocaleString('id-ID');
         document.getElementById('stat-products').textContent = products.filter(p => p.is_active).length;
+
+        // Conversion Rate
+        const confirmedOrders = orders.filter(o => o.status !== 'pending' && o.status !== 'cancelled').length;
+        const conversionRate = orders.length > 0 ? ((confirmedOrders / orders.length) * 100).toFixed(1) : 0;
+        document.getElementById('stat-conversion').textContent = conversionRate + '%';
+
+        // --- CHART DATA PROCESSING ---
+        
+        // 1. Daily Sales (Last 7 Days)
+        const last7Days = [...Array(7)].map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          return d.toISOString().split('T')[0];
+        }).reverse();
+
+        const dailyData = last7Days.map(date => {
+          const dayOrders = orders.filter(o => o.created_at.startsWith(date) && o.status !== 'cancelled');
+          return dayOrders.reduce((sum, o) => sum + o.total, 0);
+        });
+
+        renderSalesChart(last7Days, dailyData);
+
+        // 2. Best Sellers
+        const productSales = {};
+        orders.forEach(o => {
+          (o.order_items || []).forEach(item => {
+            productSales[item.product_name] = (productSales[item.product_name] || 0) + item.quantity;
+          });
+        });
+
+        const topProducts = Object.entries(productSales)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+
+        renderBestSellerChart(topProducts.map(p => p[0]), topProducts.map(p => p[1]));
+
+        // --- END CHART DATA PROCESSING ---
 
         // Recent orders table
         const tbody = document.getElementById('recent-orders');

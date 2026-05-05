@@ -7,6 +7,7 @@
  */
 import { supabaseAdmin } from '../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
+import { sendEmail } from '../_lib/email.js';
 
 async function verifyAdmin(req) {
   const token = req.headers.authorization?.replace('Bearer ', '');
@@ -56,21 +57,50 @@ export default async function handler(req, res) {
   // POST: Update order status
   if (req.method === 'POST') {
     const { order_id, status } = req.body || {};
-    const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'cancelled'];
+    const validStatuses = ['pending', 'paid', 'confirmed', 'processing', 'shipped', 'completed', 'cancelled'];
 
     if (!order_id || !validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Invalid order_id or status' });
     }
 
-    const { data, error } = await supabaseAdmin
+    // 1. Update status
+    const { data: order, error } = await supabaseAdmin
       .from('orders')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', order_id)
-      .select()
+      .select('*, order_items(*)')
       .single();
 
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(200).json({ success: true, order: data });
+
+    // 2. Inventory Management: Reduce stock if status is 'paid'
+    if (status === 'paid' && order.order_items) {
+      for (const item of order.order_items) {
+        if (item.product_id) {
+          const { data: p } = await supabaseAdmin.from('products').select('stock').eq('id', item.product_id).single();
+          if (p && p.stock !== undefined) {
+            const newStock = Math.max(0, p.stock - (item.quantity || 1));
+            await supabaseAdmin.from('products').update({ stock: newStock }).eq('id', item.product_id);
+          }
+        }
+      }
+      
+      // 3. Send Email Notification
+      if (order.customer_email) {
+        await sendEmail({
+          to: order.customer_email,
+          subject: `Pembayaran Diterima - Order #${order.order_number}`,
+          html: `
+            <h1>Terima Kasih, ${order.customer_name}!</h1>
+            <p>Pembayaran Anda untuk pesanan <strong>#${order.order_number}</strong> telah kami terima.</p>
+            <p>Pesanan Anda akan segera kami proses dan kirimkan.</p>
+            <p>Salam,<br/>Homedress_na</p>
+          `
+        });
+      }
+    }
+
+    return res.status(200).json({ success: true, order });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });

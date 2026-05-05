@@ -10,8 +10,6 @@ export default defineConfig({
         checkout: 'checkout.html',
         orderConfirmation: 'order-confirmation.html',
         trackOrder: 'track-order.html',
-        newIn: 'new-in.html',
-        promo: 'promo.html',
         aboutUs: 'about-us.html',
         faq: 'faq.html',
         storeLocator: 'store-locator.html',
@@ -23,25 +21,9 @@ export default defineConfig({
         returnPolicy: 'return-policy.html',
         terms: 'terms.html',
         privacy: 'privacy.html',
-        productJessy: 'product-jessy-set.html',
-        lpBatwing: 'setelan-wanita-batwing-rayon-salur.html',
-        lpJessy: 'setelan-wanita-korea-kekinian-terbaru.html',
-        flashSale: 'flash-sale.html',
-        bestSeller: 'best-seller.html',
-        setelan: 'setelan.html',
-        dress: 'dress.html',
-        atasan: 'atasan.html',
-        bawahan: 'bawahan.html',
-        bundling: 'bundling.html',
-        clearance: 'clearance.html',
-        diskon1030: 'diskon-10-30.html',
-        diskon50: 'diskon-50.html',
-        ratingTinggi: 'rating-tinggi.html',
-        repeatOrder: 'repeat-order.html',
-        restock: 'restock.html',
-        terlarisMinggu: 'terlaris-minggu.html',
-        terlarisBulan: 'terlaris-bulan.html',
-        viral: 'viral.html',
+        account: 'account.html',
+        login: 'login.html',
+        register: 'register.html',
         // Admin pages
         adminLogin: 'admin/login.html',
         adminDashboard: 'admin/index.html',
@@ -53,7 +35,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:3002'
+      '/api': 'http://127.0.0.1:3003'
     }
   }
 });

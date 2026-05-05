@@ -89,6 +89,8 @@ ${itemList}
 Status: ⏳ Menunggu Pembayaran
 
 Silakan lakukan pembayaran sesuai metode yang dipilih (${order.payment_method}).
+Jika memerlukan instruksi pembayaran atau QRIS, silakan cek di sini:
+🔗 https://homedress-na.vercel.app/track-order.html?order_id=${order.order_number}&phone=${order.customer_phone}
 
 Kami akan memproses pesanan kamu setelah pembayaran dikonfirmasi.
 

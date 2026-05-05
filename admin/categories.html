@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kelola Kategori | Admin HOMEDRESS_NA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body style="background:#111;color:#fff;">
+  <div class="admin">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link sidebar__link--active">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
+        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>📁 Kelola Kategori Produk</h1>
+        <button class="admin-btn admin-btn--primary" id="add-cat-btn">+ Tambah Kategori</button>
+      </div>
+
+      <div id="cat-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;margin-top:20px;">
+        <p style="color:#888;">Memuat data...</p>
+      </div>
+
+      <!-- Add/Edit Modal -->
+      <div id="cat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:500px;margin:0 auto;background:#1a1a1a;border-radius:16px;padding:32px;border:1px solid #333;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <h2 id="modal-title">Tambah Kategori</h2>
+            <button class="admin-btn admin-btn--outline admin-btn--small" id="close-modal">✕</button>
+          </div>
+          <form id="cat-form">
+            <input type="hidden" id="cat-id" />
+            
+            <div class="admin-form__group">
+              <label class="admin-form__label">Nama Kategori *</label>
+              <input class="admin-form__input" id="cat-name" placeholder="Cth: Atasan Wanita" required />
+            </div>
+
+            <div class="admin-form__group">
+              <label class="admin-form__label">Slug (URL) *</label>
+              <input class="admin-form__input" id="cat-slug" placeholder="Cth: atasan-wanita" required />
+              <small style="color:#888;">Harus unik, huruf kecil dan tanda hubung saja.</small>
+            </div>
+
+            <div class="admin-form__group">
+              <label class="admin-form__label">Tipe Kategori</label>
+              <select class="admin-form__input" id="cat-type" style="background:#222;color:#fff;">
+                <option value="catalog">Katalog (Regular)</option>
+                <option value="promo">Promo / Diskon</option>
+                <option value="best_seller">Best Seller / Terpopuler</option>
+              </select>
+            </div>
+
+            <div class="admin-form__group">
+              <label class="admin-form__label">URL Gambar (Untuk Homepage)</label>
+              <input class="admin-form__input" id="cat-img" placeholder="https://..." />
+            </div>
+
+            <div class="admin-form__group" style="display:flex;align-items:center;gap:10px;">
+              <input type="checkbox" id="cat-featured" style="width:20px;height:20px;" />
+              <label class="admin-form__label" style="margin:0;">Tampilkan di Beranda (Shop by Category)</label>
+            </div>
+
+            <div class="admin-form__group">
+              <label class="admin-form__label">Urutan (Order)</label>
+              <input type="number" class="admin-form__input" id="cat-order" value="0" />
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button type="submit" class="admin-btn admin-btn--primary">Simpan</button>
+              <button type="button" class="admin-btn admin-btn--outline" id="close-modal-2">Batal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    const modal = document.getElementById('cat-modal');
+    const form = document.getElementById('cat-form');
+    const grid = document.getElementById('cat-grid');
+
+    document.getElementById('add-cat-btn').addEventListener('click', () => {
+      form.reset();
+      document.getElementById('cat-id').value = '';
+      document.getElementById('modal-title').textContent = 'Tambah Kategori';
+      modal.style.display = 'block';
+    });
+
+    document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
+    document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
+
+    async function loadCategories() {
+      const res = await fetch('/api/admin/categories', { headers: { 'Authorization': `Bearer ${token}` }});
+      const data = await res.json();
+      const categories = data.categories || [];
+
+      if (categories.length === 0) { grid.innerHTML = '<p style="color:#888;">Belum ada kategori.</p>'; return; }
+
+      grid.innerHTML = categories.map(c => `
+        <div style="background:#222; padding:16px; border-radius:12px; border:1px solid #333;">
+          ${c.image_url ? `<img src="${c.image_url}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:12px;" />` : '<div style="width:100%;height:120px;background:#111;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;color:#444;">No Image</div>'}
+          <h3 style="margin:0 0 4px;">${c.name}</h3>
+          <p style="color:#888;font-size:0.85rem;margin:0 0 12px;">Slug: ${c.slug}</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:0.75rem;padding:2px 6px;background:#333;border-radius:4px;">${c.type.toUpperCase()}</span>
+            ${c.is_featured ? '<span style="font-size:0.75rem;color:var(--color-accent);">★ Featured</span>' : ''}
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="admin-btn admin-btn--outline admin-btn--small" style="flex:1;" onclick="editCategory('${c.id}')">Edit</button>
+            <button class="admin-btn admin-btn--danger admin-btn--small" onclick="deleteCategory('${c.id}')">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+      window._categories = categories;
+    }
+
+    window.editCategory = function(id) {
+      const c = window._categories.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('cat-id').value = c.id;
+      document.getElementById('cat-name').value = c.name;
+      document.getElementById('cat-slug').value = c.slug;
+      document.getElementById('cat-type').value = c.type;
+      document.getElementById('cat-img').value = c.image_url || '';
+      document.getElementById('cat-featured').checked = c.is_featured;
+      document.getElementById('cat-order').value = c.order_index || 0;
+      document.getElementById('modal-title').textContent = 'Edit Kategori';
+      modal.style.display = 'block';
+    };
+
+    window.deleteCategory = async function(id) {
+      if (!confirm('Hapus kategori ini?')) return;
+      const res = await fetch('/api/admin/categories', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) loadCategories();
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        id: document.getElementById('cat-id').value || undefined,
+        name: document.getElementById('cat-name').value,
+        slug: document.getElementById('cat-slug').value,
+        type: document.getElementById('cat-type').value,
+        image_url: document.getElementById('cat-img').value || null,
+        is_featured: document.getElementById('cat-featured').checked,
+        order_index: parseInt(document.getElementById('cat-order').value) || 0
+      };
+
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        modal.style.display = 'none';
+        loadCategories();
+      } else {
+        const err = await res.json();
+        alert('Gagal: ' + err.error);
+      }
+    });
+
+    loadCategories();
+  </script>
+</body>
+</html>

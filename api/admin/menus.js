@@ -1,8 +1,5 @@
 /**
- * Admin Hero API
- * GET    /api/admin/hero - List all slides
- * POST   /api/admin/hero - Create/Update slide
- * DELETE /api/admin/hero - Delete slide
+ * Admin Menus API
  */
 import { supabaseAdmin } from '../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
@@ -10,14 +7,11 @@ import { createClient } from '@supabase/supabase-js';
 async function verifyAdmin(req) {
   const authHeader = req.headers['authorization'];
   if (!authHeader) return null;
-
   const token = authHeader.replace('Bearer ', '');
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
-  
   const tempClient = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
   const { data: { user }, error } = await tempClient.auth.getUser(token);
-  
   if (error || !user) return null;
   return user;
 }
@@ -31,56 +25,49 @@ export default async function handler(req, res) {
   const user = await verifyAdmin(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  // GET: List all slides
+  // GET: List all menus
   if (req.method === 'GET') {
     const { data, error } = await supabaseAdmin
-      .from('hero_slides')
+      .from('menus')
       .select('*')
-      .order('slide_order', { ascending: true })
-      .order('created_at', { ascending: false });
+      .order('order_index', { ascending: true });
 
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(200).json({ slides: data || [] });
+    return res.status(200).json({ menus: data || [] });
   }
 
-  // POST: Create or Update slide
+  // POST: Create or Update menu
   if (req.method === 'POST') {
-    const { id, title, subtitle, link_url, image_url, video_url, slide_order, is_active, object_position } = req.body;
+    const { id, label, parent_id, category_slug, custom_url, menu_group, order_index } = req.body;
     
-    if (!title) return res.status(400).json({ error: 'Title is required' });
+    if (!label || !menu_group) return res.status(400).json({ error: 'Label and Menu Group are required' });
 
-    const payload = {
-      title,
-      subtitle: subtitle || null,
-      link_url: link_url || null,
-      image_url: image_url || null,
-      video_url: video_url || null,
-      slide_order: slide_order || 0,
-      is_active: is_active !== undefined ? is_active : true,
-      object_position: object_position || 'center',
-      updated_at: new Date().toISOString()
+    const payload = { 
+      label, 
+      parent_id: parent_id || null, 
+      category_slug: category_slug || null,
+      custom_url: custom_url || null,
+      menu_group,
+      order_index: parseInt(order_index) || 0
     };
 
     let result;
     if (id) {
-      result = await supabaseAdmin.from('hero_slides').update(payload).eq('id', id).select().single();
+      result = await supabaseAdmin.from('menus').update(payload).eq('id', id).select();
     } else {
-      result = await supabaseAdmin.from('hero_slides').insert([payload]).select().single();
+      result = await supabaseAdmin.from('menus').insert([payload]).select();
     }
 
     if (result.error) return res.status(500).json({ error: result.error.message });
-    return res.status(200).json({ slide: result.data });
+    return res.status(200).json({ menu: result.data[0] });
   }
 
-  // DELETE: "Soft delete" or deactivate a slide
+  // DELETE: Delete menu
   if (req.method === 'DELETE') {
-    const { slide_id } = req.body;
-    if (!slide_id) return res.status(400).json({ error: 'slide_id is required' });
-
-    // Actually delete or just mark inactive? We'll just delete.
-    const { error } = await supabaseAdmin.from('hero_slides').delete().eq('id', slide_id);
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: 'ID is required' });
+    const { error } = await supabaseAdmin.from('menus').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
-
     return res.status(200).json({ success: true });
   }
 

@@ -116,6 +116,20 @@
           <h3 style="margin-bottom:12px;">Detail Pesanan</h3>
           <div id="result-items"></div>
 
+          <div id="result-payment" style="display:none; margin-top:24px; padding:20px; background:#fff; border:1px solid #eee; border-radius:12px;">
+             <!-- Payment instructions -->
+          </div>
+
+          <div id="payment-guide" style="display:none; margin-top:16px; font-size:0.9rem; color:#666;">
+            <details style="cursor:pointer; background:#f9f9f9; padding:12px; border-radius:8px;">
+              <summary style="font-weight:600;">📖 Cara Pembayaran</summary>
+              <div style="margin-top:10px; line-height:1.5;">
+                <p><strong>QRIS:</strong> Simpan/Screenshot QR, buka aplikasi m-banking/e-wallet, pilih Scan/Bayar, lalu upload gambar QR tadi.</p>
+                <p style="margin-top:8px;"><strong>Virtual Account:</strong> Salin nomor VA, masuk ke m-banking, pilih menu Transfer > Virtual Account, tempel nomor VA, masukkan nominal (harus pas), lalu konfirmasi.</p>
+              </div>
+            </details>
+          </div>
+
           <div class="track-result__row" style="margin-top:16px;">
             <span>Subtotal</span><span id="result-subtotal">—</span>
           </div>
@@ -193,6 +207,61 @@
         document.getElementById('result-subtotal').textContent = 'Rp ' + order.subtotal.toLocaleString('id-ID');
         document.getElementById('result-shipping').textContent = order.shipping_cost === 0 ? 'GRATIS' : 'Rp ' + order.shipping_cost.toLocaleString('id-ID');
         document.getElementById('result-total').textContent = 'Rp ' + order.total.toLocaleString('id-ID');
+
+        // Payment Info
+        const paymentEl = document.getElementById('result-payment');
+        if (order.status === 'pending' && (order.payment_qr || order.payment_va)) {
+          paymentEl.style.display = 'block';
+          paymentEl.innerHTML = `
+            <h4 style="margin-bottom:10px;">💳 Selesaikan Pembayaran</h4>
+            ${order.payment_qr ? `
+              <div style="text-align:center;">
+                <p style="font-size:0.9rem; margin-bottom:10px;">Silakan scan QRIS berikut:</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(order.payment_qr)}" alt="QRIS" style="display:inline-block; border:1px solid #eee; padding:5px;"/>
+              </div>
+            ` : ''}
+            ${order.payment_va ? `
+              <div>
+                <p style="font-size:0.9rem; margin-bottom:5px;">Transfer ke Virtual Account:</p>
+                <p style="font-size:1.2rem; font-weight:700; color:var(--color-accent);">${order.payment_va}</p>
+                <p style="font-size:0.8rem; color:#888;">Metode: ${order.payment_method.toUpperCase()}</p>
+              </div>
+            ` : ''}
+            <div style="margin-top:15px; padding:10px; background:#fff3cd; border-radius:4px; font-size:0.8rem; color:#856404;">
+              Bayar sebelum: <strong>${new Date(order.payment_expiry).toLocaleString('id-ID')}</strong>
+            </div>
+          `;
+          document.getElementById('payment-guide').style.display = 'block';
+        } else {
+          paymentEl.style.display = 'none';
+          document.getElementById('payment-guide').style.display = 'none';
+        }
+
+        // Re-order button for cancelled/completed
+        if (order.status === 'cancelled' || order.status === 'completed') {
+          const reorderHtml = `
+            <div style="margin-top:24px; text-align:center;">
+              <button id="btn-reorder" class="btn btn--primary" style="width:100%; padding:16px;">🛒 PESAN LAGI (RE-ORDER)</button>
+              <p style="font-size:0.9rem; color:#888; margin-top:12px;">Pesan produk yang sama lagi dengan cepat.</p>
+            </div>
+          `;
+          resultEl.querySelector('.track-result__total').insertAdjacentHTML('afterend', reorderHtml);
+          
+          document.getElementById('btn-reorder').onclick = () => {
+            if (confirm('Ingin memesan produk yang sama lagi?')) {
+              CART.items = order.items.map(i => ({
+                id: i.product_slug || i.product_name.toLowerCase().replace(/ /g, '-'), // fallback if slug missing
+                name: i.product_name,
+                price: i.price_at_time,
+                qty: i.quantity,
+                size: i.size,
+                image: i.product_image
+              }));
+              CART.save();
+              window.location.href = '/checkout.html';
+            }
+          };
+        }
 
         resultEl.classList.add('is-visible');
 

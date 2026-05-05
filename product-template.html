@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO META TAGS -->
+  <title>{{PRODUCT_NAME}} | HOMEDRESS_NA</title>
+  <meta name="description" content="{{PRODUCT_DESCRIPTION_TEXT}}">
+  <meta name="keywords" content="homedress, fashion wanita, setelan rayon, piyama premium, {{PRODUCT_NAME}}">
+  
+  <!-- OPEN GRAPH (Social Media) -->
+  <meta property="og:title" content="{{PRODUCT_NAME}} | HOMEDRESS_NA">
+  <meta property="og:description" content="{{PRODUCT_DESCRIPTION_TEXT}}">
+  <meta property="og:image" content="{{PRODUCT_IMAGE_PRIMARY}}">
+  <meta property="og:url" content="https://homedressna.com/{{PRODUCT_SLUG}}.html">
+  <meta property="og:type" content="product">
+  
+  <!-- STRUCTURED DATA (Google JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "{{PRODUCT_NAME}}",
+    "image": [
+      "{{PRODUCT_IMAGE_PRIMARY}}"
+    ],
+    "description": "{{PRODUCT_DESCRIPTION_TEXT}}",
+    "sku": "{{PRODUCT_SLUG}}",
+    "brand": {
+      "@type": "Brand",
+      "name": "HOMEDRESS_NA"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": "https://homedressna.com/{{PRODUCT_SLUG}}.html",
+      "priceCurrency": "IDR",
+      "price": "{{PRODUCT_PRICE}}",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo"><a href="/">HOMEDRESS_NA</a></div>
+      <nav class="header__nav">
+        <a href="/" class="header__nav-link">BERANDA</a>
+        <a href="/category.html" class="header__nav-link">KATEGORI</a>
+      </nav>
+      <div class="header__icons">
+        <button class="header__icon-btn" id="cart-toggle">🛒 <span id="cart-count">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding-top: 130px; padding-bottom: 80px;">
+    <div class="pdp-container" style="max-width: 1400px; margin: 0 auto; padding: 0 20px;">
+      <div class="breadcrumbs" style="margin-bottom: 30px; font-size: 1.2rem; color: #888;">
+        <a href="/" style="color: inherit;">Home</a> / <a href="/category.html" style="color: inherit;">Semua Produk</a> / <span style="color: var(--color-fg);">{{PRODUCT_NAME}}</span>
+      </div>
+
+      <div class="pdp-layout">
+        <!-- GALLERY -->
+        <div class="pdp-gallery" id="pdp-gallery">
+          {{PRODUCT_GALLERY_HTML}}
+        </div>
+
+        <!-- INFO -->
+        <div class="pdp-info">
+          <div class="pdp-info__sticky">
+            <h2 class="pdp-info__brand">HOMEDRESS_NA</h2>
+            <h1 class="pdp-info__title">{{PRODUCT_NAME}}</h1>
+            
+            <div class="pdp-info__price-row" id="static-price-container">
+              <span class="pdp-info__price">Rp {{PRODUCT_PRICE_FORMATTED}}</span>
+              {{PRODUCT_ORIGINAL_PRICE_HTML}}
+            </div>
+
+            <div id="variants-container">
+              {{PRODUCT_VARIANTS_HTML}}
+            </div>
+
+            <button class="pdp-btn-cart" id="btn-add-to-cart-static">ADD TO BAG</button>
+
+            <div class="pdp-payment-banner">
+              <p>✨ <strong>Premium Quality Guarantee</strong></p>
+              <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 4px;">Pesan sekarang, stok terbatas!</p>
+            </div>
+
+            <div class="pdp-accordions">
+              <details class="pdp-accordion" open>
+                <summary class="pdp-accordion__summary">Description <span>+</span></summary>
+                <div class="pdp-accordion__content">{{PRODUCT_DESCRIPTION_HTML}}</div>
+              </details>
+              {{PRODUCT_DETAILS_ACCORDION}}
+              <details class="pdp-accordion">
+                <summary class="pdp-accordion__summary">Shipping & Returns <span>+</span></summary>
+                <div class="pdp-accordion__content">
+                  <p><strong>Shipping:</strong> 2-5 business days across Indonesia.</p>
+                  <p><strong>Returns:</strong> 7-day easy return policy for unworn items with tags.</p>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RELATED -->
+    <section class="section pdp-related" style="margin-top: 80px; padding: 0 20px;">
+      <div class="section__header" style="margin-bottom: 40px; border-bottom: 1px solid var(--color-border); padding-bottom: 20px;">
+        <h2 class="section__title" style="font-size: 2.2rem;">You may also like</h2>
+      </div>
+      <div class="product-grid product-grid--5" id="pdp-related-grid">
+        <!-- Injected by JS -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <!-- Footer content will be copied from index.html during build -->
+    {{FOOTER_HTML}}
+  </footer>
+
+  <script type="module" src="/main.js"></script>
+  <script>
+    // Embedded Data for Static Page
+    const PRODUCT = {{PRODUCT_JSON}};
+    let selectedColor = {{SELECTED_COLOR}};
+    let selectedSize = {{SELECTED_SIZE}};
+
+    function updatePrice() {
+      const container = document.getElementById('static-price-container');
+      const matchingVar = PRODUCT.variants.find(v => 
+        (!selectedColor || v.color === selectedColor) && 
+        (!selectedSize || v.size === selectedSize)
+      );
+      
+      let price = PRODUCT.price;
+      let original = PRODUCT.original_price;
+      if (matchingVar && matchingVar.price) price = matchingVar.price;
+      
+      const discount = (original && original > price) ? Math.round((1 - price/original)*100) : 0;
+      
+      if (discount > 0) {
+        container.innerHTML = `<span class="pdp-info__price pdp-info__price--sale">Rp ${price.toLocaleString('id-ID')}</span> <span class="pdp-info__price pdp-info__price--original">Rp ${original.toLocaleString('id-ID')}</span> <span class="pdp-info__badge">-${discount}% OFF</span>`;
+      } else {
+        container.innerHTML = `<span class="pdp-info__price">Rp ${price.toLocaleString('id-ID')}</span>`;
+      }
+      return price;
+    }
+
+    document.querySelectorAll('.color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('pdp-size__btn--active'));
+        btn.classList.add('pdp-size__btn--active');
+        selectedColor = btn.dataset.value;
+        updatePrice();
+      });
+    });
+
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('pdp-size__btn--active'));
+        btn.classList.add('pdp-size__btn--active');
+        selectedSize = btn.dataset.value;
+        updatePrice();
+      });
+    });
+
+    document.getElementById('btn-add-to-cart-static').addEventListener('click', () => {
+      const price = updatePrice();
+      if (window.CART) {
+        window.CART.add({
+          id: PRODUCT.slug,
+          name: PRODUCT.name,
+          price: price,
+          img: PRODUCT.images[0] || '',
+          size: selectedSize,
+          color: selectedColor,
+          qty: 1
+        });
+        if (window.showToast) window.showToast('Added to cart! 🛍️');
+      }
+    });
+
+    // Load Related Products
+    async function loadRelated() {
+      const res = await fetch('/api/products');
+      if (res.ok) {
+        const data = await res.json();
+        const related = (data.products || []).filter(p => p.slug !== PRODUCT.slug).slice(0, 5);
+        document.getElementById('pdp-related-grid').innerHTML = related.map(p => `
+          <div class="product-card" onclick="window.location.href='/${p.slug}.html'">
+            <div class="product-card__image-wrapper">
+              <img src="${p.images?.[0] || ''}" alt="${p.name}" class="product-card__image" loading="lazy" />
+            </div>
+            <div class="product-card__info">
+              <p class="product-card__brand">${p.brand || 'HOMEDRESS_NA'}</p>
+              <p class="product-card__name">${p.name}</p>
+              <p class="product-card__price">Rp ${p.price.toLocaleString('id-ID')}</p>
+            </div>
+          </div>`).join('');
+      }
+    }
+    loadRelated();
+  </script>
+</body>
+</html>

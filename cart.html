@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Bag | HOMEDRESS_NA</title>
+  <link rel="stylesheet" href="/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo"><a href="/">HOMEDRESS_NA</a></div>
+      <nav class="header__nav">
+        <a href="/" class="header__nav-link">BERANDA</a>
+        <a href="/category.html" class="header__nav-link">KATEGORI</a>
+      </nav>
+      <div class="header__icons">
+        <button class="header__icon-btn" id="cart-toggle">🛒 <span id="cart-count">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding-top: 130px; min-height: 80vh;">
+    <div class="cart-page-container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+      <h1 style="font-size: 3rem; margin-bottom: 40px; border-bottom: 1px solid var(--color-border); padding-bottom: 20px;">Your Bag</h1>
+      
+      <div class="cart-page-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: 60px;">
+        <!-- CART ITEMS -->
+        <div id="cart-page-items">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="cart-page-summary" id="cart-page-summary" style="background: #f9f9f9; padding: 30px; border-radius: 8px; align-self: start;">
+          <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Order Summary</h2>
+          <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.3rem;">
+            <span>Subtotal</span>
+            <span id="cart-subtotal">Rp 0</span>
+          </div>
+          <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.3rem; color: #888;">
+            <span>Estimated Shipping</span>
+            <span>Calculated at checkout</span>
+          </div>
+          <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 1.6rem; font-weight: 700; border-top: 1px solid var(--color-border); padding-top: 20px;">
+            <span>Total</span>
+            <span id="cart-total">Rp 0</span>
+          </div>
+          <a href="/checkout.html" class="btn btn--primary" style="width: 100%; text-align: center; display: block; padding: 20px; font-size: 1.4rem;">CHECKOUT NOW</a>
+          
+          <div style="margin-top: 30px; border-top: 1px solid var(--color-border); padding-top: 20px;">
+            <p style="font-size: 1.1rem; color: #888; line-height: 1.6;">✨ <strong>Premium Quality Guarantee</strong><br>Pakaian rumah nyaman, stylish, dan berbahan sejuk.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="cart-page-empty" style="display: none; text-align: center; padding: 100px 0;">
+        <p style="font-size: 2rem; color: #888; margin-bottom: 30px;">Bag anda kosong.</p>
+        <a href="/category.html" class="btn btn--outline" style="display: inline-block;">MULAI BELANJA</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner" id="footer-content">
+      <!-- Footer content injected by main.js or build -->
+    </div>
+  </footer>
+
+  <script src="/products-data.js"></script>
+  <script type="module" src="/main.js"></script>
+  <script type="module">
+    // Page specific initialization
+    function initCartPage() {
+      const itemsContainer = document.getElementById('cart-page-items');
+      const subtotalEl = document.getElementById('cart-subtotal');
+      const totalEl = document.getElementById('cart-total');
+      const emptyEl = document.getElementById('cart-page-empty');
+      const layoutEl = document.querySelector('.cart-page-layout');
+
+      if (!window.CART) return setTimeout(initCartPage, 100);
+
+      const render = () => {
+        if (window.CART.items.length === 0) {
+          if (layoutEl) layoutEl.style.display = 'none';
+          if (emptyEl) emptyEl.style.display = 'block';
+          return;
+        }
+
+        if (layoutEl) layoutEl.style.display = 'grid';
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        if (itemsContainer) {
+          itemsContainer.innerHTML = window.CART.items.map((item, i) => `
+            <div class="cart-page-item" style="display: flex; gap: 20px; border-bottom: 1px solid var(--color-border); padding: 20px 0;">
+              <img src="${item.img}" style="width: 120px; height: 160px; object-fit: cover; border-radius: 4px;" alt="${item.name}"/>
+              <div style="flex: 1;">
+                <h3 style="font-size: 1.6rem; margin-bottom: 5px;">${item.name}</h3>
+                <p style="color: #888; font-size: 1.2rem; margin-bottom: 10px;">${item.color || ''} ${item.color && item.size ? '|' : ''} ${item.size || ''}</p>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                  <div class="cart-item__qty" style="display: flex; align-items: center; border: 1px solid var(--color-border); border-radius: 4px; padding: 5px 10px;">
+                    <button onclick="CART.updateQty(${i},-1)" style="background: none; border: none; font-size: 1.4rem; cursor: pointer;">−</button>
+                    <span style="margin: 0 15px; font-size: 1.2rem;">${item.qty}</span>
+                    <button onclick="CART.updateQty(${i},1)" style="background: none; border: none; font-size: 1.4rem; cursor: pointer;">+</button>
+                  </div>
+                  <button onclick="CART.remove(${i})" style="background: none; border: none; color: #cc0000; cursor: pointer; text-decoration: underline; font-size: 1.1rem;">Remove</button>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <p style="font-size: 1.6rem; font-weight: 600;">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</p>
+                <p style="font-size: 1.1rem; color: #888; margin-top: 5px;">Rp ${item.price.toLocaleString('id-ID')} / item</p>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        if (subtotalEl) subtotalEl.textContent = 'Rp ' + window.CART.total().toLocaleString('id-ID');
+        if (totalEl) totalEl.textContent = 'Rp ' + window.CART.total().toLocaleString('id-ID');
+      };
+
+      window.addEventListener('cart-updated', render);
+      render();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCartPage);
+    } else {
+      initCartPage();
+    }
+  </script>
+</body>
+</html>
