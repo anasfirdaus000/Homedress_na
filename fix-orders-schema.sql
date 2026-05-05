@@ -12,7 +12,11 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_qr_string TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_va_number TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_expiry TIMESTAMPTZ;
 
--- 3. Pastikan tabel order_items memiliki kolom product_image
+-- 3. Pastikan tabel orders memiliki kolom tracking
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_tracking_number TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_courier TEXT;
+
+-- 4. Pastikan tabel order_items memiliki kolom product_image
 ALTER TABLE order_items ADD COLUMN IF NOT EXISTS product_image TEXT;
 ALTER TABLE order_items ADD COLUMN IF NOT EXISTS size TEXT;
 
