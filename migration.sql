@@ -213,11 +213,17 @@ ALTER TABLE blogs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE faqs ENABLE ROW LEVEL SECURITY;
 
 -- Public read
+DROP POLICY IF EXISTS "Public read blogs" ON blogs;
 CREATE POLICY "Public read blogs" ON blogs FOR SELECT USING (is_published = true);
+
+DROP POLICY IF EXISTS "Public read faqs" ON faqs;
 CREATE POLICY "Public read faqs" ON faqs FOR SELECT USING (true);
 
 -- Admin access
+DROP POLICY IF EXISTS "Admin full blogs" ON blogs;
 CREATE POLICY "Admin full blogs" ON blogs FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Admin full faqs" ON faqs;
 CREATE POLICY "Admin full faqs" ON faqs FOR ALL USING (true);
 
 -- Initial FAQ Data
@@ -245,12 +251,14 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 -- Enable RLS
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
--- Users can read/write their own profile
+-- Users can manage own profile
+DROP POLICY IF EXISTS "Users can manage own profile" ON user_profiles;
 CREATE POLICY "Users can manage own profile" 
 ON user_profiles FOR ALL 
 USING (auth.uid() = id);
 
 -- Service role access
+DROP POLICY IF EXISTS "Service role full access user_profiles" ON user_profiles;
 CREATE POLICY "Service role full access user_profiles" 
 ON user_profiles FOR ALL 
 USING (auth.role() = 'service_role');
