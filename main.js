@@ -719,7 +719,12 @@ function initCheckoutPage() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
     
-    // Add items to payload
+    // Add user_id and items to payload
+    if (window.supabase) {
+      const { data: { session } } = await window.supabase.auth.getSession();
+      if (session) data.user_id = session.user.id;
+    }
+
     data.items = CART.items.map(i => ({
       product_id: i.id, // This should be the slug
       size: i.size,
