@@ -97,3 +97,33 @@ Kami akan memproses pesanan kamu setelah pembayaran dikonfirmasi.
 Terima kasih! 🙏
 _HOMEDRESS_NA — Homewear Premium_`;
 }
+/**
+ * Format payment success notification
+ */
+export function formatPaymentSuccessNotification(order) {
+  return `✅ *PEMBAYARAN DITERIMA*
+
+Halo kak *${order.customer_name}*, pembayaran untuk order *${order.order_number}* sebesar *Rp ${order.total.toLocaleString('id-ID')}* telah kami terima.
+
+Pesanan kakak sedang kami siapkan dan akan segera dikirim. Kakak bisa cek status pesanan secara berkala di sini:
+🔗 https://homedress-na.vercel.app/track-order.html?order_id=${order.order_number}&phone=${order.customer_phone}
+
+Terima kasih telah berbelanja di *HOMEDRESS_NA*! 🙏`;
+}
+
+/**
+ * Format shipping notification (with tracking number)
+ */
+export function formatShippingNotification(order) {
+  return `🚚 *PESANAN DIKIRIM*
+
+Halo kak *${order.customer_name}*, pesanan kakak dengan nomor order *${order.order_number}* telah dikirim!
+
+📦 Kurir: *${order.shipping_courier || 'Ekspedisi'}*
+🔢 No. Resi: *${order.shipping_tracking_number}*
+
+Silakan lacak posisi paket kakak menggunakan nomor resi di atas. 
+
+Terima kasih sudah sabar menunggu! ❤️
+_HOMEDRESS_NA_`;
+}

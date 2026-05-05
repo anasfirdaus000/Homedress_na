@@ -3,6 +3,7 @@
  * Updates order status based on payment notification
  */
 import { supabaseAdmin } from '../../_lib/supabase.js';
+import { sendWhatsApp, formatPaymentSuccessNotification } from '../../_lib/notify.js';
 
 export default async function handler(req, res) {
   // CORS (Louvin might need it or not, but good to have)
@@ -45,6 +46,30 @@ export default async function handler(req, res) {
       if (updateError) throw new Error('Failed to update order status: ' + updateError.message);
       
       console.log(`[Louvin Webhook] Order ${orderRef} updated to ${newStatus}`);
+
+      // 2. Notify Customer if settled
+      if (event === 'payment.settled' || event === 'payment.success') {
+        const { data: fullOrder } = await supabaseAdmin
+          .from('orders')
+          .select('*')
+          .eq('order_number', orderRef)
+          .single();
+
+        if (fullOrder && fullOrder.customer_phone) {
+          const msg = formatPaymentSuccessNotification(fullOrder);
+          const result = await sendWhatsApp(fullOrder.customer_phone, msg);
+          
+          await supabaseAdmin.from('notifications_log').insert({
+            order_id: fullOrder.id,
+            channel: 'whatsapp',
+            provider: 'fonnte',
+            recipient: fullOrder.customer_phone,
+            status: result.success ? 'sent' : 'failed',
+            error_message: result.error || null
+          });
+          console.log(`[Louvin Webhook] WA notification sent to ${fullOrder.customer_phone}`);
+        }
+      }
     } else {
       console.log(`[Louvin Webhook] Event ${event} ignored (not a final status).`);
     }

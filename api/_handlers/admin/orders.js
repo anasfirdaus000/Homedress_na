@@ -64,18 +64,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid order_id or status' });
     }
 
-    // 1. Update status
+    // 1. Update status and tracking info
+    const updatePayload = { 
+      status, 
+      updated_at: new Date().toISOString() 
+    };
+
+    if (req.body.shipping_tracking_number) updatePayload.shipping_tracking_number = req.body.shipping_tracking_number;
+    if (req.body.shipping_courier) updatePayload.shipping_courier = req.body.shipping_courier;
+
     const { data: order, error } = await supabaseAdmin
       .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updatePayload)
       .eq('id', order_id)
       .select('*, order_items(*)')
       .single();
 
     if (error) return res.status(500).json({ error: error.message });
 
-    // 2. Inventory Management: Reduce stock if status is 'paid'
-    if (status === 'paid' && order.order_items) {
+    // 2. Inventory Management: Reduce stock if status is 'confirmed' or 'paid'
+    if ((status === 'paid' || status === 'confirmed') && order.order_items) {
       for (const item of order.order_items) {
         if (item.product_id) {
           const { data: p } = await supabaseAdmin.from('products').select('stock').eq('id', item.product_id).single();
@@ -86,25 +94,16 @@ export default async function handler(req, res) {
         }
       }
       
-      // 3. Send Notifications
-      const msg = `Halo kak *${order.customer_name}* 👋\n\nPembayaran untuk pesanan *#${order.order_number}* telah kami terima. Pesanan akan segera kami proses dan kirimkan.\n\nTerima kasih sudah belanja di *HOMEDRESS_NA*! 🙏`;
-      
-      if (order.customer_phone) {
-        await sendWhatsApp(order.customer_phone, msg);
-      }
+      const { formatPaymentSuccessNotification } = await import('../../_lib/notify.js');
+      const msg = formatPaymentSuccessNotification(order);
+      if (order.customer_phone) await sendWhatsApp(order.customer_phone, msg);
+    }
 
-      if (order.customer_email) {
-        await sendEmail({
-          to: order.customer_email,
-          subject: `Pembayaran Diterima - Order #${order.order_number}`,
-          html: `
-            <h1>Terima Kasih, ${order.customer_name}!</h1>
-            <p>Pembayaran Anda untuk pesanan <strong>#${order.order_number}</strong> telah kami terima.</p>
-            <p>Pesanan Anda akan segera kami proses dan kirimkan.</p>
-            <p>Salam,<br/>Homedress_na</p>
-          `
-        });
-      }
+    // 3. Shipping Notification
+    if (status === 'shipped' && order.shipping_tracking_number) {
+      const { formatShippingNotification } = await import('../../_lib/notify.js');
+      const msg = formatShippingNotification(order);
+      if (order.customer_phone) await sendWhatsApp(order.customer_phone, msg);
     }
 
     return res.status(200).json({ success: true, order });
