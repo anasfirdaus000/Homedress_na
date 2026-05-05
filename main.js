@@ -62,46 +62,48 @@ function injectUI() {
     drawer.id = 'cart-drawer';
     drawer.className = 'cart-drawer';
     drawer.innerHTML = `
-      <div class="cart-drawer__content">
-        <div class="cart-drawer__header">
-          <h3>Keranjang Belanja</h3>
-          <button class="cart-drawer__close" id="cart-drawer-close">✕</button>
-        </div>
-        <div class="cart-drawer__body">
-          <div id="cart-drawer-list"></div>
-          <div id="cart-drawer-empty" style="display:none; text-align:center; padding:40px 0;">
-            <p style="font-size:1.4rem; color:#888;">Keranjang anda kosong.</p>
-            <a href="/category.html" class="btn btn--outline" style="margin-top:20px; display:inline-block;">BELANJA SEKARANG</a>
-          </div>
-        </div>
-        <div class="cart-drawer__footer">
-          <div class="cart-drawer__total-row"><span>Subtotal</span><span id="cart-drawer-total">Rp 0</span></div>
-          <a href="/checkout.html" class="cart-drawer__checkout-btn">PROSES CHECKOUT</a>
-        </div>
+      <div class="cart-drawer__header">
+        <h3>Keranjang Belanja</h3>
+        <button class="cart-drawer__close" id="cart-drawer-close">✕</button>
       </div>
-      <div class="cart-drawer__overlay" id="cart-drawer-overlay"></div>
+      <div class="cart-drawer__list" id="cart-drawer-list"></div>
+      <div id="cart-drawer-empty" class="cart-drawer__empty" style="display:none;">
+        Keranjang anda kosong.
+        <a href="/category.html" class="cart-drawer__shop-btn">BELANJA SEKARANG</a>
+      </div>
+      <div class="cart-drawer__footer">
+        <div class="cart-drawer__total"><span>Subtotal</span><span id="cart-drawer-total">Rp 0</span></div>
+        <a href="/checkout.html" class="cart-drawer__checkout">PROSES CHECKOUT</a>
+      </div>
     `;
     document.body.appendChild(drawer);
+
+    // Overlay as sibling (matches CSS: .cart-drawer.is-open ~ .drawer-overlay)
+    const overlay = document.createElement('div');
+    overlay.id = 'cart-drawer-overlay';
+    overlay.className = 'drawer-overlay';
+    document.body.appendChild(overlay);
   }
 
   // 2. Wishlist Drawer
   if (!document.getElementById('wishlist-drawer')) {
     const wDrawer = document.createElement('div');
     wDrawer.id = 'wishlist-drawer';
-    wDrawer.className = 'wishlist-drawer';
+    wDrawer.className = 'cart-drawer'; // reuse same CSS class
+    wDrawer.style.zIndex = '9998';
     wDrawer.innerHTML = `
-      <div class="wishlist-drawer__content">
-        <div class="wishlist-drawer__header">
-          <h3>Wishlist</h3>
-          <button class="wishlist-drawer__close" id="wishlist-drawer-close">✕</button>
-        </div>
-        <div class="wishlist-drawer__body">
-          <div id="wishlist-drawer-list"></div>
-        </div>
+      <div class="cart-drawer__header">
+        <h3>Wishlist ❤️</h3>
+        <button class="cart-drawer__close" id="wishlist-drawer-close">✕</button>
       </div>
-      <div class="wishlist-drawer__overlay" id="wishlist-drawer-overlay"></div>
+      <div class="cart-drawer__list" id="wishlist-drawer-list"></div>
     `;
     document.body.appendChild(wDrawer);
+
+    const wOverlay = document.createElement('div');
+    wOverlay.id = 'wishlist-drawer-overlay';
+    wOverlay.className = 'drawer-overlay';
+    document.body.appendChild(wOverlay);
   }
 
   // 3. Toast Notification
@@ -111,6 +113,7 @@ function injectUI() {
     toast.className = 'toast';
     document.body.appendChild(toast);
   }
+
 
   // GLOBAL DELEGATION FOR ALL BUTTONS
   document.body.addEventListener('click', (e) => {
