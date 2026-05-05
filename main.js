@@ -5,7 +5,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SB_URL = 'https://owajvfwhhdhvhrwjbkmd.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4';
 window.supabase = createClient(SB_URL, SB_KEY);
 
 // ========== HELPERS ==========
@@ -15,7 +15,10 @@ function createCard(p) {
   const originalPrice = p.original_price || 0;
   const discount = p.discount || 0;
   const slug = p.slug || '';
-  const images = p.images || [];
+  let images = p.images || [];
+  if (typeof images === 'string') {
+    try { images = JSON.parse(images); } catch(e) { images = [images]; }
+  }
 
   const priceHtml = discount > 0 && originalPrice
     ? `<span class="product-card__price--sale">Rp ${price.toLocaleString('id-ID')}</span> <span class="product-card__price--original">Rp ${originalPrice.toLocaleString('id-ID')}</span>`
@@ -271,7 +274,7 @@ function renderCartDrawer() {
   if (empty) empty.style.display = 'none';
   list.innerHTML = CART.items.map((item, i) => `
     <div class="cart-item">
-      <img src="${item.img || '/images/placeholder.jpg'}" alt="${item.name}" class="cart-item__img"/>
+      <img src="${(Array.isArray(item.images) ? item.images[0] : (item.images || item.img || item.image || '/images/placeholder.jpg'))}" alt="${item.name}" class="cart-item__img"/>
       <div class="cart-item__info">
         <p class="cart-item__name">${item.name}</p>
         <p class="cart-item__size">${item.size ? 'Size: '+item.size : ''}</p>
@@ -296,7 +299,7 @@ function renderWishlistDrawer() {
   }
   list.innerHTML = WISHLIST.items.map((item, i) => `
     <div class="wishlist-item">
-      <img src="${item.img || item.image || '/images/placeholder.jpg'}" alt="${item.name}" class="wishlist-item__img"/>
+      <img src="${(Array.isArray(item.images) ? item.images[0] : (item.images || item.img || item.image || '/images/placeholder.jpg'))}" alt="${item.name}" class="wishlist-item__img"/>
       <div class="wishlist-item__info">
         <p class="wishlist-item__name">${item.name}</p>
         <p class="wishlist-item__price">Rp ${(item.price || 0).toLocaleString('id-ID')}</p>
@@ -737,7 +740,11 @@ function initCheckoutPage() {
         // Redirect to success page
         window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
       } else {
-        throw new Error(result.error || 'Gagal memproses pesanan');
+        let errorMsg = result.error || 'Gagal memproses pesanan';
+        if (result.details && Array.isArray(result.details)) {
+          errorMsg += ': ' + result.details.join(', ');
+        }
+        throw new Error(errorMsg);
       }
     } catch (err) {
       errDiv.textContent = err.message;
