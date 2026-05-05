@@ -149,14 +149,17 @@ function renderCartDrawer() {
   total.textContent = 'Rp ' + CART.total().toLocaleString('id-ID');
 }
 
-function openCartDrawer() { 
-  const d = document.getElementById('cart-drawer');
-  if (d) { d.classList.add('is-open'); document.body.style.overflow = 'hidden'; renderCartDrawer(); }
-}
 function closeCartDrawer() { 
   const d = document.getElementById('cart-drawer');
   if (d) { d.classList.remove('is-open'); document.body.style.overflow = ''; }
 }
+
+// Attach cart toggle listener
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#cart-toggle') || e.target.closest('.header__cart-btn')) {
+    openCartDrawer();
+  }
+});
 
 // ========== SCROLL REVEAL ANIMATIONS ==========
 function initScrollAnimations() {
@@ -200,11 +203,21 @@ function initAnnouncementBar() {
 function initNewsletter() {
   const form = document.getElementById('newsletter-form');
   if (!form) return;
-  form.onsubmit = (e) => {
+  form.onsubmit = async (e) => {
     e.preventDefault();
     const btn = form.querySelector('button');
-    btn.textContent = 'Subscribed ✓';
+    const input = form.querySelector('input');
+    const originalText = btn.textContent;
+    
+    btn.textContent = 'Menyimpan...';
     btn.disabled = true;
+
+    // Simulate API call for now (can be connected to a real DB table later)
+    setTimeout(() => {
+      btn.textContent = 'Berhasil! ✓';
+      input.value = '';
+      showToast('Terima kasih! Anda telah terdaftar di newsletter kami.');
+    }, 800);
   };
 }
 
@@ -308,18 +321,19 @@ async function initDynamicHome(products = [], featured = []) {
 }
 
 async function initDynamicMenus(products = []) {
-  const nav = document.getElementById('dynamic-nav');
-  if (!nav) return;
+  const navs = document.querySelectorAll('#dynamic-nav, #main-nav');
+  if (navs.length === 0) return;
   try {
     const res = await fetch('/api/menus');
     if (res.ok) {
       const { menus } = await res.json();
       const main = menus.filter(m => m.menu_group === 'main_nav' && !m.parent_id);
-      nav.innerHTML = main.map(m => `
+      const html = main.map(m => `
         <div class="header__nav-item">
           <a href="${m.category_slug ? `/category.html?filter=${m.category_slug}` : (m.custom_url || '#')}" class="header__nav-link">${m.label}</a>
         </div>
       `).join('');
+      navs.forEach(nav => nav.innerHTML = html);
     }
   } catch (e) {}
 }
@@ -406,7 +420,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Page specific logic
   if (window.location.pathname.includes('category.html')) {
-     // initCategoryPagination logic...
+    initCategoryPagination(pData);
+  }
+  if (window.location.pathname.includes('checkout.html')) {
+    initCheckoutPage();
   }
 
   // Animation triggers
@@ -425,4 +442,139 @@ function showToast(msg) {
   if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
   t.textContent = msg; t.classList.add('is-visible');
   setTimeout(() => t.classList.remove('is-visible'), 3000);
+}
+
+// ========== CATEGORY PAGINATION ==========
+function initCategoryPagination(products = []) {
+  const grid = document.getElementById('category-product-grid');
+  const sortSelect = document.getElementById('category-sort');
+  const countText = document.getElementById('pagination-count-text');
+  if (!grid) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const filter = urlParams.get('filter');
+  
+  let filtered = [...products];
+  if (filter) {
+    if (filter === 'flash-sale') filtered = products.filter(p => p.discount > 0);
+    else if (filter === 'best-seller') filtered = products.filter(p => p.social_proof?.toLowerCase().includes('terlaris') || p.rating >= 4.5);
+    else if (filter === 'new-in') filtered = products.slice(0, 12);
+    else filtered = products.filter(p => p.category_slug === filter || p.category_id === filter);
+  }
+
+  const render = (data) => {
+    if (data.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1; padding:100px 0; text-align:center; color:#888;">Produk tidak ditemukan.</div>';
+      countText.textContent = 'Menampilkan 0 produk';
+      return;
+    }
+    grid.innerHTML = data.map(createCard).join('');
+    countText.textContent = `Menampilkan ${data.length} produk`;
+    initScrollAnimations();
+  };
+
+  if (sortSelect) {
+    sortSelect.onchange = () => {
+      const val = sortSelect.value;
+      if (val === 'price-asc') filtered.sort((a,b) => a.price - b.price);
+      else if (val === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+      else if (val === 'name-asc') filtered.sort((a,b) => a.name.localeCompare(b.name));
+      else filtered.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      render(filtered);
+    };
+  }
+
+  render(filtered);
+}
+
+// ========== CHECKOUT PAGE ==========
+function initCheckoutPage() {
+  const form = document.getElementById('checkout-form');
+  const summary = document.getElementById('checkout-summary');
+  if (!form || !summary) return;
+
+  const renderSummary = () => {
+    const items = CART.items;
+    if (items.length === 0) {
+      summary.innerHTML = '<p>Keranjang kosong.</p>';
+      return;
+    }
+
+    const subtotal = CART.total();
+    const shipping = subtotal >= 200000 ? 0 : 15000;
+    const total = subtotal + shipping;
+
+    summary.innerHTML = `
+      <div class="checkout-summary-list">
+        ${items.map(item => `
+          <div class="summary-item" style="display:flex; gap:12px; margin-bottom:16px; align-items:center;">
+            <div style="position:relative;">
+              <img src="${item.img || '/images/placeholder.jpg'}" style="width:64px; height:64px; object-fit:cover; border-radius:4px;" />
+              <span style="position:absolute; top:-8px; right:-8px; background:#000; color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem;">${item.qty}</span>
+            </div>
+            <div style="flex:1;">
+              <p style="font-weight:600; margin:0;">${item.name}</p>
+              <p style="font-size:1.1rem; color:#888; margin:0;">${item.size || 'N/A'}</p>
+            </div>
+            <p style="font-weight:600; margin:0;">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</p>
+          </div>
+        `).join('')}
+      </div>
+      <div style="border-top:1px solid #eee; margin-top:20px; padding-top:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Subtotal</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Ongkos Kirim</span><span>${shipping === 0 ? 'GRATIS' : 'Rp ' + shipping.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-top:16px; font-weight:800; font-size:1.8rem;"><span>TOTAL</span><span>Rp ${total.toLocaleString('id-ID')}</span></div>
+      </div>
+    `;
+  };
+
+  renderSummary();
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-checkout');
+    const errDiv = document.getElementById('checkout-error');
+    
+    if (CART.items.length === 0) {
+      alert('Keranjang belanja kosong!');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'MEMPROSES...';
+    errDiv.style.display = 'none';
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Add items to payload
+    data.items = CART.items.map(i => ({
+      product_id: i.id, // This should be the slug
+      size: i.size,
+      quantity: i.qty
+    }));
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      if (res.ok && result.success) {
+        CART.items = [];
+        CART.save();
+        // Redirect to success page
+        window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
+      } else {
+        throw new Error(result.error || 'Gagal memproses pesanan');
+      }
+    } catch (err) {
+      errDiv.textContent = err.message;
+      errDiv.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'BUAT PESANAN';
+    }
+  };
 }
