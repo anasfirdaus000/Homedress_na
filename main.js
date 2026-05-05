@@ -56,13 +56,12 @@ function createMegaCard(p) {
 
 // ========== UI COMPONENTS INJECTION ==========
 function injectUI() {
-  // Inject Cart Drawer if not exists
+  // 1. Cart Drawer
   if (!document.getElementById('cart-drawer')) {
     const drawer = document.createElement('div');
     drawer.id = 'cart-drawer';
     drawer.className = 'cart-drawer';
     drawer.innerHTML = `
-      <div class="cart-drawer__overlay" id="cart-drawer-overlay"></div>
       <div class="cart-drawer__content">
         <div class="cart-drawer__header">
           <h3>Keranjang Belanja</h3>
@@ -76,19 +75,93 @@ function injectUI() {
           </div>
         </div>
         <div class="cart-drawer__footer">
-          <div class="cart-drawer__total-row">
-            <span>Subtotal</span>
-            <span id="cart-drawer-total">Rp 0</span>
-          </div>
-          <p style="font-size:1.1rem; color:#888; margin-bottom:20px;">Shipping & taxes calculated at checkout.</p>
+          <div class="cart-drawer__total-row"><span>Subtotal</span><span id="cart-drawer-total">Rp 0</span></div>
           <a href="/checkout.html" class="cart-drawer__checkout-btn">PROSES CHECKOUT</a>
         </div>
       </div>
+      <div class="cart-drawer__overlay" id="cart-drawer-overlay"></div>
     `;
     document.body.appendChild(drawer);
-    document.getElementById('cart-drawer-close').onclick = closeCartDrawer;
-    document.getElementById('cart-drawer-overlay').onclick = closeCartDrawer;
   }
+
+  // 2. Wishlist Drawer
+  if (!document.getElementById('wishlist-drawer')) {
+    const wDrawer = document.createElement('div');
+    wDrawer.id = 'wishlist-drawer';
+    wDrawer.className = 'wishlist-drawer';
+    wDrawer.innerHTML = `
+      <div class="wishlist-drawer__content">
+        <div class="wishlist-drawer__header">
+          <h3>Wishlist</h3>
+          <button class="wishlist-drawer__close" id="wishlist-drawer-close">✕</button>
+        </div>
+        <div class="wishlist-drawer__body">
+          <div id="wishlist-drawer-list"></div>
+        </div>
+      </div>
+      <div class="wishlist-drawer__overlay" id="wishlist-drawer-overlay"></div>
+    `;
+    document.body.appendChild(wDrawer);
+  }
+
+  // 3. Toast Notification
+  if (!document.getElementById('toast-notification')) {
+    const toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+
+  // GLOBAL DELEGATION FOR ALL BUTTONS
+  document.body.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.getAttribute('data-action');
+    if (action === 'open-cart') { e.preventDefault(); openCartDrawer(); }
+    if (action === 'open-wishlist') { e.preventDefault(); openWishlistDrawer(); }
+    if (action === 'open-account') { e.preventDefault(); window.location.href = window.AUTH?.user ? '/account.html' : '/login.html'; }
+  });
+
+  // Explicit listeners for header icons (fallback)
+  const cartToggle = document.getElementById('cart-toggle');
+  if (cartToggle) cartToggle.onclick = (e) => { e.preventDefault(); openCartDrawer(); };
+
+  const wishlistToggle = document.querySelector('[aria-label="Wishlist"]');
+  if (wishlistToggle) wishlistToggle.onclick = (e) => { e.preventDefault(); openWishlistDrawer(); };
+
+  const accountToggle = document.querySelector('[aria-label="Account"]');
+  if (accountToggle) accountToggle.onclick = (e) => { e.preventDefault(); window.location.href = window.AUTH?.user ? '/account.html' : '/login.html'; };
+
+  // Close buttons
+  const closes = [
+    { btn: 'cart-drawer-close', overlay: 'cart-drawer-overlay', fn: closeCartDrawer },
+    { btn: 'wishlist-drawer-close', overlay: 'wishlist-drawer-overlay', fn: closeWishlistDrawer }
+  ];
+  closes.forEach(c => {
+    const b = document.getElementById(c.btn); if (b) b.onclick = c.fn;
+    const o = document.getElementById(c.overlay); if (o) o.onclick = c.fn;
+  });
+}
+
+function openCartDrawer() {
+  document.getElementById('cart-drawer').classList.add('is-open');
+  renderCartDrawer();
+}
+function closeCartDrawer() { document.getElementById('cart-drawer').classList.remove('is-open'); }
+
+function openWishlistDrawer() {
+  document.getElementById('wishlist-drawer').classList.add('is-open');
+  renderWishlistDrawer();
+}
+function closeWishlistDrawer() { document.getElementById('wishlist-drawer').classList.remove('is-open'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast-notification');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('is-visible');
+  setTimeout(() => t.classList.remove('is-visible'), 3000);
 }
 
 // ========== CART SYSTEM ==========
@@ -216,12 +289,27 @@ function closeCartDrawer() {
   if (d) { d.classList.remove('is-open'); document.body.style.overflow = ''; }
 }
 
-// Attach cart toggle listener
-document.addEventListener('click', (e) => {
-  if (e.target.closest('#cart-toggle') || e.target.closest('.header__cart-btn')) {
-    openCartDrawer();
+function renderWishlistDrawer() {
+  const list = document.getElementById('wishlist-drawer-list');
+  if (!list) return;
+  if (WISHLIST.items.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:40px 0;"><p style="color:#888;">Wishlist anda kosong.</p></div>';
+    return;
   }
-});
+  list.innerHTML = WISHLIST.items.map((item, i) => `
+    <div class="wishlist-item">
+      <img src="${item.img || item.image || '/images/placeholder.jpg'}" alt="${item.name}" class="wishlist-item__img"/>
+      <div class="wishlist-item__info">
+        <p class="wishlist-item__name">${item.name}</p>
+        <p class="wishlist-item__price">Rp ${(item.price || 0).toLocaleString('id-ID')}</p>
+        <div style="display:flex; gap:10px;">
+          <a href="/product.html?slug=${item.slug}" class="btn btn--outline" style="padding:6px 12px; font-size:0.8rem;">LIHAT</a>
+          <button onclick="WISHLIST.toggle({slug:'${item.slug}'})" class="btn btn--outline" style="padding:6px 12px; font-size:0.8rem; color:red;">HAPUS</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
 
 // ========== SCROLL REVEAL ANIMATIONS ==========
 function initScrollAnimations() {
@@ -482,7 +570,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNewsletter();
   initParallax();
   initScrollAnimations();
+  
   CART.updateBadge();
+  WISHLIST.updateUI();
+  AUTH.init();
 
   console.log('🔄 Loading Dynamic Content...');
   const fetchSafe = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -507,22 +598,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
 
   // Page specific logic
-  if (window.location.pathname.includes('category.html')) {
-    initCategoryPagination(pData);
-  }
-  if (window.location.pathname.includes('checkout.html')) {
-    initCheckoutPage();
-  }
-  if (window.location.pathname.includes('faq.html')) {
-    initFAQPage();
-  }
-  if (window.location.pathname.includes('blog')) {
-    initBlogPage();
-  }
-
-  // Auth Init
-  AUTH.init();
-  WISHLIST.updateUI();
+  const path = window.location.pathname;
+  if (path.includes('category.html')) initCategoryPagination(pData);
+  if (path.includes('checkout.html')) initCheckoutPage();
+  if (path.includes('faq.html')) initFAQPage();
+  if (path.includes('blog')) initBlogPage();
 
   // Animation triggers
   const observer = new IntersectionObserver((entries) => {
@@ -534,13 +614,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   console.log('✨ Ready.');
 });
-
-function showToast(msg) {
-  let t = document.getElementById('toast');
-  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
-  t.textContent = msg; t.classList.add('is-visible');
-  setTimeout(() => t.classList.remove('is-visible'), 3000);
-}
 
 // ========== CATEGORY PAGINATION ==========
 function initCategoryPagination(products = []) {

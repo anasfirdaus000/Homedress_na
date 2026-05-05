@@ -1,108 +1,140 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daftar | HOMEDRESS_NA</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar Sekarang | HOMEDRESS_NA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
   <style>
-    .auth-container { max-width: 400px; margin: 80px auto; padding: 40px 20px; text-align: center; }
-    .auth-title { font-size: 2rem; margin-bottom: 8px; font-weight: 700; }
-    .auth-subtitle { color: #666; margin-bottom: 32px; font-size: 0.9rem; }
-    .auth-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
-    .auth-label { font-size: 0.85rem; font-weight: 600; color: #333; }
-    .auth-input { padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-family: inherit; }
-    .auth-btn { background: var(--color-accent); color: #fff; border: none; padding: 16px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 8px; }
-    .auth-btn:hover { background: #000; }
-    .auth-link { color: var(--color-accent); text-decoration: underline; font-weight: 600; }
-    .auth-error { color: #e74c3c; font-size: 0.85rem; display: none; margin-top: 8px; }
-    .auth-success { color: #27ae60; font-size: 0.85rem; display: none; margin-top: 8px; }
+    :root {
+      --primary: #000;
+      --accent: #E84C3D;
+      --bg: #F9F9F9;
+      --card-bg: #FFFFFF;
+    }
+    body { background-color: var(--bg); font-family: 'DM Sans', sans-serif; }
+    .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-card { background: var(--card-bg); width: 100%; max-width: 440px; padding: 48px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
+    .auth-logo { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; text-align: center; margin-bottom: 32px; display: block; text-decoration: none; color: #000; }
+    .auth-header { text-align: center; margin-bottom: 32px; }
+    .auth-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .auth-header p { color: #666; font-size: 1rem; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333; }
+    .form-input { width: 100%; padding: 14px 16px; border: 1.5px solid #E5E5E5; border-radius: 12px; font-family: inherit; font-size: 1rem; transition: all 0.3s; }
+    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+    
+    .btn-submit { width: 100%; background: var(--primary); color: #fff; border: none; padding: 16px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, opacity 0.2s; margin-top: 12px; }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .auth-footer { text-align: center; margin-top: 32px; font-size: 0.95rem; color: #666; }
+    .auth-footer a { color: var(--primary); font-weight: 700; text-decoration: none; }
+    
+    .alert { padding: 14px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 20px; display: none; }
+    .alert--error { background: #FFEAEA; color: #D32F2F; border: 1px solid #FFCDCD; }
+    .alert--success { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+
+    @media (max-width: 480px) {
+      .auth-card { padding: 32px 24px; }
+    }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <header id="header" class="header" style="background:#fff;border-bottom:1px solid #eee;">
-    <div class="header__inner">
-      <a href="/" class="header__logo">HOMEDRESS_NA</a>
+  <div class="auth-page">
+    <div class="auth-card">
+      <a href="/" class="auth-logo">HOMEDRESS_NA</a>
+      <div class="auth-header">
+        <h1>Buat Akun</h1>
+        <p>Mulai pengalaman belanja eksklusif Anda.</p>
+      </div>
+
+      <div id="error-msg" class="alert alert--error"></div>
+      <div id="success-msg" class="alert alert--success"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" id="name" class="form-input" placeholder="Contoh: Siti Aminah" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat Email</label>
+          <input type="email" id="email" class="form-input" placeholder="nama@email.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kata Sandi</label>
+          <input type="password" id="password" class="form-input" placeholder="Minimal 6 karakter" required minlength="6" />
+        </div>
+        
+        <button type="submit" class="btn-submit" id="btn-submit">DAFTAR SEKARANG</button>
+      </form>
+
+      <div class="auth-footer">
+        Sudah punya akun? <a href="/login.html">Masuk di sini</a>
+      </div>
     </div>
-  </header>
-
-  <main class="auth-container">
-    <a href="/" class="auth-logo">HOMEDRESS_NA</a>
-    <h1 class="auth-title">Buat Akun</h1>
-    <p class="auth-subtitle">Simpan alamat Anda dan nikmati checkout lebih cepat.</p>
-
-    <form id="register-form" class="auth-form">
-      <div class="auth-group">
-        <label class="auth-label">Nama Lengkap</label>
-        <input type="text" id="name" class="auth-input" placeholder="Nama lengkap Anda" required />
-      </div>
-      <div class="auth-group">
-        <label class="auth-label">Email</label>
-        <input type="email" id="email" class="auth-input" placeholder="name@email.com" required />
-      </div>
-      <div class="auth-group">
-        <label class="auth-label">Password</label>
-        <input type="password" id="password" class="auth-input" placeholder="Minimal 6 karakter" minlength="6" required />
-      </div>
-      <div id="error-msg" class="auth-error"></div>
-      <div id="success-msg" class="auth-success"></div>
-      <button type="submit" class="auth-btn" id="btn-submit">DAFTAR SEKARANG</button>
-    </form>
-
-    <p style="margin-top: 32px; font-size: 1rem; color: #666;">
-      Sudah punya akun? <a href="/login.html" class="auth-link">Login di sini</a>
-    </p>
-  </main>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+    const SB_URL = 'https://owajvfwhhdhvhrwjbkmd.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4';
+    const supabase = createClient(SB_URL, SB_KEY);
 
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    const form = document.getElementById('register-form');
+    const btn = document.getElementById('btn-submit');
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('error-msg');
-      const successMsg = document.getElementById('success-msg');
-      const btn = document.getElementById('btn-submit');
 
       btn.disabled = true;
-      btn.textContent = 'MOHON TUNGGU...';
+      btn.textContent = 'MENGIRIM...';
       errorMsg.style.display = 'none';
       successMsg.style.display = 'none';
 
-      // 1. Register User
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: { data: { full_name: name } }
-      });
+      try {
+        // 1. SignUp
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: name } }
+        });
 
-      if (error) {
-        errorMsg.textContent = error.message;
+        if (error) throw error;
+
+        // 2. Profile creation (upsert)
+        if (data.user) {
+          const { error: pErr } = await supabase.from('user_profiles').upsert({
+            id: data.user.id,
+            full_name: name,
+            updated_at: new Date().toISOString()
+          });
+          if (pErr) console.warn('Profile sync failed:', pErr.message);
+        }
+
+        successMsg.textContent = 'Pendaftaran berhasil! Mengarahkan ke halaman Akun...';
+        successMsg.style.display = 'block';
+        
+        setTimeout(() => {
+          window.location.href = '/account.html';
+        }, 1500);
+
+      } catch (err) {
+        errorMsg.textContent = err.message;
         errorMsg.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'DAFTAR SEKARANG';
-        return;
       }
-
-      // 2. Insert into user_profiles
-      if (data.user) {
-        await supabase.from('user_profiles').upsert({
-          id: data.user.id,
-          full_name: name
-        });
-      }
-
-      successMsg.innerHTML = 'Pendaftaran berhasil! Mengarahkan ke halaman akun...';
-      successMsg.style.display = 'block';
-      
-      setTimeout(() => {
-        window.location.href = '/account.html';
-      }, 2000);
     });
   </script>
 </body>
