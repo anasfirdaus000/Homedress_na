@@ -9,8 +9,9 @@ import { supabaseAdmin } from './_lib/supabase.js';
 
 const STATUS_LABELS = {
   pending: { label: 'Menunggu Pembayaran', icon: '⏳', step: 1 },
-  confirmed: { label: 'Pembayaran Dikonfirmasi', icon: '✅', step: 2 },
-  processing: { label: 'Sedang Diproses', icon: '📦', step: 3 },
+  paid: { label: 'Pembayaran Diterima', icon: '✅', step: 2 },
+  confirmed: { label: 'Pesanan Dikonfirmasi', icon: '📦', step: 2 },
+  processing: { label: 'Sedang Diproses', icon: '⚙️', step: 3 },
   shipped: { label: 'Dalam Pengiriman', icon: '🚚', step: 4 },
   completed: { label: 'Pesanan Selesai', icon: '🎉', step: 5 },
   cancelled: { label: 'Dibatalkan', icon: '❌', step: -1 }
@@ -18,29 +19,40 @@ const STATUS_LABELS = {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
 
-  const { order_number, customer_phone } = req.body || {};
+  let { order_number, order, customer_phone } = req.method === 'GET' ? req.query : (req.body || {});
+  const finalOrderNumber = (order_number || order || '').toUpperCase().trim();
 
-  if (!order_number || !customer_phone) {
-    return res.status(400).json({ error: 'Nomor order dan nomor HP wajib diisi' });
+  if (!finalOrderNumber) {
+    return res.status(400).json({ error: 'Nomor order wajib diisi' });
   }
 
-  // Sanitize phone
-  const phone = customer_phone.replace(/[\s\-()]/g, '');
+  // If POST, phone is REQUIRED for full tracking.
+  // If GET, we allow checking status by order_number alone (for the success page polling)
+  if (req.method === 'POST' && !customer_phone) {
+    return res.status(400).json({ error: 'Nomor HP wajib diisi untuk pelacakan penuh' });
+  }
+
+  // Sanitize phone if provided
+  const phone = customer_phone ? customer_phone.replace(/[\s\-()]/g, '') : null;
 
   try {
-    // Find order by number + phone (double verification)
-    const { data: order, error } = await supabaseAdmin
+    // Find order by number + phone (if provided)
+    let query = supabaseAdmin
       .from('orders')
       .select('id, order_number, customer_name, status, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry')
-      .eq('order_number', order_number.toUpperCase().trim())
-      .eq('customer_phone', phone)
-      .single();
+      .eq('order_number', finalOrderNumber);
+
+    if (phone) {
+      query = query.eq('customer_phone', phone);
+    }
+
+    const { data: order, error } = await query.single();
 
     if (error || !order) {
       return res.status(404).json({ error: 'Pesanan tidak ditemukan. Pastikan nomor order dan nomor HP sudah benar.' });
