@@ -4,7 +4,7 @@
  * POST   /api/admin/products — Create/Update product
  * DELETE /api/admin/products — Delete product
  */
-import { supabaseAdmin } from '../_lib/supabase.js';
+import { supabaseAdmin } from '../../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
 
 async function verifyAdmin(req) {

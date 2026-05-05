@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+    { "source": "/api/admin/(.*)", "destination": "/api/admin_api.js" },
+    { "source": "/api/checkout", "destination": "/api/order_ops.js" },
+    { "source": "/api/track", "destination": "/api/order_ops.js" },
+    { "source": "/api/webhook/(.*)", "destination": "/api/webhooks.js" },
+    { "source": "/api/(.*)", "destination": "/api/storefront.js" }
   ]
 }

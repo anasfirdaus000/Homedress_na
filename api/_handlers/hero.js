@@ -2,7 +2,7 @@
  * Public Hero API
  * GET /api/hero — List all ACTIVE hero slides
  */
-import { supabaseAdmin } from './_lib/supabase.js';
+import { supabaseAdmin } from '../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

@@ -10,10 +10,10 @@
  * 6. Send WA notifications + log result
  * 7. Return order confirmation
  */
-import { supabaseAdmin } from './_lib/supabase.js';
-import { rateLimit } from './_lib/rate-limit.js';
-import { validateCheckoutInput } from './_lib/validate.js';
-import { sendWhatsApp, formatAdminNotification, formatCustomerNotification } from './_lib/notify.js';
+import { supabaseAdmin } from '../_lib/supabase.js';
+import { rateLimit } from '../_lib/rate-limit.js';
+import { validateCheckoutInput } from '../_lib/validate.js';
+import { sendWhatsApp, formatAdminNotification, formatCustomerNotification } from '../_lib/notify.js';
 
 export default async function handler(req, res) {
   // CORS

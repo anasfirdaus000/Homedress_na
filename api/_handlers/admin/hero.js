@@ -4,7 +4,7 @@
  * POST   /api/admin/hero - Create/Update slide
  * DELETE /api/admin/hero - Delete slide
  */
-import { supabaseAdmin } from '../_lib/supabase.js';
+import { supabaseAdmin } from '../../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
 
 async function verifyAdmin(req) {

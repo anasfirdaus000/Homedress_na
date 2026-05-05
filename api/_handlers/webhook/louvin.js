@@ -2,7 +2,7 @@
  * Louvin Webhook Handler
  * Updates order status based on payment notification
  */
-import { supabaseAdmin } from '../_lib/supabase.js';
+import { supabaseAdmin } from '../../_lib/supabase.js';
 
 export default async function handler(req, res) {
   // CORS (Louvin might need it or not, but good to have)

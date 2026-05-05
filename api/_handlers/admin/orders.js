@@ -5,10 +5,10 @@
  * 
  * Requires Supabase Auth token (admin role)
  */
-import { supabaseAdmin } from '../_lib/supabase.js';
+import { supabaseAdmin } from '../../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '../_lib/email.js';
-import { sendWhatsApp } from '../_lib/notify.js';
+import { sendEmail } from '../../_lib/email.js';
+import { sendWhatsApp } from '../../_lib/notify.js';
 
 async function verifyAdmin(req) {
   const token = req.headers.authorization?.replace('Bearer ', '');

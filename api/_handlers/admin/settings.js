@@ -3,7 +3,7 @@
  * GET  /api/admin/settings — Get all site settings
  * POST /api/admin/settings — Update a setting
  */
-import { supabaseAdmin } from '../_lib/supabase.js';
+import { supabaseAdmin } from '../../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
 
 async function verifyAdmin(req) {

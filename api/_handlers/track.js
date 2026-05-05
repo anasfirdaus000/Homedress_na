@@ -5,7 +5,7 @@
  * - Input: order_number + customer_phone
  * - Returns: order status + items (no sensitive admin data)
  */
-import { supabaseAdmin } from './_lib/supabase.js';
+import { supabaseAdmin } from '../_lib/supabase.js';
 
 const STATUS_LABELS = {
   pending: { label: 'Menunggu Pembayaran', icon: '⏳', step: 1 },

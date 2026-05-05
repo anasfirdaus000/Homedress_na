@@ -2,7 +2,7 @@
  * Search API
  * GET /api/search?q=query
  */
-import { supabaseAdmin } from './_lib/supabase.js';
+import { supabaseAdmin } from '../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

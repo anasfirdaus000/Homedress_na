@@ -4,7 +4,7 @@
  * POST   /api/admin/categories - Create/Update category
  * DELETE /api/admin/categories - Delete category
  */
-import { supabaseAdmin } from '../_lib/supabase.js';
+import { supabaseAdmin } from '../../_lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
 
 async function verifyAdmin(req) {

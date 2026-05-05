@@ -1,7 +1,7 @@
 /**
- * Public Menus API
+ * Public Categories API
  */
-import { supabaseAdmin } from './_lib/supabase.js';
+import { supabaseAdmin } from '../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,12 +11,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const { data, error } = await supabaseAdmin
-      .from('menus')
-      .select('*')
-      .order('order_index', { ascending: true });
+      .from('categories')
+      .select('*');
 
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(200).json({ menus: data || [] });
+    return res.status(200).json({ categories: data || [] });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });

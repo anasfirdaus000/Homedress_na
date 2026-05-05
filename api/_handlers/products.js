@@ -2,7 +2,7 @@
  * Public Products API
  * GET /api/products — List all ACTIVE products
  */
-import { supabaseAdmin } from './_lib/supabase.js';
+import { supabaseAdmin } from '../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
