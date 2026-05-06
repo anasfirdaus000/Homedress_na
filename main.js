@@ -471,23 +471,59 @@ async function initDynamicHome(products = [], featured = []) {
   }
 }
 
-async function initDynamicMenus(products = []) {
+async function initDynamicMenus() {
   const navs = document.querySelectorAll('#dynamic-nav, #main-nav');
   const footerLinks = document.getElementById('dynamic-footer-links');
   
   try {
-    const res = await fetch('/api/menus');
-    if (res.ok) {
-      const { menus } = await res.json();
+    const [menuRes, catRes] = await Promise.all([
+      fetch('/api/menus'),
+      fetch('/api/categories')
+    ]);
+
+    if (menuRes.ok && catRes.ok) {
+      const { menus } = await menuRes.json();
+      const { categories } = await catRes.json();
       
-      // 1. Main Nav
+      // 1. Main Nav Rendering Logic
       if (navs.length > 0) {
-        const main = menus.filter(m => m.menu_group === 'main_nav' && !m.parent_id);
-        const html = main.map(m => `
-          <div class="header__nav-item">
-            <a href="${m.category_slug ? `/category.html?filter=${m.category_slug}` : (m.custom_url || '#')}" class="header__nav-link">${m.label}</a>
-          </div>
-        `).join('');
+        const rootMenus = menus.filter(m => m.menu_group === 'main_nav' && !m.parent_id);
+        
+        const html = rootMenus.map(m => {
+          let children = menus.filter(c => c.parent_id === m.id);
+          
+          // Special Case: Auto-populate 'Kategori' if it has no children in DB
+          if (m.label.toLowerCase().includes('kategori') && children.length === 0) {
+            children = categories.map(cat => ({
+              label: cat.name,
+              custom_url: `/category.html?filter=${cat.slug}`
+            }));
+          }
+
+          if (children.length > 0) {
+            return `
+              <div class="header__nav-item has-dropdown">
+                <a href="${m.custom_url || '#'}" class="header__nav-link">
+                  ${m.label} <span class="nav-arrow">▼</span>
+                </a>
+                <div class="header__dropdown">
+                  <ul class="dropdown__list">
+                    ${children.map(c => `
+                      <li><a href="${c.custom_url || `/category.html?filter=${c.category_slug}`}">${c.label}</a></li>
+                    `).join('')}
+                  </ul>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="header__nav-item">
+                <a href="${m.category_slug ? `/category.html?filter=${m.category_slug}` : (m.custom_url || '#')}" class="header__nav-link">${m.label}</a>
+              </div>
+            `;
+          }
+        }).join('');
+        
         navs.forEach(nav => nav.innerHTML = html);
       }
 
