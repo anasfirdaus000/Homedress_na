@@ -698,7 +698,7 @@ async function initDynamicMenus(products = []) {
 
           if (children.length > 0) {
             // Check if we should use Mega Menu (more than 5 items or 'Kategori')
-            const isMega = children.length > 5 || labelLower.includes('kategori') || labelLower.includes('explore');
+            const isMega = children.length > 5 || labelLower.includes('kategori') || labelLower.includes('explore') || labelLower.includes('promo');
 
             if (isMega) {
               return `
@@ -709,11 +709,27 @@ async function initDynamicMenus(products = []) {
                   <div class="header__megamenu">
                     <div class="megamenu__inner">
                       <div class="megamenu__col megamenu__col--list">
-                        <h4 class="megamenu__title">${labelLower.includes('kategori') ? 'SHOP BY CATEGORIES' : 'EXPLORE'}</h4>
+                        <h4 class="megamenu__title">${labelLower.includes('kategori') ? 'SHOP BY CATEGORIES' : (labelLower.includes('promo') ? 'OFFERS' : 'EXPLORE')}</h4>
                         <ul class="megamenu__list">
-                          ${children.map(c => `
-                            <li><a href="${c.custom_url || `/category.html?filter=${c.category_slug}`}">${c.label}</a></li>
-                          `).join('')}
+                          ${children.map(c => {
+                            const grandchildren = menus.filter(gc => gc.parent_id === c.id);
+                            const childUrl = c.custom_url || `/category.html?filter=${c.category_slug}`;
+                            const childLink = `<li><a href="${childUrl}">${c.label}</a></li>`;
+                            
+                            if (grandchildren.length > 0) {
+                              return `
+                                <li>
+                                  <a href="${childUrl}" style="font-weight:bold; color:var(--color-accent);">${c.label}</a>
+                                  <ul style="list-style:none; padding-left:15px; margin-top:5px;">
+                                    ${grandchildren.map(gc => `
+                                      <li><a href="${gc.custom_url || `/category.html?filter=${gc.category_slug}`}" style="font-size:0.85rem; color:#666;">↳ ${gc.label}</a></li>
+                                    `).join('')}
+                                  </ul>
+                                </li>
+                              `;
+                            }
+                            return childLink;
+                          }).join('')}
                         </ul>
                         ${labelLower.includes('kategori') ? '<a href="/category.html" class="megamenu__all-btn">VIEW ALL CATEGORIES →</a>' : ''}
                       </div>
