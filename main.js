@@ -471,7 +471,7 @@ async function initDynamicHome(products = [], featured = []) {
   }
 }
 
-async function initDynamicMenus() {
+async function initDynamicMenus(products = []) {
   const navs = document.querySelectorAll('#dynamic-nav, #main-nav');
   const footerLinks = document.getElementById('dynamic-footer-links');
   
