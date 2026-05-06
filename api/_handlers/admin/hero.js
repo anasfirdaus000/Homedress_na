@@ -5,22 +5,7 @@
  * DELETE /api/admin/hero - Delete slide
  */
 import { supabaseAdmin } from '../../_lib/supabase.js';
-import { createClient } from '@supabase/supabase-js';
-
-async function verifyAdmin(req) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return null;
-
-  const token = authHeader.replace('Bearer ', '');
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
-  
-  const tempClient = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
-  const { data: { user }, error } = await tempClient.auth.getUser(token);
-  
-  if (error || !user) return null;
-  return user;
-}
+import { verifyAdmin } from '../../_lib/auth.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

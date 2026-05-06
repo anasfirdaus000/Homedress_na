@@ -5,7 +5,7 @@
  * Returns the secure URL of the uploaded image.
  */
 import { v2 as cloudinary } from 'cloudinary';
-import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '../../_lib/auth.js';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -13,16 +13,6 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
-// Verify Admin Helper
-async function verifyAdmin(req) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  if (!token) return null;
-  const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-  return user;
-}
 
 // Config for Vercel Serverless to accept larger payloads (for base64 images)
 export const config = {

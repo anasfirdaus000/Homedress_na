@@ -121,6 +121,13 @@
       }
 
       currentUser = session.user;
+      
+      const ADMIN_EMAIL = 'Homedressnaweb@gmail.com';
+      if (currentUser.email === ADMIN_EMAIL) {
+        window.location.href = '/admin/';
+        return;
+      }
+
       document.getElementById('prof-email').value = currentUser.email;
 
       // Load Profile

@@ -99,6 +99,13 @@
         btn.disabled = false;
         btn.textContent = 'LOGIN';
       } else {
+        // Redirect to admin dashboard if it's the admin email
+        const ADMIN_EMAIL = 'Homedressnaweb@gmail.com';
+        if (data.user.email === ADMIN_EMAIL) {
+          window.location.href = '/admin/';
+          return;
+        }
+
         // Redirect to account or checkout based on referrer
         const urlParams = new URLSearchParams(window.location.search);
         const redirect = urlParams.get('redirect') || '/account.html';

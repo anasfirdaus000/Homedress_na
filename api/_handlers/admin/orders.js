@@ -6,19 +6,9 @@
  * Requires Supabase Auth token (admin role)
  */
 import { supabaseAdmin } from '../../_lib/supabase.js';
-import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '../../_lib/auth.js';
 import { sendEmail } from '../../_lib/email.js';
 import { sendWhatsApp } from '../../_lib/notify.js';
-
-async function verifyAdmin(req) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  if (!token) return null;
-  
-  const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-  return user;
-}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

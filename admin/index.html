@@ -143,7 +143,12 @@
 
     // Auth guard
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not authenticated'); }
+    const ADMIN_EMAIL = 'Homedressnaweb@gmail.com';
+    if (!session || session.user.email !== ADMIN_EMAIL) {
+      if (session) await supabase.auth.signOut();
+      window.location.href = '/admin/login.html?error=unauthorized';
+      throw new Error('Unauthorized');
+    }
 
     const token = session.access_token;
     document.getElementById('admin-email').textContent = session.user.email;
