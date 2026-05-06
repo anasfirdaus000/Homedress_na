@@ -1,90 +1,115 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Newsletter Subscribers | Admin HOMEDRESS_NA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <style>
-    body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; margin: 0; }
-    .sidebar { width: 260px; background: #0f172a; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
-    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
-    
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; margin-bottom: 24px; }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; padding: 12px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
-    .table td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; }
-    
-    .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; font-size: 0.85rem; }
-    .btn--outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
-    .btn--danger { background: #fee2e2; color: #b91c1c; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newsletter | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
-  <div class="sidebar">
-    <h2 style="margin-bottom: 40px; font-size: 1.2rem; letter-spacing: 1px;">ADMIN PANEL</h2>
-    <nav style="display: flex; flex-direction: column; gap: 10px;">
-      <a href="/admin/index.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Dashboard</a>
-      <a href="/admin/orders.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pesanan</a>
-      <a href="/admin/products.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Produk</a>
-      <a href="/admin/newsletter.html" class="btn btn--primary" style="text-align: left; background: #2563eb;">Newsletter</a>
-      <a href="/admin/settings.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pengaturan</a>
-    </nav>
-  </div>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
+        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
+        <a href="/admin/newsletter.html" class="sidebar__link sidebar__link--active">📧 Newsletter</a>
+        <a href="/admin/shipping.html" class="sidebar__link">🚚 Pengiriman</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link" target="_blank">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
 
-  <main class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-      <div>
-        <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0;">Pelanggan Newsletter</h1>
-        <p style="color: #64748b; margin-top: 4px;">Daftar email yang berlangganan newsletter Anda.</p>
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>📧 Pelanggan Newsletter</h1>
+        <button class="admin-btn admin-btn--primary" id="export-btn">📥 Export CSV</button>
       </div>
-      <button class="btn btn--outline" onclick="exportToCSV()">Export to CSV</button>
-    </div>
 
-    <div class="card">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Tanggal Terdaftar</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="subscriber-list">
-          <tr><td colspan="3" style="text-align:center; padding:40px; color:#999;">Memuat data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+      <div class="admin-card" style="margin-top:20px;">
+        <div id="stat-bar" style="display:flex;gap:16px;margin-bottom:20px;">
+          <div style="background:#222;padding:16px 24px;border-radius:12px;flex:1;text-align:center;">
+            <div style="font-size:2rem;font-weight:700;" id="total-count">0</div>
+            <div style="color:#888;font-size:0.85rem;">Total Subscriber</div>
+          </div>
+          <div style="background:#222;padding:16px 24px;border-radius:12px;flex:1;text-align:center;">
+            <div style="font-size:2rem;font-weight:700;" id="this-month-count">0</div>
+            <div style="color:#888;font-size:0.85rem;">Bulan Ini</div>
+          </div>
+        </div>
+
+        <table class="admin-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:12px;border-bottom:1px solid #333;color:#888;">#</th>
+              <th style="text-align:left;padding:12px;border-bottom:1px solid #333;color:#888;">Email</th>
+              <th style="text-align:left;padding:12px;border-bottom:1px solid #333;color:#888;">Tanggal Daftar</th>
+              <th style="text-align:center;padding:12px;border-bottom:1px solid #333;color:#888;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="subscriber-list">
+            <tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    let _subscribers = [];
 
     async function loadSubscribers() {
       const { data, error } = await supabase
         .from('newsletter_subscribers')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       const tbody = document.getElementById('subscriber-list');
-      if (error || !data) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat data.</td></tr>';
+      _subscribers = data || [];
+
+      // Stats
+      document.getElementById('total-count').textContent = _subscribers.length;
+      const thisMonth = new Date().getMonth();
+      const thisYear = new Date().getFullYear();
+      const monthCount = _subscribers.filter(s => {
+        const d = new Date(s.created_at);
+        return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+      }).length;
+      document.getElementById('this-month-count').textContent = monthCount;
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">Belum ada pelanggan terdaftar.</td></tr>';
         return;
       }
 
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:40px; color:#999;">Belum ada pelanggan terdaftar.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = data.map(s => `
-        <tr>
-          <td><strong>${s.email}</strong></td>
-          <td style="color: #64748b;">${new Date(s.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
-          <td>
-            <button class="btn btn--danger" onclick="deleteSubscriber('${s.id}')">Hapus</button>
+      tbody.innerHTML = data.map((s, i) => `
+        <tr style="border-bottom:1px solid #222;">
+          <td style="padding:12px;color:#888;">${i + 1}</td>
+          <td style="padding:12px;font-weight:600;">${s.email}</td>
+          <td style="padding:12px;color:#888;">${new Date(s.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })}</td>
+          <td style="padding:12px;text-align:center;">
+            <button class="admin-btn admin-btn--danger admin-btn--small" onclick="deleteSubscriber('${s.id}')">🗑️</button>
           </td>
         </tr>
       `).join('');
@@ -96,10 +121,19 @@
       if (!error) loadSubscribers();
     };
 
-    window.exportToCSV = () => {
-      // Logic for CSV export can be added here
-      alert('Fitur ekspor akan segera hadir!');
-    };
+    document.getElementById('export-btn').addEventListener('click', () => {
+      if (_subscribers.length === 0) { alert('Tidak ada data untuk diexport.'); return; }
+      const csv = 'Email,Tanggal Daftar\n' + _subscribers.map(s =>
+        `${s.email},${new Date(s.created_at).toISOString()}`
+      ).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `newsletter_subscribers_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
 
     loadSubscribers();
   </script>

@@ -1,131 +1,166 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manajemen Ongkir | Admin HOMEDRESS_NA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manajemen Pengiriman | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
   <style>
-    body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; margin: 0; }
-    .sidebar { width: 260px; background: #0f172a; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
-    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
-    
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; margin-bottom: 24px; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .table th { text-align: left; padding: 12px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
-    .table td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-    .badge--blue { background: #e0f2fe; color: #0369a1; }
-    
-    .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; font-size: 0.9rem; }
-    .btn--primary { background: #2563eb; color: #fff; }
-    .btn--primary:hover { background: #1d4ed8; }
-    .btn--outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
-    
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; }
-    .form-input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; }
-
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    .modal.is-open { display: flex; }
-    .modal-content { background: #fff; padding: 32px; border-radius: 16px; width: 450px; }
+    .rate-card { background:#222; border:1px solid #333; border-radius:12px; padding:20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+    .rate-card__info { flex:1; }
+    .rate-card__province { font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+    .rate-card__detail { color:#888; font-size:0.85rem; }
+    .rate-card__cost { font-size:1.2rem; font-weight:700; color:var(--color-accent, #e74c3c); margin-right:20px; }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2 style="margin-bottom: 40px; font-size: 1.2rem; letter-spacing: 1px;">ADMIN PANEL</h2>
-    <nav style="display: flex; flex-direction: column; gap: 10px;">
-      <a href="/admin/index.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Dashboard</a>
-      <a href="/admin/products.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Produk</a>
-      <a href="/admin/orders.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pesanan</a>
-      <a href="/admin/shipping.html" class="btn btn--primary" style="text-align: left;">Pengiriman</a>
-      <a href="/admin/settings.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pengaturan</a>
-    </nav>
-  </div>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
+        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
+        <a href="/admin/newsletter.html" class="sidebar__link">📧 Newsletter</a>
+        <a href="/admin/shipping.html" class="sidebar__link sidebar__link--active">🚚 Pengiriman</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link" target="_blank">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
 
-  <main class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-      <div>
-        <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0;">Manajemen Ongkir</h1>
-        <p style="color: #64748b; margin-top: 4px;">Atur tarif pengiriman berdasarkan wilayah (Provinsi).</p>
+    <main class="admin-main">
+      <div class="admin-header">
+        <div>
+          <h1>🚚 Manajemen Pengiriman</h1>
+          <p style="color:#888;margin-top:4px;">Atur tarif ongkir berdasarkan provinsi. Lokasi toko: <strong id="origin-text">Memuat...</strong></p>
+        </div>
+        <button class="admin-btn admin-btn--primary" id="add-rate-btn">+ Tambah Wilayah</button>
       </div>
-      <button class="btn btn--primary" onclick="openModal()">+ Tambah Wilayah</button>
-    </div>
 
-    <div class="card">
-      <div style="display:flex; justify-content: space-between; align-items: center;">
-         <h3 style="margin: 0;">Tarif Aktif</h3>
-         <div style="font-size: 0.9rem; color: #64748b;">Lokasi Toko: <strong id="origin-text">Memuat...</strong></div>
+      <div id="rates-list" style="margin-top:20px;">
+        <p style="color:#888;">Memuat data...</p>
       </div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Provinsi</th>
-            <th>Kurir</th>
-            <th>Tambahan Biaya</th>
-            <th>Estimasi</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="rates-table-body">
-          <tr><td colspan="5" style="text-align:center; padding:40px; color:#999;">Memuat data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
 
-  <!-- Modal Edit/Add -->
-  <div id="rate-modal" class="modal">
-    <div class="modal-content">
-      <h3 id="modal-title" style="margin-top:0;">Tambah Tarif Wilayah</h3>
-      <form id="rate-form">
-        <input type="hidden" id="rate-id">
-        <div class="form-group">
-          <label class="form-label">Provinsi</label>
-          <select id="province-select" class="form-input" required>
-            <option value="DKI Jakarta">DKI Jakarta</option>
-            <option value="Jawa Barat">Jawa Barat</option>
-            <option value="Jawa Tengah">Jawa Tengah</option>
-            <option value="Jawa Timur">Jawa Timur</option>
-            <option value="Banten">Banten</option>
-            <option value="DI Yogyakarta">DI Yogyakarta</option>
-            <option value="Bali">Bali</option>
-            <option value="Luar Jawa">Luar Jawa (Lainnya)</option>
-          </select>
+      <!-- Modal -->
+      <div id="rate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:500px;margin:0 auto;background:#1a1a1a;border-radius:16px;padding:32px;border:1px solid #333;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <h2 id="modal-title">Tambah Tarif</h2>
+            <button class="admin-btn admin-btn--outline admin-btn--small" id="close-modal">✕</button>
+          </div>
+          <form id="rate-form">
+            <input type="hidden" id="rate-id" />
+            <div class="admin-form__group">
+              <label class="admin-form__label">Provinsi *</label>
+              <select class="admin-form__input" id="province-select" required style="background:#222;color:#fff;">
+                <option value="DKI Jakarta">DKI Jakarta</option>
+                <option value="Jawa Barat">Jawa Barat</option>
+                <option value="Jawa Tengah">Jawa Tengah</option>
+                <option value="Jawa Timur">Jawa Timur</option>
+                <option value="Banten">Banten</option>
+                <option value="DI Yogyakarta">DI Yogyakarta</option>
+                <option value="Bali">Bali</option>
+                <option value="Sumatera Utara">Sumatera Utara</option>
+                <option value="Sumatera Barat">Sumatera Barat</option>
+                <option value="Sumatera Selatan">Sumatera Selatan</option>
+                <option value="Riau">Riau</option>
+                <option value="Kepulauan Riau">Kepulauan Riau</option>
+                <option value="Jambi">Jambi</option>
+                <option value="Bengkulu">Bengkulu</option>
+                <option value="Lampung">Lampung</option>
+                <option value="Bangka Belitung">Bangka Belitung</option>
+                <option value="Kalimantan Barat">Kalimantan Barat</option>
+                <option value="Kalimantan Tengah">Kalimantan Tengah</option>
+                <option value="Kalimantan Selatan">Kalimantan Selatan</option>
+                <option value="Kalimantan Timur">Kalimantan Timur</option>
+                <option value="Kalimantan Utara">Kalimantan Utara</option>
+                <option value="Sulawesi Utara">Sulawesi Utara</option>
+                <option value="Sulawesi Tengah">Sulawesi Tengah</option>
+                <option value="Sulawesi Selatan">Sulawesi Selatan</option>
+                <option value="Sulawesi Tenggara">Sulawesi Tenggara</option>
+                <option value="Gorontalo">Gorontalo</option>
+                <option value="Sulawesi Barat">Sulawesi Barat</option>
+                <option value="Nusa Tenggara Barat">Nusa Tenggara Barat</option>
+                <option value="Nusa Tenggara Timur">Nusa Tenggara Timur</option>
+                <option value="Maluku">Maluku</option>
+                <option value="Maluku Utara">Maluku Utara</option>
+                <option value="Papua">Papua</option>
+                <option value="Papua Barat">Papua Barat</option>
+                <option value="Papua Selatan">Papua Selatan</option>
+                <option value="Papua Tengah">Papua Tengah</option>
+                <option value="Papua Pegunungan">Papua Pegunungan</option>
+                <option value="Papua Barat Daya">Papua Barat Daya</option>
+                <option value="Aceh">Aceh</option>
+              </select>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Kurir *</label>
+              <select class="admin-form__input" id="courier-select" required style="background:#222;color:#fff;"></select>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Tambahan Biaya (Rp)</label>
+              <input type="number" class="admin-form__input" id="additional-cost" value="0" required />
+              <small style="color:#888;">Biaya tambahan dari harga dasar kurir.</small>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Estimasi Pengiriman</label>
+              <input type="text" class="admin-form__input" id="estimated-days" placeholder="2-4 hari" required />
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button type="submit" class="admin-btn admin-btn--primary">Simpan</button>
+              <button type="button" class="admin-btn admin-btn--outline" id="close-modal-2">Batal</button>
+            </div>
+          </form>
         </div>
-        <div class="form-group">
-          <label class="form-label">Kurir</label>
-          <select id="courier-select" class="form-input" required></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tambahan Biaya (Rp)</label>
-          <input type="number" id="additional-cost" class="form-input" value="0" required />
-          <small style="color:#888;">Biaya tambahan dari harga dasar kurir.</small>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Estimasi Pengiriman</label>
-          <input type="text" id="estimated-days" class="form-input" placeholder="Contoh: 2-4 hari" required />
-        </div>
-        <div style="display:flex; gap:12px; margin-top:24px;">
-          <button type="button" class="btn btn--outline" style="flex:1;" onclick="closeModal()">Batal</button>
-          <button type="submit" class="btn btn--primary" style="flex:1;">Simpan</button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </main>
   </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    const modal = document.getElementById('rate-modal');
+    const form = document.getElementById('rate-form');
+
+    document.getElementById('add-rate-btn').addEventListener('click', () => {
+      form.reset();
+      document.getElementById('rate-id').value = '';
+      document.getElementById('modal-title').textContent = 'Tambah Tarif';
+      modal.style.display = 'block';
+    });
+    document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
+    document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
 
     async function init() {
-      // Check origin
+      // Load origin
       const { data: origin } = await supabase.from('site_settings').select('value').eq('key', 'store_origin_province').single();
-      if (origin) document.getElementById('origin-text').textContent = origin.value;
+      if (origin) {
+        try {
+          document.getElementById('origin-text').textContent = JSON.parse(origin.value);
+        } catch(e) {
+          document.getElementById('origin-text').textContent = origin.value;
+        }
+      }
 
-      // Load couriers for dropdown
+      // Load couriers
       const { data: couriers } = await supabase.from('shipping_methods').select('id, name');
       const cSelect = document.getElementById('courier-select');
       cSelect.innerHTML = (couriers || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -134,33 +169,28 @@
     }
 
     async function loadRates() {
-      const tbody = document.getElementById('rates-table-body');
+      const list = document.getElementById('rates-list');
       const { data, error } = await supabase.from('shipping_rates').select('*, shipping_methods(name)');
-      
-      if (error || !data) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Gagal memuat data.</td></tr>';
+
+      if (error || !data || data.length === 0) {
+        list.innerHTML = '<p style="color:#888;text-align:center;padding:40px;">Belum ada tarif wilayah.</p>';
         return;
       }
 
-      tbody.innerHTML = data.map(r => `
-        <tr>
-          <td><strong>${r.province}</strong></td>
-          <td><span class="badge badge--blue">${r.shipping_methods?.name || 'Unknown'}</span></td>
-          <td>Rp ${parseInt(r.additional_cost).toLocaleString('id-ID')}</td>
-          <td>${r.estimated_days}</td>
-          <td>
-            <button class="btn btn--outline" onclick="editRate('${r.id}')" style="padding: 6px 12px; font-size: 0.8rem;">Edit</button>
-          </td>
-        </tr>
+      list.innerHTML = data.map(r => `
+        <div class="rate-card">
+          <div class="rate-card__info">
+            <div class="rate-card__province">${r.province}</div>
+            <div class="rate-card__detail">${r.shipping_methods?.name || 'Kurir'} · Est. ${r.estimated_days}</div>
+          </div>
+          <div class="rate-card__cost">+Rp ${parseInt(r.additional_cost).toLocaleString('id-ID')}</div>
+          <div style="display:flex;gap:8px;">
+            <button class="admin-btn admin-btn--outline admin-btn--small" onclick="editRate('${r.id}')">✏️</button>
+            <button class="admin-btn admin-btn--danger admin-btn--small" onclick="deleteRate('${r.id}')">🗑️</button>
+          </div>
+        </div>
       `).join('');
     }
-
-    window.openModal = () => document.getElementById('rate-modal').classList.add('is-open');
-    window.closeModal = () => {
-      document.getElementById('rate-modal').classList.remove('is-open');
-      document.getElementById('rate-form').reset();
-      document.getElementById('rate-id').value = '';
-    };
 
     window.editRate = async (id) => {
       const { data } = await supabase.from('shipping_rates').select('*').eq('id', id).single();
@@ -170,18 +200,24 @@
         document.getElementById('courier-select').value = data.courier_id;
         document.getElementById('additional-cost').value = data.additional_cost;
         document.getElementById('estimated-days').value = data.estimated_days;
-        document.getElementById('modal-title').textContent = 'Edit Tarif Wilayah';
-        openModal();
+        document.getElementById('modal-title').textContent = 'Edit Tarif';
+        modal.style.display = 'block';
       }
     };
 
-    document.getElementById('rate-form').onsubmit = async (e) => {
+    window.deleteRate = async (id) => {
+      if (!confirm('Hapus tarif ini?')) return;
+      await supabase.from('shipping_rates').delete().eq('id', id);
+      loadRates();
+    };
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('rate-id').value;
       const payload = {
         province: document.getElementById('province-select').value,
         courier_id: document.getElementById('courier-select').value,
-        additional_cost: document.getElementById('additional-cost').value,
+        additional_cost: parseInt(document.getElementById('additional-cost').value),
         estimated_days: document.getElementById('estimated-days').value
       };
 
@@ -191,9 +227,9 @@
         await supabase.from('shipping_rates').insert([payload]);
       }
 
-      closeModal();
+      modal.style.display = 'none';
       loadRates();
-    };
+    });
 
     init();
   </script>

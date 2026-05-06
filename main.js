@@ -555,6 +555,65 @@ async function initShopByCategory(categories = []) {
   `).join('');
 }
 
+// ========== EDITORIAL SECTIONS (DB-driven) ==========
+async function initEditorialSections() {
+  const wrapper = document.getElementById('editorial-wrapper');
+  if (!wrapper) return;
+
+  // Default fallback data
+  const defaults = [
+    { title: 'ELEGANSI<br/>HARIAN', desc: 'Homedress dirancang eksklusif dari bahan premium yang memberikan kilau sutra yang mewah di setiap helai.', bg_image: '/images/hero_editorial.png', product_image: '/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png', link: '/category.html?filter=homedress' },
+    { title: 'KENYAMANAN<br/>MAKSIMAL', desc: 'Koleksi One Set dengan bahan rayon organik yang adem dan lembut di kulit.', bg_image: '/images/editorial_bag.png', product_image: '/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png', link: '/category.html?filter=one-set' },
+    { title: 'GAYA<br/>MODERN', desc: 'Tampil stylish dengan motif modern yang memberikan kesan mewah namun tetap nyaman.', bg_image: '/images/editorial_modern.png', product_image: '/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png', link: '/category.html?filter=gamis' }
+  ];
+
+  let sections = defaults;
+  try {
+    const keys = ['editorial_1', 'editorial_2', 'editorial_3'];
+    const { data } = await window.supabase.from('site_settings').select('key, value').in('key', keys);
+    if (data && data.length > 0) {
+      sections = keys.map((k, i) => {
+        const found = data.find(d => d.key === k);
+        if (found) {
+          try { return JSON.parse(found.value); } catch(e) { return defaults[i]; }
+        }
+        return defaults[i];
+      });
+    }
+  } catch(e) { /* use defaults */ }
+
+  wrapper.innerHTML = sections.map((s, i) => `
+    <section class="editorial-pinned" id="pinned-${i+1}">
+      <div class="editorial-pinned__bg">
+        <img src="${s.bg_image}" alt="${s.title.replace(/<br\/?>/g, ' ')}" />
+      </div>
+      <div class="editorial-pinned__container">
+        <div class="editorial-pinned__content">
+          <h2 class="editorial-pinned__title">${s.title}</h2>
+          <p class="editorial-pinned__desc">${s.desc}</p>
+          <a href="${s.link}" class="editorial-pinned__cta">LIHAT PRODUK</a>
+        </div>
+        <div class="editorial-pinned__highlight">
+          <img src="${s.product_image}" alt="Detail" />
+        </div>
+      </div>
+    </section>
+  `).join('');
+}
+
+// ========== MAPS FROM DB ==========
+async function initMapsFromDB() {
+  const container = document.getElementById('footer-map-container');
+  if (!container) return;
+  try {
+    const { data } = await window.supabase.from('site_settings').select('value').eq('key', 'google_maps_url').single();
+    if (data && data.value) {
+      const url = typeof data.value === 'string' && data.value.startsWith('"') ? JSON.parse(data.value) : data.value;
+      container.innerHTML = `<iframe src="${url}" class="footer__map-iframe" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+    }
+  } catch(e) { /* keep default */ }
+}
+
 async function initDynamicHome(products = [], featured = []) {
   const newInGrid = document.getElementById('new-in-grid');
   const homeNewArrivals = document.getElementById('home-new-arrivals');
@@ -818,8 +877,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     initHeroSlider(hData),
     initShopByCategory(cData),
     initDynamicHome(pData, fData),
-    initDynamicMenus(pData)
+    initDynamicMenus(pData),
+    initEditorialSections(),
+    initMapsFromDB()
   ]);
+
+  // Ensure cart badge is up-to-date on page load
+  window.CART.updateBadge();
 
   // Page specific logic
   const path = window.location.pathname;

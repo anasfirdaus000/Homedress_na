@@ -1,108 +1,362 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pengaturan Toko | Admin HOMEDRESS_NA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pengaturan Web | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
   <style>
-    body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; margin: 0; }
-    .sidebar { width: 260px; background: #0f172a; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
-    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
-    
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; margin-bottom: 24px; }
-    .form-group { margin-bottom: 24px; }
-    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b; }
-    .form-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; }
-    
-    .btn { padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
-    .btn--primary { background: #2563eb; color: #fff; }
-    .btn--outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
+    .settings-section { background:#222; border:1px solid #333; border-radius:16px; padding:28px; margin-bottom:24px; }
+    .settings-section h3 { margin:0 0 20px; font-size:1.1rem; display:flex; align-items:center; gap:8px; }
+    .editorial-card { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:20px; margin-bottom:16px; }
+    .editorial-card h4 { margin:0 0 16px; color:var(--color-accent, #e74c3c); }
+    .logo-item { display:inline-flex; align-items:center; gap:8px; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:8px 12px; margin:4px; }
+    .logo-item img { height:30px; width:auto; }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2 style="margin-bottom: 40px; font-size: 1.2rem; letter-spacing: 1px;">ADMIN PANEL</h2>
-    <nav style="display: flex; flex-direction: column; gap: 10px;">
-      <a href="/admin/index.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Dashboard</a>
-      <a href="/admin/products.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Produk</a>
-      <a href="/admin/orders.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pesanan</a>
-      <a href="/admin/shipping.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pengiriman</a>
-      <a href="/admin/settings.html" class="btn btn--primary" style="text-align: left;">Pengaturan</a>
-    </nav>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav">
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
+        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
+        <a href="/admin/newsletter.html" class="sidebar__link">📧 Newsletter</a>
+        <a href="/admin/shipping.html" class="sidebar__link">🚚 Pengiriman</a>
+        <a href="/admin/settings.html" class="sidebar__link sidebar__link--active">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link" target="_blank">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>⚙️ Pengaturan Website</h1>
+      </div>
+
+      <!-- SECTION 1: General Settings -->
+      <div class="settings-section">
+        <h3>🏪 Pengaturan Umum</h3>
+        <form id="general-form">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="admin-form__group">
+              <label class="admin-form__label">Provinsi Asal Toko</label>
+              <input class="admin-form__input" id="store_origin_province" placeholder="Jawa Timur" />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Kota Asal Toko</label>
+              <input class="admin-form__input" id="store_origin_city" placeholder="Malang" />
+            </div>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Teks Announcement Bar</label>
+            <input class="admin-form__input" id="announcement_text" placeholder="PROMO SPESIAL: Diskon 50%!" />
+          </div>
+          <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Pengaturan Umum</button>
+        </form>
+      </div>
+
+      <!-- SECTION 2: Google Maps -->
+      <div class="settings-section">
+        <h3>📍 Google Maps (Footer)</h3>
+        <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Paste URL embed Google Maps untuk ditampilkan di footer website.</p>
+        <form id="maps-form">
+          <div class="admin-form__group">
+            <label class="admin-form__label">URL Embed Google Maps</label>
+            <input class="admin-form__input" id="google_maps_url" placeholder="https://www.google.com/maps/embed?pb=..." />
+            <small style="color:#888;">Buka Google Maps → Share → Embed → Copy URL saja (yang di dalam src="...")</small>
+          </div>
+          <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Maps</button>
+        </form>
+      </div>
+
+      <!-- SECTION 3: Editorial Banners -->
+      <div class="settings-section">
+        <h3>🎨 Section Editorial (Homepage)</h3>
+        <p style="color:#888;font-size:0.85rem;margin-bottom:20px;">Kelola 3 section banner besar di homepage (ELEGANSI HARIAN, KENYAMANAN MAKSIMAL, GAYA MODERN). Setiap section bisa mengarah ke 1 produk.</p>
+        <form id="editorial-form">
+          <div class="editorial-card">
+            <h4>Section 1</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">Judul (gunakan &lt;br/&gt; untuk baris baru)</label>
+                <input class="admin-form__input" id="ed1-title" placeholder="ELEGANSI<br/>HARIAN" />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">Link Produk/Kategori</label>
+                <input class="admin-form__input" id="ed1-link" placeholder="/product.html?slug=..." />
+              </div>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Deskripsi</label>
+              <textarea class="admin-form__textarea" id="ed1-desc" rows="2" placeholder="Deskripsi singkat..."></textarea>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">URL Gambar Background</label>
+                <input class="admin-form__input" id="ed1-bg" placeholder="https://..." />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">URL Gambar Produk</label>
+                <input class="admin-form__input" id="ed1-img" placeholder="https://..." />
+              </div>
+            </div>
+          </div>
+
+          <div class="editorial-card">
+            <h4>Section 2</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">Judul</label>
+                <input class="admin-form__input" id="ed2-title" placeholder="KENYAMANAN<br/>MAKSIMAL" />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">Link Produk/Kategori</label>
+                <input class="admin-form__input" id="ed2-link" placeholder="/product.html?slug=..." />
+              </div>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Deskripsi</label>
+              <textarea class="admin-form__textarea" id="ed2-desc" rows="2"></textarea>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">URL Gambar Background</label>
+                <input class="admin-form__input" id="ed2-bg" />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">URL Gambar Produk</label>
+                <input class="admin-form__input" id="ed2-img" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editorial-card">
+            <h4>Section 3</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">Judul</label>
+                <input class="admin-form__input" id="ed3-title" placeholder="GAYA<br/>MODERN" />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">Link Produk/Kategori</label>
+                <input class="admin-form__input" id="ed3-link" placeholder="/product.html?slug=..." />
+              </div>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Deskripsi</label>
+              <textarea class="admin-form__textarea" id="ed3-desc" rows="2"></textarea>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">URL Gambar Background</label>
+                <input class="admin-form__input" id="ed3-bg" />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">URL Gambar Produk</label>
+                <input class="admin-form__input" id="ed3-img" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Editorial</button>
+        </form>
+      </div>
+
+      <!-- SECTION 4: Brand Logos -->
+      <div class="settings-section">
+        <h3>🏷️ Logo Brand (Marquee Homepage)</h3>
+        <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Kelola logo brand yang muncul di homepage. Upload gambar logo via Cloudinary lalu paste URL-nya.</p>
+        <div id="logos-list" style="margin-bottom:16px;"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div class="admin-form__group" style="flex:1;margin:0;">
+            <label class="admin-form__label">URL Logo Baru</label>
+            <input class="admin-form__input" id="new-logo-url" placeholder="https://res.cloudinary.com/..." />
+          </div>
+          <div class="admin-form__group" style="width:180px;margin:0;">
+            <label class="admin-form__label">Alt Text</label>
+            <input class="admin-form__input" id="new-logo-alt" placeholder="Brand Name" />
+          </div>
+          <button class="admin-btn admin-btn--primary" id="add-logo-btn" style="height:42px;">+ Tambah</button>
+        </div>
+        <div style="margin-top:12px;">
+          <input type="file" id="logo-file-upload" accept="image/*" style="display:none;" />
+          <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('logo-file-upload').click()">📁 Upload File Logo</button>
+          <span id="logo-upload-status" style="font-size:0.8rem;margin-left:8px;"></span>
+        </div>
+      </div>
+
+    </main>
   </div>
-
-  <main class="main-content">
-    <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 32px;">Pengaturan Situs & Lokasi Toko</h1>
-
-    <div class="card">
-      <h2 style="margin-top: 0; margin-bottom: 24px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Alamat Asal Toko (Origin)
-      </h2>
-      <p style="color: #64748b; margin-bottom: 24px;">Alamat ini akan digunakan sebagai titik awal kalkulasi ongkir ke pembeli.</p>
-      
-      <form id="settings-form">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div class="form-group">
-            <label class="form-label">Provinsi Asal</label>
-            <input type="text" id="store_origin_province" class="form-input" placeholder="Contoh: Jawa Timur" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Kota Asal</label>
-            <input type="text" id="store_origin_city" class="form-input" placeholder="Contoh: Malang" required />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Teks Pengumuman (Announcement Bar)</label>
-          <input type="text" id="announcement_text" class="form-input" placeholder="Contoh: Diskon 50% untuk semua produk!" required />
-        </div>
-
-        <div style="border-top: 1px solid #f1f5f9; padding-top: 24px; margin-top: 24px;">
-          <button type="submit" class="btn btn--primary" id="btn-save">Simpan Pengaturan</button>
-        </div>
-      </form>
-    </div>
-  </main>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
 
-    async function loadSettings() {
-      const { data } = await supabase.from('site_settings').select('key, value');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    // ========== HELPER: Save setting ==========
+    async function saveSetting(key, value) {
+      const jsonVal = JSON.stringify(value);
+      await supabase.from('site_settings').upsert({ key, value: jsonVal }, { onConflict: 'key' });
+    }
+
+    async function loadSetting(key) {
+      const { data } = await supabase.from('site_settings').select('value').eq('key', key).single();
       if (data) {
-        data.forEach(s => {
-          const el = document.getElementById(s.key);
-          if (el) el.value = s.value;
-        });
+        try { return JSON.parse(data.value); } catch(e) { return data.value; }
+      }
+      return null;
+    }
+
+    // ========== GENERAL SETTINGS ==========
+    async function loadGeneral() {
+      const keys = ['store_origin_province', 'store_origin_city', 'announcement_text'];
+      for (const k of keys) {
+        const val = await loadSetting(k);
+        if (val) document.getElementById(k).value = val;
       }
     }
 
-    document.getElementById('settings-form').onsubmit = async (e) => {
+    document.getElementById('general-form').onsubmit = async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('btn-save');
-      btn.textContent = 'Menyimpan...';
-      btn.disabled = true;
-
       const keys = ['store_origin_province', 'store_origin_city', 'announcement_text'];
-      const updates = keys.map(k => ({
-        key: k,
-        value: document.getElementById(k).value
-      }));
-
-      for (const item of updates) {
-        await supabase.from('site_settings').upsert(item, { onConflict: 'key' });
+      for (const k of keys) {
+        await saveSetting(k, document.getElementById(k).value);
       }
-
-      alert('Pengaturan berhasil disimpan!');
-      btn.textContent = 'Simpan Pengaturan';
-      btn.disabled = false;
+      alert('✅ Pengaturan umum disimpan!');
     };
 
-    loadSettings();
+    // ========== MAPS ==========
+    async function loadMaps() {
+      const val = await loadSetting('google_maps_url');
+      if (val) document.getElementById('google_maps_url').value = val;
+    }
+
+    document.getElementById('maps-form').onsubmit = async (e) => {
+      e.preventDefault();
+      await saveSetting('google_maps_url', document.getElementById('google_maps_url').value);
+      alert('✅ Google Maps disimpan!');
+    };
+
+    // ========== EDITORIAL ==========
+    async function loadEditorial() {
+      for (let i = 1; i <= 3; i++) {
+        const val = await loadSetting(`editorial_${i}`);
+        if (val) {
+          document.getElementById(`ed${i}-title`).value = val.title || '';
+          document.getElementById(`ed${i}-desc`).value = val.desc || '';
+          document.getElementById(`ed${i}-link`).value = val.link || '';
+          document.getElementById(`ed${i}-bg`).value = val.bg_image || '';
+          document.getElementById(`ed${i}-img`).value = val.product_image || '';
+        }
+      }
+    }
+
+    document.getElementById('editorial-form').onsubmit = async (e) => {
+      e.preventDefault();
+      for (let i = 1; i <= 3; i++) {
+        const data = {
+          title: document.getElementById(`ed${i}-title`).value,
+          desc: document.getElementById(`ed${i}-desc`).value,
+          link: document.getElementById(`ed${i}-link`).value,
+          bg_image: document.getElementById(`ed${i}-bg`).value,
+          product_image: document.getElementById(`ed${i}-img`).value
+        };
+        await saveSetting(`editorial_${i}`, data);
+      }
+      alert('✅ Editorial sections disimpan!');
+    };
+
+    // ========== BRAND LOGOS ==========
+    let _logos = [];
+
+    async function loadLogos() {
+      const val = await loadSetting('brand_logos');
+      _logos = val || [];
+      renderLogos();
+    }
+
+    function renderLogos() {
+      const list = document.getElementById('logos-list');
+      if (_logos.length === 0) {
+        list.innerHTML = '<p style="color:#888;">Belum ada logo. Tambahkan via form di bawah.</p>';
+        return;
+      }
+      list.innerHTML = _logos.map((l, i) => `
+        <div class="logo-item">
+          <img src="${l.url}" alt="${l.alt}" />
+          <span style="font-size:0.8rem;color:#888;">${l.alt}</span>
+          <button class="admin-btn admin-btn--danger admin-btn--small" onclick="removeLogo(${i})" style="padding:2px 8px;font-size:0.7rem;">✕</button>
+        </div>
+      `).join('');
+    }
+
+    window.removeLogo = async (index) => {
+      _logos.splice(index, 1);
+      await saveSetting('brand_logos', _logos);
+      renderLogos();
+    };
+
+    document.getElementById('add-logo-btn').addEventListener('click', async () => {
+      const url = document.getElementById('new-logo-url').value.trim();
+      const alt = document.getElementById('new-logo-alt').value.trim() || 'Brand';
+      if (!url) { alert('URL logo wajib diisi'); return; }
+      _logos.push({ url, alt });
+      await saveSetting('brand_logos', _logos);
+      document.getElementById('new-logo-url').value = '';
+      document.getElementById('new-logo-alt').value = '';
+      renderLogos();
+    });
+
+    // Logo Upload via Cloudinary
+    document.getElementById('logo-file-upload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const statusEl = document.getElementById('logo-upload-status');
+      statusEl.textContent = '⏳ Mengupload...';
+      statusEl.style.color = '#f39c12';
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: reader.result, folder: 'homedress_na/logos' })
+          });
+          const data = await res.json();
+          if (data.url) {
+            document.getElementById('new-logo-url').value = data.url;
+            statusEl.textContent = '✅ Upload berhasil! Klik "+ Tambah" untuk menyimpan.';
+            statusEl.style.color = '#27ae60';
+          } else {
+            throw new Error(data.error || 'Gagal');
+          }
+        };
+      } catch(err) {
+        statusEl.textContent = '❌ ' + err.message;
+        statusEl.style.color = '#e74c3c';
+      }
+    });
+
+    // ========== INIT ALL ==========
+    await Promise.all([loadGeneral(), loadMaps(), loadEditorial(), loadLogos()]);
   </script>
 </body>
 </html>

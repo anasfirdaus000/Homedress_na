@@ -49,23 +49,25 @@ export default async function handler(req, res) {
     
     if (!title) return res.status(400).json({ error: 'Title is required' });
 
+    // Build clean payload — empty strings become null
     const payload = {
-      title,
-      subtitle: subtitle || null,
-      link_url: link_url || null,
-      image_url: image_url || null,
-      video_url: video_url || null,
-      slide_order: slide_order || 0,
+      title: title.trim(),
+      subtitle: subtitle?.trim() || null,
+      link_url: link_url?.trim() || null,
+      image_url: image_url?.trim() || null,
+      video_url: video_url?.trim() || null,
+      slide_order: parseInt(slide_order) || 0,
       is_active: is_active !== undefined ? is_active : true,
-      object_position: object_position || 'center',
+      object_position: object_position?.trim() || 'center',
       updated_at: new Date().toISOString()
     };
 
     let result;
     if (id) {
-      const { id: slideId, ...updateData } = req.body;
-      result = await supabaseAdmin.from('hero_slides').update(updateData).eq('id', id).select().single();
+      // UPDATE: use the sanitized payload, NOT raw req.body
+      result = await supabaseAdmin.from('hero_slides').update(payload).eq('id', id).select().single();
     } else {
+      // INSERT
       result = await supabaseAdmin.from('hero_slides').insert([payload]).select().single();
     }
 

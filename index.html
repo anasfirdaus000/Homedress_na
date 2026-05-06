@@ -99,6 +99,7 @@
         </button>
         <button id="cart-toggle" class="header__icon-btn header__cart-btn" aria-label="Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="header-badge" id="cart-count">0</span>
         </button>
       </div>
     </div>
@@ -283,77 +284,47 @@
     <!-- Pinned banners will be dynamically injected here by main.js -->
   </div>
 
-  <!-- PINNED EDITORIAL SECTIONS (NEW POSITION) -->
-  <div class="editorial-pinned-wrapper">
-    <!-- Section 1 -->
-    <section class="editorial-pinned" id="pinned-1">
-      <div class="editorial-pinned__bg">
-        <img src="/images/hero_editorial.png" alt="Elegansi Harian" />
-      </div>
-      <div class="editorial-pinned__container">
-        <div class="editorial-pinned__content">
-          <h2 class="editorial-pinned__title">ELEGANSI<br/>HARIAN</h2>
-          <p class="editorial-pinned__desc">Homedress dirancang eksklusif dari bahan premium yang memberikan kilau sutra yang mewah di setiap helai. Nyaman namun tetap berkelas.</p>
-          <a href="/category.html?filter=homedress" class="editorial-pinned__cta">LIHAT PRODUK</a>
-        </div>
-        <div class="editorial-pinned__highlight">
-          <img src="/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png" alt="Detail" />
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 2 -->
-    <section class="editorial-pinned" id="pinned-2">
-      <div class="editorial-pinned__bg">
-        <img src="/images/editorial_bag.png" alt="Kenyamanan Maksimal" />
-      </div>
-      <div class="editorial-pinned__container">
-        <div class="editorial-pinned__content">
-          <h2 class="editorial-pinned__title">KENYAMANAN<br/>MAKSIMAL</h2>
-          <p class="editorial-pinned__desc">Koleksi One Set dengan bahan rayon organik yang adem dan lembut di kulit. Cocok untuk segala aktivitas di rumah maupun luar rumah.</p>
-          <a href="/category.html?filter=one-set" class="editorial-pinned__cta">LIHAT PRODUK</a>
-        </div>
-        <div class="editorial-pinned__highlight">
-          <img src="/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png" alt="Detail" />
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 3 -->
-    <section class="editorial-pinned" id="pinned-3">
-      <div class="editorial-pinned__bg">
-        <img src="/images/editorial_modern.png" alt="Gaya Modern" />
-      </div>
-      <div class="editorial-pinned__container">
-        <div class="editorial-pinned__content">
-          <h2 class="editorial-pinned__title">GAYA<br/>MODERN</h2>
-          <p class="editorial-pinned__desc">Tampil stylish dengan motif modern yang memberikan kesan mewah namun tetap nyaman untuk dipakai seharian. Definisi fashion masa kini.</p>
-          <a href="/category.html?filter=gamis" class="editorial-pinned__cta">LIHAT PRODUK</a>
-        </div>
-        <div class="editorial-pinned__highlight">
-          <img src="/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png" alt="Detail" />
-        </div>
-      </div>
-    </section>
+  <!-- PINNED EDITORIAL SECTIONS (DYNAMIC from DB) -->
+  <div class="editorial-pinned-wrapper" id="editorial-wrapper">
+    <!-- Will be populated by initEditorialSections() in main.js -->
   </div>
 
-  <!-- NEWSLETTER / FOOTER -->
-
+  <!-- FOOTER -->
   <footer id="footer" class="footer">
     <div class="footer__inner">
+      <!-- Col 1: Newsletter -->
       <div class="footer__newsletter">
         <h3 class="footer__newsletter-title">Newsletter</h3>
-        <p class="footer__newsletter-text">Sign up for latest news and releases.</p>
+        <p class="footer__newsletter-text">Dapatkan info produk terbaru & promo eksklusif.</p>
         <form class="footer__newsletter-form" id="newsletter-form">
-          <input type="email" placeholder="Email Address" class="footer__newsletter-input" required />
+          <input type="email" placeholder="Alamat Email" class="footer__newsletter-input" required />
           <button type="submit" class="footer__newsletter-btn">Subscribe</button>
         </form>
         <p class="footer__connect">Connect: <a href="https://www.tiktok.com/@homedress_na?_r=1&_t=ZS-95zilkA1J0m" class="footer__social-link" target="_blank">TikTok ↗</a> | <a href="https://instagram.com/homedress_na" class="footer__social-link" target="_blank">Instagram ↗</a></p>
       </div>
-      <div id="dynamic-footer-links" style="display: contents;">
-        <!-- Footer links will be dynamically injected here by main.js -->
+
+      <!-- Col 2: Shop Links -->
+      <div class="footer__links-group">
+        <h4 class="footer__links-title">SHOP</h4>
+        <a href="/category.html?filter=homedress" class="footer__link">Homedress</a>
+        <a href="/category.html?filter=one-set" class="footer__link">One Set</a>
+        <a href="/category.html?filter=gamis" class="footer__link">Gamis</a>
+        <a href="/category.html?filter=new-in" class="footer__link">New Arrival</a>
+        <a href="/category.html?filter=flash-sale" class="footer__link">Flash Sale</a>
       </div>
-      <div class="footer__links-group" style="flex: 1.5;">
+
+      <!-- Col 3: Customer Care -->
+      <div class="footer__links-group">
+        <h4 class="footer__links-title">CUSTOMER CARE</h4>
+        <a href="/about-us.html" class="footer__link">Tentang Kami</a>
+        <a href="/faq.html" class="footer__link">FAQ</a>
+        <a href="/shipping-policy.html" class="footer__link">Kebijakan Pengiriman</a>
+        <a href="/return-policy.html" class="footer__link">Kebijakan Retur</a>
+        <a href="/contact.html" class="footer__link">Hubungi Kami</a>
+      </div>
+
+      <!-- Col 4: Contact & Map -->
+      <div class="footer__links-group">
         <h4 class="footer__links-title">HUBUNGI KAMI</h4>
         <p style="color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px;">
           <strong>HOMEDRESS_NA</strong><br>
@@ -364,7 +335,7 @@
           <strong>WhatsApp:</strong><br>
           <a href="https://wa.me/6285216854492" target="_blank" style="color: var(--color-accent); text-decoration: none;">+62 852-1685-4492</a>
         </p>
-        <div class="footer__map-container">
+        <div class="footer__map-container" id="footer-map-container">
           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.24009778263!2d106.749008!3d-6.2297465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x100c5e82dd4b820!2sJakarta%20Selatan%2C%20Kota%20Jakarta%20Selatan%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" class="footer__map-iframe" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
