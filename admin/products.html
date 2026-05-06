@@ -77,6 +77,10 @@
               <div id="dynamic-categories-container" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#222;padding:12px;border-radius:8px;border:1.5px solid #333;">
                 <p style="color:#888;">Memuat kategori...</p>
               </div>
+              <div style="margin-top:12px; padding:12px; background:rgba(255,215,0,0.1); border:1.5px dashed gold; border-radius:8px; display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="prod-featured-promo" style="width:20px; height:20px; cursor:pointer;" />
+                <label for="prod-featured-promo" style="color:gold; font-weight:bold; cursor:pointer;">⭐ Tampilkan sebagai Unggulan di Promo Hari Ini (Beranda)</label>
+              </div>
             </div>
             
             <div class="admin-form__group">
@@ -102,6 +106,7 @@
               </div>
               <small style="color:#888; display:block; margin-top:8px;">Kosongkan varian jika produk ini tidak memiliki pilihan warna/ukuran. Harga dasar akan digunakan.</small>
             </div>
+
             <div class="admin-form__group">
               <label class="admin-form__label">Upload Gambar (Otomatis ke Cloudinary)</label>
               <div style="display:flex;gap:8px;">
@@ -334,10 +339,14 @@
       document.getElementById('prod-price').value = p.price;
       document.getElementById('prod-original-price').value = p.original_price || '';
       document.getElementById('prod-description').value = p.description || '';
+      
       // Set checkboxes
       const catCheckboxes = document.querySelectorAll('input[name="prod-category"]');
       const cats = p.category || [];
       catCheckboxes.forEach(cb => { cb.checked = cats.includes(cb.value); });
+
+      // Featured Promo Checkbox
+      document.getElementById('prod-featured-promo').checked = cats.includes('featured-promo');
 
       // Set Variants
       variantsTbody.innerHTML = '';
@@ -418,7 +427,14 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       // Get selected categories
-      const selectedCats = Array.from(document.querySelectorAll('input[name="prod-category"]:checked')).map(cb => cb.value);
+      let selectedCats = Array.from(document.querySelectorAll('input[name="prod-category"]:checked')).map(cb => cb.value);
+
+      // Add featured-promo tag if checked
+      if (document.getElementById('prod-featured-promo').checked) {
+        if (!selectedCats.includes('featured-promo')) selectedCats.push('featured-promo');
+      } else {
+        selectedCats = selectedCats.filter(c => c !== 'featured-promo');
+      }
 
       const productData = {
         name: document.getElementById('prod-name').value.trim(),
@@ -473,4 +489,3 @@
   </script>
 </body>
 </html>
-

@@ -640,8 +640,9 @@ async function initDynamicHome(products = [], featured = []) {
     homeNewArrivals.innerHTML = products.slice(0, 10).map(createCard).join('');
   }
   if (flashSaleGrid) {
-    const saleProds = products.filter(p => p.discount > 0).slice(0, 10);
-    flashSaleGrid.innerHTML = saleProds.length ? saleProds.map(createCard).join('') : '<p>Belum ada promo aktif.</p>';
+    // Only show products with 'featured-promo' tag on homepage, max 5
+    const saleProds = products.filter(p => p.discount > 0 && Array.isArray(p.category) && p.category.includes('featured-promo')).slice(0, 5);
+    flashSaleGrid.innerHTML = saleProds.length ? saleProds.map(createCard).join('') : '<p style="padding:20px; color:#999; text-align:center; grid-column:1/-1;">Belum ada promo unggulan yang dipilih.</p>';
   }
 
   // Pinned Editorial
