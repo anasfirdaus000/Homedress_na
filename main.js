@@ -207,20 +207,48 @@ window.CART = {
 // ========== WISHLIST SYSTEM ==========
 window.WISHLIST = {
   items: JSON.parse(localStorage.getItem('hd_wishlist') || '[]'),
-  save() { 
+  async save() { 
     localStorage.setItem('hd_wishlist', JSON.stringify(this.items));
     this.updateUI();
+
+    // Sync with DB if logged in
+    const { data: { session } } = await window.supabase.auth.getSession();
+    if (session) {
+      const userId = session.user.id;
+      // Simple sync: clear and insert (or use individual upsert for better perf)
+      // For now, let's just handle individual toggles for efficiency
+    }
   },
-  toggle(product) {
+  async toggle(product) {
     const idx = this.items.findIndex(i => i.slug === product.slug);
+    const { data: { session } } = await window.supabase.auth.getSession();
+    
     if (idx > -1) {
       this.items.splice(idx, 1);
       showToast('Dihapus dari wishlist 🤍');
+      if (session) {
+        await window.supabase.from('user_wishlist').delete().eq('user_id', session.user.id).eq('product_slug', product.slug);
+      }
     } else {
       this.items.push(product);
       showToast('Ditambah ke wishlist ❤️');
+      if (session) {
+        await window.supabase.from('user_wishlist').insert([{ user_id: session.user.id, product_slug: product.slug }]);
+      }
     }
     this.save();
+  },
+  async syncFromDB() {
+    const { data: { session } } = await window.supabase.auth.getSession();
+    if (!session) return;
+    
+    const { data, error } = await window.supabase.from('user_wishlist').select('product_slug').eq('user_id', session.user.id);
+    if (!error && data) {
+      // Merge with local (optional, or just overwrite)
+      const slugs = data.map(d => d.product_slug);
+      // Fetch full product info for these slugs if needed, or just keep slugs
+      // For UI consistency, we usually need the full product object
+    }
   },
   has(slug) { return this.items.some(i => i.slug === slug); },
   updateUI() {
@@ -342,12 +370,31 @@ function initHeaderScroll() {
 }
 
 // ========== ANNOUNCEMENT BAR ==========
-function initAnnouncementBar() {
-  const items = document.querySelector('.announcement-bar__items');
-  if (!items) return;
-  const clone = items.cloneNode(true);
-  clone.setAttribute('aria-hidden', 'true');
-  items.parentElement.appendChild(clone);
+async function initAnnouncementBar() {
+  const bar = document.querySelector('.announcement-bar');
+  const itemsContainer = document.querySelector('.announcement-bar__items');
+  if (!bar || !itemsContainer) return;
+
+  try {
+    const { data, error } = await window.supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'announcement_text')
+      .single();
+
+    if (!error && data) {
+      // Repeat the text to ensure the marquee loop is smooth
+      const text = data.value;
+      itemsContainer.innerHTML = Array(8).fill(`<span class="announcement-bar__item">${text}</span>`).join('');
+      
+      // Clone for infinite loop
+      const clone = itemsContainer.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      itemsContainer.parentElement.appendChild(clone);
+    }
+  } catch (e) {
+    console.error('Error loading announcement:', e);
+  }
 }
 
 // ========== NEWSLETTER ==========
@@ -358,17 +405,29 @@ function initNewsletter() {
     e.preventDefault();
     const btn = form.querySelector('button');
     const input = form.querySelector('input');
-    const originalText = btn.textContent;
+    const email = input.value.trim();
     
     btn.textContent = 'Menyimpan...';
     btn.disabled = true;
 
-    // Simulate API call for now (can be connected to a real DB table later)
-    setTimeout(() => {
+    try {
+      const { error } = await window.supabase
+        .from('newsletter_subscribers')
+        .insert([{ email }]);
+
+      if (error) {
+        if (error.code === '23505') throw new Error('Email sudah terdaftar!');
+        throw error;
+      }
+
       btn.textContent = 'Berhasil! ✓';
       input.value = '';
       showToast('Terima kasih! Anda telah terdaftar di newsletter kami.');
-    }, 800);
+    } catch (err) {
+      showToast(err.message || 'Gagal mendaftar newsletter.');
+      btn.textContent = 'Daftar';
+      btn.disabled = false;
+    }
   };
 }
 
@@ -606,6 +665,15 @@ function initSearch() {
           <input type="text" placeholder="Cari produk..." class="search-overlay__input" id="search-overlay-input"/>
           <button id="search-overlay-close" class="search-overlay__close">✕</button>
         </div>
+        <div id="popular-searches" class="search-overlay__popular">
+           <h4 style="font-size: 0.8rem; letter-spacing: 2px; color: #999; margin-bottom: 20px;">POPULAR COLLECTIONS</h4>
+           <div style="display: flex; gap: 15px; flex-wrap: wrap;" id="popular-list">
+             <a href="/category.html?filter=homedress" style="text-decoration:none; padding: 8px 16px; border: 1px solid #eee; border-radius: 4px; color: #333; font-size: 0.9rem;">Homedress</a>
+             <a href="/category.html?filter=one-set" style="text-decoration:none; padding: 8px 16px; border: 1px solid #eee; border-radius: 4px; color: #333; font-size: 0.9rem;">One Set</a>
+             <a href="/category.html?filter=new-in" style="text-decoration:none; padding: 8px 16px; border: 1px solid #eee; border-radius: 4px; color: #333; font-size: 0.9rem;">New Arrival</a>
+             <a href="/category.html?filter=flash-sale" style="text-decoration:none; padding: 8px 16px; border: 1px solid #eee; border-radius: 4px; color: #333; font-size: 0.9rem;">Flash Sale ⚡</a>
+           </div>
+        </div>
         <div class="search-overlay__results" id="search-results"></div>
       </div>
     `;
@@ -617,19 +685,35 @@ function initSearch() {
 
   const sInput = document.getElementById('search-overlay-input');
   const sResults = document.getElementById('search-results');
+  const popular = document.getElementById('popular-searches');
   let timeout;
 
   sInput.oninput = () => {
     clearTimeout(timeout);
     const q = sInput.value.trim();
-    if (q.length < 2) { sResults.innerHTML = ''; return; }
+    if (q.length === 0) { 
+      sResults.innerHTML = ''; 
+      popular.style.display = 'block';
+      return; 
+    }
+    popular.style.display = 'none';
+    if (q.length < 2) return;
+
     timeout = setTimeout(async () => {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      const prods = data.products || [];
+      const { data, error } = await window.supabase
+        .from('products')
+        .select('*')
+        .ilike('name', `%${q}%`)
+        .limit(10);
+      
+      const prods = data || [];
+      if (prods.length === 0) {
+        sResults.innerHTML = '<p style="padding: 20px; color: #999;">Tidak menemukan produk dengan nama tersebut.</p>';
+        return;
+      }
       sResults.innerHTML = prods.map(p => `
         <a href="/product.html?slug=${p.slug}" class="search-result-item">
-          <img src="${p.images[0]}" />
+          <img src="${(Array.isArray(p.images) ? p.images[0] : (p.images || '/images/placeholder.jpg'))}" />
           <div><p>${p.name}</p><span>Rp ${p.price.toLocaleString('id-ID')}</span></div>
         </a>
       `).join('');
@@ -756,10 +840,71 @@ function initCategoryPagination(products = []) {
 }
 
 // ========== CHECKOUT PAGE ==========
-function initCheckoutPage() {
+async function initCheckoutPage() {
   const form = document.getElementById('checkout-form');
   const summary = document.getElementById('checkout-summary');
+  const shippingContainer = document.getElementById('shipping-options');
+  const provinceInput = form?.querySelector('[name="province"]');
   if (!form || !summary) return;
+
+  let selectedShipping = null;
+  let shippingMethods = [];
+  let currentProvince = '';
+
+  const fetchShippingOptions = async (province = '') => {
+    if (shippingContainer) shippingContainer.innerHTML = '<p style="color: #888;">Menghitung ongkir...</p>';
+    
+    try {
+      // Fetch base methods
+      const { data: methods } = await window.supabase.from('shipping_methods').select('*').eq('is_active', true);
+      
+      // Fetch rates for province
+      const { data: rates } = await window.supabase.from('shipping_rates').select('*').eq('province', province || 'Jawa Timur');
+      
+      shippingMethods = (methods || []).map(m => {
+        const rate = (rates || []).find(r => r.courier_id === m.id) || (rates || []).find(r => r.province === 'Luar Jawa' && r.courier_id === m.id);
+        return {
+          ...m,
+          final_cost: parseFloat(m.base_cost) + (rate ? parseFloat(rate.additional_cost) : 0),
+          estimation: rate ? rate.estimated_days : '3-5 hari'
+        };
+      });
+
+      if (shippingContainer && shippingMethods.length > 0) {
+        shippingContainer.innerHTML = shippingMethods.map((m, i) => `
+          <label class="shipping-option" style="display:flex; align-items:center; gap:12px; padding:16px; border:1px solid #eee; border-radius:8px; margin-bottom:12px; cursor:pointer;">
+            <input type="radio" name="shipping_method" value="${m.code}" ${i===0?'checked':''} data-cost="${m.final_cost}" />
+            <div style="flex:1;">
+              <p style="font-weight:600; margin:0;">${m.name}</p>
+              <p style="font-size:0.85rem; color:#888; margin:0;">Estimasi ${m.estimation}</p>
+            </div>
+            <span style="font-weight:600;">Rp ${parseInt(m.final_cost).toLocaleString('id-ID')}</span>
+          </label>
+        `).join('');
+
+        shippingContainer.querySelectorAll('input').forEach(input => {
+          input.onchange = () => {
+            selectedShipping = shippingMethods.find(m => m.code === input.value);
+            renderSummary();
+          };
+        });
+        selectedShipping = shippingMethods[0];
+        renderSummary();
+      }
+    } catch (e) { console.error('Error fetching shipping:', e); }
+  };
+
+  // Listen for province change
+  if (provinceInput) {
+    provinceInput.onchange = (e) => {
+      currentProvince = e.target.value;
+      fetchShippingOptions(currentProvince);
+    };
+    // Initial fetch
+    fetchShippingOptions(provinceInput.value);
+  } else {
+    fetchShippingOptions();
+  }
 
   const renderSummary = () => {
     const items = CART.items;
@@ -769,15 +914,15 @@ function initCheckoutPage() {
     }
 
     const subtotal = CART.total();
-    const shipping = subtotal >= 200000 ? 0 : 15000;
-    const total = subtotal + shipping;
+    const shippingCost = selectedShipping ? parseFloat(selectedShipping.final_cost) : 0;
+    const total = subtotal + shippingCost;
 
     summary.innerHTML = `
       <div class="checkout-summary-list">
         ${items.map(item => `
           <div class="summary-item" style="display:flex; gap:12px; margin-bottom:16px; align-items:center;">
             <div style="position:relative;">
-              <img src="${item.img || '/images/placeholder.jpg'}" style="width:64px; height:64px; object-fit:cover; border-radius:4px;" />
+              <img src="${(Array.isArray(item.images) ? item.images[0] : (item.images || item.img || '/images/placeholder.jpg'))}" style="width:64px; height:64px; object-fit:cover; border-radius:4px;" />
               <span style="position:absolute; top:-8px; right:-8px; background:#000; color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem;">${item.qty}</span>
             </div>
             <div style="flex:1;">
@@ -790,7 +935,7 @@ function initCheckoutPage() {
       </div>
       <div style="border-top:1px solid #eee; margin-top:20px; padding-top:20px;">
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Subtotal</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Ongkos Kirim</span><span>${shipping === 0 ? 'GRATIS' : 'Rp ' + shipping.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Ongkos Kirim</span><span>Rp ${shippingCost.toLocaleString('id-ID')}</span></div>
         <div style="display:flex; justify-content:space-between; margin-top:16px; font-weight:800; font-size:1.8rem;"><span>TOTAL</span><span>Rp ${total.toLocaleString('id-ID')}</span></div>
       </div>
     `;

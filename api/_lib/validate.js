@@ -58,6 +58,7 @@ export function validateCheckoutInput(body) {
       province: (body.province || '').trim().substring(0, 100),
       notes: (body.notes || '').trim().substring(0, 500),
       payment_method: body.payment_method || 'transfer',
+      shipping_method: body.shipping_method || 'jne_reg',
       items: (body.items || []).map(item => ({
         product_id: item.product_id,
         quantity: Math.min(Math.max(parseInt(item.quantity) || 1, 1), 100),

@@ -29,6 +29,11 @@ async function checkData() {
   const { data: featured, error: fError } = await supabase.from('featured_sections').select('title, is_active');
   if (fError) console.error(fError);
   else console.log(featured);
+
+  console.log('--- USER PROFILES ---');
+  const { data: profiles, error: prError } = await supabase.from('user_profiles').select('*').limit(3);
+  if (prError) console.error(prError);
+  else console.log(profiles);
 }
 
 checkData();

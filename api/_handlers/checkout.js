@@ -82,10 +82,33 @@ export default async function handler(req, res) {
       };
     });
 
-    const shippingCost = subtotal >= 200000 ? 0 : 15000; // Free shipping >200k
+    // Fetch shipping cost from DB
+    let shippingCost = 15000;
+    if (sanitized.shipping_method) {
+      const { data: sMethod } = await supabaseAdmin
+        .from('shipping_methods')
+        .select('base_cost')
+        .eq('code', sanitized.shipping_method)
+        .single();
+      if (sMethod) shippingCost = parseFloat(sMethod.base_cost);
+    }
+
     const total = subtotal + shippingCost;
 
-    // 5. GENERATE ORDER NUMBER
+    // 5. STOCK CHECK
+    const { data: stockCheck } = await supabaseAdmin
+      .from('products')
+      .select('id, name, stock')
+      .in('slug', productSlugs);
+    
+    for (const item of sanitized.items) {
+      const dbProd = (stockCheck || []).find(p => p.id === productMap[item.product_id]?.id);
+      if (dbProd && dbProd.stock < item.quantity) {
+        return res.status(400).json({ error: `Maaf, stok "${dbProd.name}" tidak mencukupi (Tersisa: ${dbProd.stock})` });
+      }
+    }
+
+    // 6. GENERATE ORDER NUMBER
     const { data: orderNumData, error: orderNumError } = await supabaseAdmin
       .rpc('generate_order_number');
 
