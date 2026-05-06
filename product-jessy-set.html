@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Detail | HOMEDRESS_NA</title>
+  <meta name="description" content="Shop premium homedress, athleisure, and lifestyle fashion at HOMEDRESS_NA." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div id="announcement-bar" class="announcement-bar">
+    <div class="announcement-bar__track">
+      <div class="announcement-bar__items">
+        <span class="announcement-bar__item">SPRING SALE NOW LIVE</span>
+        <span class="announcement-bar__item">Shop in store - Liverpool One</span>
+        <span class="announcement-bar__item">SPRING SALE NOW LIVE</span>
+        <span class="announcement-bar__item">Shop in store - Liverpool One</span>
+        <span class="announcement-bar__item">SPRING SALE NOW LIVE</span>
+        <span class="announcement-bar__item">Shop in store - Liverpool One</span>
+        <span class="announcement-bar__item">SPRING SALE NOW LIVE</span>
+        <span class="announcement-bar__item">Shop in store - Liverpool One</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header id="header" class="header">
+    <div class="header__inner">
+      <div class="header__left">
+        <div class="header__search-bar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search products..." class="header__search-input" />
+        </div>
+      </div>
+      <div class="header__center">
+        <a href="/" id="logo" class="header__logo">HOMEDRESS_NA</a>
+      </div>
+      <div class="header__right">
+        <span class="header__currency">Rp IDR</span>
+        <button class="header__icon-btn" aria-label="Account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <button class="header__icon-btn" aria-label="Wishlist">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <button id="cart-toggle" class="header__icon-btn header__cart-btn" aria-label="Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav id="dynamic-nav" class="header__nav">
+  <div class="header__nav-item"><a href="/" class="header__nav-link">Beranda</a></div>
+
+  <!-- FLASH SALE MEGA MENU -->
+  <div class="header__nav-item">
+    <a href="/category.html?filter=flash-sale" class="header__nav-link" style="color: var(--color-accent);">Flash Sale ⚡ <span class="nav-arrow">▼</span></a>
+    <div class="header__megamenu">
+      <div class="megamenu__inner">
+        <div class="megamenu__col" style="min-width: 250px;">
+          <h4 class="megamenu__title">SPESIAL FLASH SALE</h4>
+          <ul class="megamenu__list">
+            <li><a href="/category.html?filter=flash-sale">Semua Item Flash Sale</a></li>
+            <li><a href="/category.html?filter=cantika-set" style="color: var(--color-accent); font-weight: bold;">↳ Cantika Set (Special)</a></li>
+            <li><a href="/category.html?filter=jessy-set" style="color: var(--color-accent); font-weight: bold;">↳ Jessy Set (Baru!)</a></li>
+          </ul>
+        </div>
+        <div class="megamenu__featured">
+          <h4 class="megamenu__title">FLASH SALE HIGHLIGHT</h4>
+          <div class="megamenu__grid megamenu__grid--4">
+            <a href="/product.html?id=setelan-hitam-olahraga-santai" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="" /></div>
+              <span>Setelan Flash Sale</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEST SELLER MEGA MENU -->
+  <div class="header__nav-item">
+    <a href="/category.html?filter=best-seller" class="header__nav-link">Best Seller 🔥 <span class="nav-arrow">▼</span></a>
+    <div class="header__megamenu">
+      <div class="megamenu__inner">
+        <div class="megamenu__col" style="min-width: 250px;">
+          <h4 class="megamenu__title">PALING DIMINATI</h4>
+          <ul class="megamenu__list">
+            <li><a href="/category.html?filter=terlaris-minggu">Terlaris Minggu Ini</a></li>
+            <li><a href="/category.html?filter=terlaris-bulan">Terlaris Bulan Ini</a></li>
+            <li><a href="/category.html?filter=rating-tinggi">Produk Rating Tinggi ⭐</a></li>
+            <li><a href="/category.html?filter=repeat-order">Repeat Order Terbanyak</a></li>
+            <li><a href="/category.html?filter=viral">Lagi Viral 🔥</a></li>
+          </ul>
+        </div>
+        <div class="megamenu__featured">
+          <h4 class="megamenu__title">KAMI REKOMENDASIKAN</h4>
+          <div class="megamenu__grid megamenu__grid--4">
+            <a href="/product.html?id=setelan-santai-mint-premium" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-19_ecd62676-bd1a-4b2f-a5d3-ed2d838d8217.png" alt="" /></div>
+              <span>Setelan Viral</span>
+            </a>
+            <a href="/product.html?id=paket-bundling-2-dress" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png" alt="" /></div>
+              <span>Homedress Nyaman</span>
+            </a>
+            <a href="/product.html?id=t-shirt-santai-abu" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png" alt="" /></div>
+              <span>Top Rating</span>
+            </a>
+            <a href="/product.html?id=setelan-hitam-polos" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/13_2a0325a5-7366-447c-b9f4-18f8ccb48248.png" alt="" /></div>
+              <span>Paling Laku</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="header__nav-item"><a href="/category.html?filter=new-in" class="header__nav-link">New Arrival</a></div>
+
+  <!-- SEMUA PRODUK MEGA MENU -->
+  <div class="header__nav-item">
+    <a href="/category.html" class="header__nav-link">Semua Produk <span class="nav-arrow">▼</span></a>
+    <div class="header__megamenu">
+      <div class="megamenu__inner">
+        <div class="megamenu__col" style="min-width: 250px;">
+          <h4 class="megamenu__title">KATALOG</h4>
+          <ul class="megamenu__list">
+            <li><a href="/category.html">Semua Item</a></li>
+            <li><a href="/category.html?filter=dress">Dress / Homedress</a></li>
+            <li><a href="/category.html?filter=setelan">Setelan</a></li>
+            <li><a href="/category.html?filter=atasan">Atasan</a></li>
+            <li><a href="/category.html?filter=bawahan">Bawahan</a></li>
+            <li><a href="/category.html?filter=new-in">New Arrival ✨</a></li>
+            <li><a href="/category.html?filter=restock">Restock 🔄</a></li>
+            <li><a href="/category.html?filter=viral">Lagi Viral 🔥</a></li>
+          </ul>
+        </div>
+        <div class="megamenu__featured">
+          <h4 class="megamenu__title">PILIHAN KAMI</h4>
+          <div class="megamenu__grid megamenu__grid--4">
+            <a href="/product.html?id=setelan-santai-mint-premium" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png" alt="" /></div>
+              <span>Setelan Nyaman</span>
+            </a>
+            <a href="/product.html?id=dress-kasual-navy-blue" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-22_95380a0c-9058-49dc-bafa-b6a272ab8fce.png" alt="" /></div>
+              <span>Dress Kasual</span>
+            </a>
+            <a href="/product.html?id=atasan-piyama-lengan-panjang" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/Untitled_design_29917e1b-5767-46fd-a07a-802abac5ece3.png" alt="" /></div>
+              <span>Piyama Premium</span>
+            </a>
+            <a href="/product.html?id=daster-modern-motif-bunga" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-18.png" alt="" /></div>
+              <span>Homedress Santai</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMO HARI INI MEGA MENU -->
+  <div class="header__nav-item">
+    <a href="/category.html?filter=promo" class="header__nav-link header__nav-link--sale">Promo Hari Ini 💸 <span class="nav-arrow">▼</span></a>
+    <div class="header__megamenu">
+      <div class="megamenu__inner">
+        <div class="megamenu__col" style="min-width: 250px;">
+          <h4 class="megamenu__title">PROMO & DISKON</h4>
+          <ul class="megamenu__list">
+            <li><a href="/flash-sale.html">Flash Sale ⚡</a></li>
+            <li><a href="/diskon-10-30.html">Diskon 10–30%</a></li>
+            <li><a href="/diskon-50.html">Diskon 50%++ 🔥</a></li>
+            <li><a href="/bundling.html">Bundling Hemat</a></li>
+            <li><a href="/clearance.html">Clearance Sale</a></li>
+          </ul>
+        </div>
+        <div class="megamenu__featured">
+          <h4 class="megamenu__title">SPESIAL DISKON</h4>
+          <div class="megamenu__grid megamenu__grid--4">
+            <a href="/product.html?id=paket-bundling-2-dress" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/45964E36-0747-4AB6-8315-23B1C57EA16E.jpg" alt="" /></div>
+              <span>Bundling Hemat</span>
+            </a>
+            <a href="/product.html?id=setelan-hitam-olahraga-santai" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="" /></div>
+              <span>Clearance -50%</span>
+            </a>
+            <a href="/product.html?id=daster-modern-motif-bunga" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/12_4c153cfc-80b6-4d22-8abe-0576d6ea0a01.png" alt="" /></div>
+              <span>Flash Sale Item</span>
+            </a>
+            <a href="/product.html?id=celana-pendek-santai" class="megamenu__card">
+              <div class="megamenu__img-wrap"><img src="/images/629F5E92-479F-4E54-AE27-6D738460207B.jpg" alt="" /></div>
+              <span>Gratis Ongkir</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="header__nav-item">
+    <a href="/category.html" class="header__nav-link">EXPLORE <span class="nav-arrow">▼</span></a>
+    <div class="header__megamenu" style="height: max-content;">
+      <div class="megamenu__inner">
+        <div class="megamenu__col" style="border: none;">
+          <h4 class="megamenu__title">EXPLORE</h4>
+          <ul class="megamenu__list">
+            <li><a href="/about-us.html">About us</a></li>
+            <li><a href="/blog-rayon-vs-crinkle-airflow.html" style="color: var(--color-accent); font-weight: bold;">Blog: Rayon vs Crinkle</a></li>
+            <li><a href="/faq.html">FAQs</a></li>
+            <li><a href="/store-locator.html">Store Locator</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+  </header>
+
+<main style="padding-top: 130px; padding-bottom: 80px;">
+  <div class="pdp-container">
+    <!-- BREADCRUMBS -->
+    <div class="breadcrumbs pdp-breadcrumbs">
+      <a href="/">Home</a> / <a href="/category.html">Semua Produk</a> / <span id="pdp-breadcrumb-name">Loading...</span>
+    </div>
+
+    <div class="pdp-layout">
+      <!-- LEFT: GALLERY (dynamic) -->
+      <div class="pdp-gallery" id="pdp-gallery"></div>
+
+      <!-- RIGHT: INFO (dynamic) -->
+      <div class="pdp-info">
+        <div class="pdp-info__sticky" id="pdp-info-content">
+          <p style="padding:60px 0;text-align:center;color:var(--color-fg-light);">Memuat produk...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  <section class="section pdp-related">
+    <div class="section__header pdp-related__header">
+      <h2 class="section__title">You may also like</h2>
+      <a href="/category.html" class="section__link">SHOP NOW</a>
+    </div>
+    <div class="product-grid product-grid--5" id="pdp-related-grid"></div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer id="footer" class="footer">
+    <div class="footer__inner">
+      <div class="footer__newsletter">
+        <h3 class="footer__newsletter-title">Newsletter</h3>
+        <p class="footer__newsletter-text">Sign up for latest news and releases.</p>
+        <form class="footer__newsletter-form" id="newsletter-form">
+          <input type="email" placeholder="Email Address" class="footer__newsletter-input" required />
+          <button type="submit" class="footer__newsletter-btn">Subscribe</button>
+        </form>
+        <p class="footer__connect">Connect: <a href="https://www.tiktok.com/@homedress_na" class="footer__social-link" target="_blank">TikTok ↗</a> | <a href="#" class="footer__social-link">Instagram ↗</a></p>
+      </div>
+      <div class="footer__links-group">
+        <h4 class="footer__links-title">SHOP</h4>
+        <a href="/category.html?filter=dress" class="footer__link">Clothing</a>
+        <a href="/category.html" class="footer__link">Footwear</a>
+        <a href="/category.html" class="footer__link">Accessories</a>
+        <a href="/category.html" class="footer__link">Gift Cards</a>
+      </div>
+      <div class="footer__links-group">
+        <h4 class="footer__links-title">EXPLORE</h4>
+        <a href="/about-us.html" class="footer__link">About Us</a>
+        <a href="/blog.html" class="footer__link">Blog</a>
+        <a href="/store-locator.html" class="footer__link">Store Locator</a>
+      </div>
+      <div class="footer__links-group">
+        <h4 class="footer__links-title">CUSTOMER CARE</h4>
+        <a href="/return-policy.html" class="footer__link">Start A Return</a>
+        <a href="/contact.html" class="footer__link">Contact Us</a>
+        <a href="/shipping-policy.html" class="footer__link">Shipping Policy</a>
+        <a href="/return-policy.html" class="footer__link">Return Policy</a>
+        <a href="/faq.html" class="footer__link">FAQs</a>
+      <div class="footer__links-group" style="flex: 1.5;">
+        <h4 class="footer__links-title">HUBUNGI KAMI</h4>
+        <p style="color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px;">
+          <strong>HOMEDRESS_NA</strong><br>
+          Jl. Pakaian Nyaman No. 1<br>
+          Jakarta Selatan, DKI Jakarta
+        </p>
+        <p style="color: #888; font-size: 0.9rem; line-height: 1.6;">
+          <strong>WhatsApp:</strong><br>
+          <a href="https://wa.me/6285216854492" target="_blank" style="color: var(--color-accent); text-decoration: none;">+62 852-1685-4492</a>
+        </p>
+        <div class="footer__map-container">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.24009778263!2d106.749008!3d-6.2297465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x100c5e82dd4b820!2sJakarta%20Selatan%2C%20Kota%20Jakarta%20Selatan%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" class="footer__map-iframe" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__bottom-left">
+        <a href="/terms.html" class="footer__bottom-link">Term & Conditions</a>
+        <a href="/privacy.html" class="footer__bottom-link">Privacy Policy</a>
+      </div>
+      <div class="footer__bottom-center"><span>© 2026 HOMEDRESS_NA</span></div>
+      <div class="footer__bottom-right">
+        <div class="footer__payment-icons">
+          <span class="payment-icon">💳</span><span class="payment-icon">💳</span><span class="payment-icon">💳</span><span class="payment-icon">💳</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/products-data.js"></script>
+  <script type="module" src="/main.js"></script>
+  <script type="module">
+  document.addEventListener('DOMContentLoaded', async function() {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    
+    if (!slug) {
+      window.location.href = '/category.html';
+      return;
+    }
+
+    let product = null;
+    let allProducts = [];
+
+    try {
+      // 1. Fetch main product
+      const res = await fetch(`/api/products?slug=${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        product = data.product;
+      }
+
+      // 2. Fetch related products (for the "You may also like" section)
+      const relatedRes = await fetch('/api/products?limit=5');
+      if (relatedRes.ok) {
+        const data = await relatedRes.json();
+        allProducts = data.products || [];
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
+    
+    if (!product) {
+      document.getElementById('pdp-info-content').innerHTML = `
+        <div style="padding:60px 0;text-align:center;">
+          <h2 style="margin-bottom:16px;">Produk tidak ditemukan</h2>
+          <p style="color:#666; margin-bottom:24px;">Maaf, produk yang Anda cari mungkin sudah tidak tersedia atau link salah.</p>
+          <a href="/category.html" class="btn btn--primary" style="padding:12px 24px; text-decoration:none;">Lihat Semua Produk</a>
+        </div>`;
+      return;
+    }
+
+    // NORMALIZE
+    product.brand = product.brand || 'HOMEDRESS_NA';
+    product.images = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? JSON.parse(product.images) : []);
+    product.variants = Array.isArray(product.variants) ? product.variants : (typeof product.variants === 'string' ? JSON.parse(product.variants) : []);
+    product.details = Array.isArray(product.details) ? product.details : (typeof product.details === 'string' ? JSON.parse(product.details) : []);
+    
+    document.title = `${product.name} | HOMEDRESS_NA`;
+    const bc = document.getElementById('pdp-breadcrumb-name');
+    if (bc) bc.textContent = product.name;
+
+    // 1. GALLERY
+    const gallery = document.getElementById('pdp-gallery');
+    let galleryHTML = '';
+    if (product.images.length > 0) {
+      product.images.forEach((img, i) => {
+        galleryHTML += `
+          <div class="pdp-gallery__item pdp-gallery__item--full">
+            <img src="${img}" alt="${product.name}" class="pdp-gallery__img" loading="lazy" />
+          </div>`;
+      });
+    } else {
+      galleryHTML = '<div class="pdp-gallery__item pdp-gallery__item--full"><img src="/images/placeholder.jpg" class="pdp-gallery__img" /></div>';
+    }
+    gallery.innerHTML = galleryHTML;
+
+    // 1. UPDATE SEO METADATA
+    if (product) {
+      document.title = `${product.name} | HOMEDRESS_NA`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', product.description || `Beli ${product.name} di HOMEDRESS_NA. Kualitas premium, harga terjangkau.`);
+    }
+
+    // 2. VARIANTS PROCESSING
+    let colors = [...new Set(product.variants.map(v => v.color).filter(Boolean))];
+    let sizes = [...new Set(product.variants.map(v => v.size).filter(Boolean))];
+    let selectedColor = colors[0] || null;
+    let selectedSize = sizes[0] || null;
+
+    function updatePrice() {
+      let currentPrice = product.price;
+      let currentOriginalPrice = product.original_price || product.price;
+      
+      const matchingVar = product.variants.find(v => 
+        (!selectedColor || v.color === selectedColor) && 
+        (!selectedSize || v.size === selectedSize)
+      );
+      
+      if (matchingVar && matchingVar.price) currentPrice = matchingVar.price;
+      
+      const discount = currentOriginalPrice > currentPrice ? Math.round((1 - currentPrice / currentOriginalPrice) * 100) : 0;
+      const pContainer = document.getElementById('dynamic-price-container');
+      
+      if (pContainer) {
+        if (discount > 0) {
+          pContainer.innerHTML = `
+            <span class="pdp-info__price pdp-info__price--sale">Rp ${currentPrice.toLocaleString('id-ID')}</span>
+            <span class="pdp-info__price pdp-info__price--original">Rp ${currentOriginalPrice.toLocaleString('id-ID')}</span>
+            <span class="pdp-info__badge">-${discount}% OFF</span>`;
+        } else {
+          pContainer.innerHTML = `<span class="pdp-info__price">Rp ${currentPrice.toLocaleString('id-ID')}</span>`;
+        }
+      }
+      return currentPrice;
+    }
+
+    // 3. RENDER INFO PANEL
+    let variantsHTML = '';
+    if (colors.length > 0) {
+      variantsHTML += `
+        <div class="pdp-size">
+          <span class="pdp-size__label">WARNA: <strong id="selected-color-name">${selectedColor}</strong></span>
+          <div class="pdp-size__grid">
+            ${colors.map(c => `<button class="pdp-size__btn color-btn ${c === selectedColor ? 'pdp-size__btn--active' : ''}" data-value="${c}">${c}</button>`).join('')}
+          </div>
+        </div>`;
+    }
+    if (sizes.length > 0) {
+      variantsHTML += `
+        <div class="pdp-size">
+          <span class="pdp-size__label">UKURAN: <strong id="selected-size-name">${selectedSize}</strong></span>
+          <div class="pdp-size__grid">
+            ${sizes.map(s => `<button class="pdp-size__btn size-btn ${s === selectedSize ? 'pdp-size__btn--active' : ''}" data-value="${s}">${s}</button>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('pdp-info-content').innerHTML = `
+      <h2 class="pdp-info__brand">${product.brand}</h2>
+      <h1 class="pdp-info__title">${product.name}</h1>
+      <div class="pdp-info__price-row" id="dynamic-price-container"></div>
+      ${variantsHTML}
+      <button class="pdp-btn-cart" id="btn-add-to-cart">TAMBAH KE KERANJANG</button>
+      <div class="pdp-accordions">
+        <details class="pdp-accordion" open>
+          <summary class="pdp-accordion__summary">Deskripsi Produk <span>+</span></summary>
+          <div class="pdp-accordion__content">${product.description || 'Tidak ada deskripsi.'}</div>
+        </details>
+        ${product.details.length > 0 ? `
+        <details class="pdp-accordion">
+          <summary class="pdp-accordion__summary">Detail Material <span>+</span></summary>
+          <div class="pdp-accordion__content"><ul>${product.details.map(d => `<li>${d}</li>`).join('')}</ul></div>
+        </details>` : ''}
+      </div>
+    `;
+
+    // 4. ATTACH EVENTS
+    document.querySelectorAll('.color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('pdp-size__btn--active'));
+        btn.classList.add('pdp-size__btn--active');
+        selectedColor = btn.dataset.value;
+        document.getElementById('selected-color-name').textContent = selectedColor;
+        updatePrice();
+      });
+    });
+
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('pdp-size__btn--active'));
+        btn.classList.add('pdp-size__btn--active');
+        selectedSize = btn.dataset.value;
+        document.getElementById('selected-size-name').textContent = selectedSize;
+        updatePrice();
+      });
+    });
+
+    updatePrice();
+
+    // 5. RELATED PRODUCTS
+    const relatedGrid = document.getElementById('pdp-related-grid');
+    if (relatedGrid) {
+      const related = allProducts.filter(p => p.slug !== product.slug).slice(0, 5);
+      relatedGrid.innerHTML = related.map(p => `
+        <div class="product-card" onclick="window.location.href='/product.html?slug=${p.slug}'">
+          <div class="product-card__image-wrapper">
+            <img src="${p.images?.[0] || ''}" alt="${p.name}" class="product-card__image" loading="lazy" />
+          </div>
+          <div class="product-card__info">
+            <p class="product-card__name">${p.name}</p>
+            <p class="product-card__price">Rp ${p.price.toLocaleString('id-ID')}</p>
+          </div>
+        </div>`).join('');
+    }
+
+    // 6. ADD TO CART
+    document.getElementById('btn-add-to-cart').addEventListener('click', () => {
+      const price = updatePrice();
+      if (window.CART) {
+        window.CART.add({
+          id: product.slug,
+          name: product.name,
+          price: price,
+          images: product.images,
+          img: Array.isArray(product.images) ? product.images[0] : product.images,
+          size: selectedSize,
+          color: selectedColor,
+          qty: 1
+        });
+        showToast(`${product.name} berhasil ditambah!`);
+      }
+    });
+  });
+  </script>
+</body>
+</html>

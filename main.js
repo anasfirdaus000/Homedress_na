@@ -491,9 +491,10 @@ async function initDynamicMenus() {
         
         const html = rootMenus.map(m => {
           let children = menus.filter(c => c.parent_id === m.id);
+          const labelLower = m.label.toLowerCase();
           
           // Special Case: Auto-populate 'Kategori' if it has no children in DB
-          if (m.label.toLowerCase().includes('kategori') && children.length === 0) {
+          if (labelLower.includes('kategori') && children.length === 0) {
             children = categories.map(cat => ({
               label: cat.name,
               custom_url: `/category.html?filter=${cat.slug}`
@@ -501,20 +502,58 @@ async function initDynamicMenus() {
           }
 
           if (children.length > 0) {
-            return `
-              <div class="header__nav-item has-dropdown">
-                <a href="${m.custom_url || '#'}" class="header__nav-link">
-                  ${m.label} <span class="nav-arrow">▼</span>
-                </a>
-                <div class="header__dropdown">
-                  <ul class="dropdown__list">
-                    ${children.map(c => `
-                      <li><a href="${c.custom_url || `/category.html?filter=${c.category_slug}`}">${c.label}</a></li>
-                    `).join('')}
-                  </ul>
+            // Check if we should use Mega Menu (more than 5 items or 'Kategori')
+            const isMega = children.length > 5 || labelLower.includes('kategori') || labelLower.includes('explore');
+
+            if (isMega) {
+              return `
+                <div class="header__nav-item has-megamenu">
+                  <a href="${m.custom_url || '#'}" class="header__nav-link">
+                    ${m.label} <span class="nav-arrow">▼</span>
+                  </a>
+                  <div class="header__megamenu">
+                    <div class="megamenu__inner">
+                      <div class="megamenu__col megamenu__col--list">
+                        <h4 class="megamenu__title">${labelLower.includes('kategori') ? 'SHOP BY CATEGORIES' : 'EXPLORE'}</h4>
+                        <ul class="megamenu__list">
+                          ${children.map(c => `
+                            <li><a href="${c.custom_url || `/category.html?filter=${c.category_slug}`}">${c.label}</a></li>
+                          `).join('')}
+                        </ul>
+                        ${labelLower.includes('kategori') ? '<a href="/category.html" class="megamenu__all-btn">VIEW ALL CATEGORIES →</a>' : ''}
+                      </div>
+                      <div class="megamenu__col megamenu__col--featured">
+                        <h4 class="megamenu__title">FEATURED COLLECTIONS</h4>
+                        <div class="megamenu__featured-grid">
+                          ${products.slice(0, 4).map(p => `
+                            <a href="/product.html?slug=${p.slug}" class="megamenu__card">
+                              <div class="megamenu__img-wrap"><img src="${p.images[0]}" alt="${p.name}" /></div>
+                              <span class="megamenu__card-name">${p.name}</span>
+                            </a>
+                          `).join('')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            `;
+              `;
+            } else {
+              // Standard Dropdown for smaller menus
+              return `
+                <div class="header__nav-item has-dropdown">
+                  <a href="${m.custom_url || '#'}" class="header__nav-link">
+                    ${m.label} <span class="nav-arrow">▼</span>
+                  </a>
+                  <div class="header__dropdown">
+                    <ul class="dropdown__list">
+                      ${children.map(c => `
+                        <li><a href="${c.custom_url || `/category.html?filter=${c.category_slug}`}">${c.label}</a></li>
+                      `).join('')}
+                    </ul>
+                  </div>
+                </div>
+              `;
+            }
           } else {
             return `
               <div class="header__nav-item">
