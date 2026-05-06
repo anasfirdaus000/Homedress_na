@@ -633,11 +633,14 @@ async function initDynamicHome(products = [], featured = []) {
   const homeNewArrivals = document.getElementById('home-new-arrivals');
   const flashSaleGrid = document.getElementById('flash-sale-grid');
   
+  const newProds = products.filter(p => Array.isArray(p.category) && p.category.includes('new-in')).slice(0, 10);
+  const finalNewProds = newProds.length > 0 ? newProds : products.slice(0, 10);
+
   if (newInGrid) {
-    newInGrid.innerHTML = products.slice(0, 10).map(createCard).join('');
+    newInGrid.innerHTML = finalNewProds.map(createCard).join('');
   }
   if (homeNewArrivals) {
-    homeNewArrivals.innerHTML = products.slice(0, 10).map(createCard).join('');
+    homeNewArrivals.innerHTML = finalNewProds.map(createCard).join('');
   }
   if (flashSaleGrid) {
     // Only show products with 'featured-promo' tag on homepage, max 5
@@ -863,6 +866,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNewsletter();
   initParallax();
   initScrollAnimations();
+  initPromoPopup();
   
   // Show Skeletons immediately
   showSkeletons('new-in-grid', 4);
@@ -949,8 +953,12 @@ function initCategoryPagination(products = []) {
     } else if (filter === 'best-seller') {
       filtered = products.filter(p => p.social_proof?.toLowerCase().includes('terlaris') || p.rating >= 4.5 || (Array.isArray(p.category) && p.category.includes('best-seller')));
     } else if (filter === 'new-in') {
-      filtered = products.filter(p => (Array.isArray(p.category) && p.category.includes('new-in'))).slice(0, 15);
-      if (filtered.length === 0) filtered = products.slice(0, 12);
+      // Show products with manual 'new-in' tag OR show the latest 20 products
+      filtered = products.filter(p => (Array.isArray(p.category) && p.category.includes('new-in')));
+      if (filtered.length < 5) {
+        // Fallback to latest products if manually selected are few or none
+        filtered = products.slice(0, 20);
+      }
     } else {
       const fLower = filter.toLowerCase();
       filtered = products.filter(p => {
@@ -1225,5 +1233,26 @@ async function initBlogPage() {
         </a>
       `).join('');
     }
+  }
+}
+
+function initPromoPopup() {
+  const popup = document.getElementById('promo-popup');
+  const closeBtn = document.getElementById('promo-close');
+  if (!popup) return;
+
+  // Show after 3 seconds
+  setTimeout(() => {
+    // Only show if user hasn't closed it in this session
+    if (!sessionStorage.getItem('promo-closed')) {
+      popup.classList.add('is-visible');
+    }
+  }, 3000);
+
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      popup.classList.remove('is-visible');
+      sessionStorage.setItem('promo-closed', 'true');
+    };
   }
 }

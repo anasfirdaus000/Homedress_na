@@ -2674,84 +2674,8 @@ input {
 }
 
 /* ========================================= */
-/* 33. FLOATING PROMO POPUP                  */
+/* 34. OTHER UTILITIES                      */
 /* ========================================= */
-.promo-popup {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 100;
-  max-width: 300px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  border-radius: 12px;
-  overflow: hidden;
-  animation: slideUp 0.5s ease-out;
-}
-
-.promo-popup__content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.promo-popup__badge {
-  display: inline-block;
-  background: var(--color-accent);
-  color: #000;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 4px;
-  width: max-content;
-}
-
-.promo-popup__title {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.promo-popup__text {
-  font-size: 0.85rem;
-  color: var(--color-fg-light);
-  margin: 0 0 12px 0;
-}
-
-.promo-popup__btn {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background: var(--color-fg);
-  color: var(--color-bg);
-  text-align: center;
-  font-weight: 500;
-  text-transform: uppercase;
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.promo-popup__btn:hover {
-  background: var(--color-accent);
-  color: #000;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-  .promo-popup {
-    bottom: 80px; /* Above mobile navbar if any */
-    right: 16px;
-    max-width: calc(100% - 32px);
-  }
-}
 
 /* =========================================
    REPRIMO BANNER (PINNED SECTIONS)

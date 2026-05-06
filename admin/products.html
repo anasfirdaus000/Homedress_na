@@ -86,6 +86,10 @@
                   <input type="checkbox" id="prod-all-promo" style="width:20px; height:20px; cursor:pointer;" />
                   <label for="prod-all-promo" style="color:#27ae60; font-weight:bold; cursor:pointer;">🛍️ Tampilkan di Halaman Daftar Promo (View All)</label>
                 </div>
+                <div style="display:flex; align-items:center; gap:10px; border-top: 1px solid rgba(255,215,0,0.2); padding-top:10px;">
+                  <input type="checkbox" id="prod-new-in" style="width:20px; height:20px; cursor:pointer;" />
+                  <label for="prod-new-in" style="color:#3498db; font-weight:bold; cursor:pointer;">🆕 Tampilkan di New In This Week (Beranda)</label>
+                </div>
               </div>
             </div>
             
@@ -354,6 +358,7 @@
       // Featured Promo Checkboxes
       document.getElementById('prod-featured-promo').checked = cats.includes('featured-promo');
       document.getElementById('prod-all-promo').checked = cats.includes('all-promo');
+      document.getElementById('prod-new-in').checked = cats.includes('new-in');
 
       // Set Variants
       variantsTbody.innerHTML = '';
@@ -447,6 +452,12 @@
         if (!selectedCats.includes('all-promo')) selectedCats.push('all-promo');
       } else {
         selectedCats = selectedCats.filter(c => c !== 'all-promo');
+      }
+
+      if (document.getElementById('prod-new-in').checked) {
+        if (!selectedCats.includes('new-in')) selectedCats.push('new-in');
+      } else {
+        selectedCats = selectedCats.filter(c => c !== 'new-in');
       }
 
       const productData = {
