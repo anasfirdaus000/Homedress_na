@@ -641,7 +641,7 @@ async function initDynamicHome(products = [], featured = []) {
   }
   if (flashSaleGrid) {
     // Only show products with 'featured-promo' tag on homepage, max 5
-    const saleProds = products.filter(p => p.discount > 0 && Array.isArray(p.category) && p.category.includes('featured-promo')).slice(0, 5);
+    const saleProds = products.filter(p => Array.isArray(p.category) && p.category.includes('featured-promo')).slice(0, 5);
     flashSaleGrid.innerHTML = saleProds.length ? saleProds.map(createCard).join('') : '<p style="padding:20px; color:#999; text-align:center; grid-column:1/-1;">Belum ada promo unggulan yang dipilih.</p>';
   }
 
@@ -937,8 +937,15 @@ function initCategoryPagination(products = []) {
       titleEl.textContent = prettyTitle;
     }
 
-    if (filter === 'flash-sale') {
-      filtered = products.filter(p => p.discount > 0 || (Array.isArray(p.category) && p.category.includes('flash-sale')));
+    if (filter === 'flash-sale' || filter === 'promo') {
+      // Show products with all-promo OR featured-promo tag
+      filtered = products.filter(p => 
+        (Array.isArray(p.category) && (p.category.includes('all-promo') || p.category.includes('featured-promo')))
+      );
+      // Fallback: if none selected manually, show all discounted products
+      if (filtered.length === 0) {
+        filtered = products.filter(p => p.discount > 0);
+      }
     } else if (filter === 'best-seller') {
       filtered = products.filter(p => p.social_proof?.toLowerCase().includes('terlaris') || p.rating >= 4.5 || (Array.isArray(p.category) && p.category.includes('best-seller')));
     } else if (filter === 'new-in') {

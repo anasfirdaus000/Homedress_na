@@ -77,9 +77,15 @@
               <div id="dynamic-categories-container" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#222;padding:12px;border-radius:8px;border:1.5px solid #333;">
                 <p style="color:#888;">Memuat kategori...</p>
               </div>
-              <div style="margin-top:12px; padding:12px; background:rgba(255,215,0,0.1); border:1.5px dashed gold; border-radius:8px; display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="prod-featured-promo" style="width:20px; height:20px; cursor:pointer;" />
-                <label for="prod-featured-promo" style="color:gold; font-weight:bold; cursor:pointer;">⭐ Tampilkan sebagai Unggulan di Promo Hari Ini (Beranda)</label>
+              <div style="margin-top:12px; padding:12px; background:rgba(255,215,0,0.1); border:1.5px dashed gold; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <input type="checkbox" id="prod-featured-promo" style="width:20px; height:20px; cursor:pointer;" />
+                  <label for="prod-featured-promo" style="color:gold; font-weight:bold; cursor:pointer;">⭐ Tampilkan sebagai Unggulan di Promo Hari Ini (Beranda)</label>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; border-top: 1px solid rgba(255,215,0,0.2); padding-top:10px;">
+                  <input type="checkbox" id="prod-all-promo" style="width:20px; height:20px; cursor:pointer;" />
+                  <label for="prod-all-promo" style="color:#27ae60; font-weight:bold; cursor:pointer;">🛍️ Tampilkan di Halaman Daftar Promo (View All)</label>
+                </div>
               </div>
             </div>
             
@@ -345,8 +351,9 @@
       const cats = p.category || [];
       catCheckboxes.forEach(cb => { cb.checked = cats.includes(cb.value); });
 
-      // Featured Promo Checkbox
+      // Featured Promo Checkboxes
       document.getElementById('prod-featured-promo').checked = cats.includes('featured-promo');
+      document.getElementById('prod-all-promo').checked = cats.includes('all-promo');
 
       // Set Variants
       variantsTbody.innerHTML = '';
@@ -429,11 +436,17 @@
       // Get selected categories
       let selectedCats = Array.from(document.querySelectorAll('input[name="prod-category"]:checked')).map(cb => cb.value);
 
-      // Add featured-promo tag if checked
+      // Add promo tags if checked
       if (document.getElementById('prod-featured-promo').checked) {
         if (!selectedCats.includes('featured-promo')) selectedCats.push('featured-promo');
       } else {
         selectedCats = selectedCats.filter(c => c !== 'featured-promo');
+      }
+      
+      if (document.getElementById('prod-all-promo').checked) {
+        if (!selectedCats.includes('all-promo')) selectedCats.push('all-promo');
+      } else {
+        selectedCats = selectedCats.filter(c => c !== 'all-promo');
       }
 
       const productData = {
