@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey);
 
 async function checkData() {
   console.log('--- PRODUCTS ---');
-  const { data: products, error: pError } = await supabase.from('products').select('slug, name, is_active');
+  const { data: products, error: pError } = await supabase.from('products').select('*').limit(3);
   if (pError) console.error(pError);
   else console.log(products);
 

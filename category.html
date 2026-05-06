@@ -31,201 +31,28 @@
   <!-- HEADER -->
   <header id="header" class="header header--transparent">
     <div class="header__inner">
-      <div class="header__left">
-        <div class="header__search-bar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search products..." class="header__search-input" />
-        </div>
-      </div>
+      <div class="header__left"></div>
       <div class="header__center">
         <a href="/" id="logo" class="header__logo">HOMEDRESS_NA</a>
       </div>
       <div class="header__right">
         <span class="header__currency">Rp IDR</span>
-        <button class="header__icon-btn" aria-label="Account">
+        <a href="/account.html" class="header__icon-btn" aria-label="Account">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </button>
-        <button class="header__icon-btn" aria-label="Wishlist">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
+        </a>
         <button id="cart-toggle" class="header__icon-btn header__cart-btn" aria-label="Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         </button>
       </div>
     </div>
-    <nav id="dynamic-nav" class="header__nav">
-  <div class="header__nav-item"><a href="/" class="header__nav-link">Beranda</a></div>
+    <nav id="dynamic-nav" class="header__nav"></nav>
+  </header>
 
-  <!-- FLASH SALE MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/category.html?filter=flash-sale" class="header__nav-link" style="color: var(--color-accent);">Flash Sale ⚡ <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">SPESIAL FLASH SALE</h4>
-          <ul class="megamenu__list">
-            <li><a href="/category.html?filter=flash-sale">Semua Item Flash Sale</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">FLASH SALE HIGHLIGHT</h4>
-          <div class="megamenu__grid megamenu__grid--4">
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="" /></div>
-              <span>Setelan Flash Sale</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BEST SELLER MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/category.html?filter=best-seller" class="header__nav-link">Best Seller 🔥 <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">PALING DIMINATI</h4>
-          <ul class="megamenu__list">
-            <li><a href="/category.html?filter=terlaris-minggu">Terlaris Minggu Ini</a></li>
-            <li><a href="/category.html?filter=terlaris-bulan">Terlaris Bulan Ini</a></li>
-            <li><a href="/category.html?filter=rating-tinggi">Produk Rating Tinggi ⭐</a></li>
-            <li><a href="/category.html?filter=repeat-order">Repeat Order Terbanyak</a></li>
-            <li><a href="/category.html?filter=viral">Lagi Viral 🔥</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">KAMI REKOMENDASIKAN</h4>
-          <div class="megamenu__grid megamenu__grid--4">
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-19_ecd62676-bd1a-4b2f-a5d3-ed2d838d8217.png" alt="" /></div>
-              <span>Setelan Viral</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png" alt="" /></div>
-              <span>Homedress Nyaman</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png" alt="" /></div>
-              <span>Top Rating</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/13_2a0325a5-7366-447c-b9f4-18f8ccb48248.png" alt="" /></div>
-              <span>Paling Laku</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="header__nav-item"><a href="/category.html?filter=new-in" class="header__nav-link">New Arrival</a></div>
-
-  <!-- SEMUA PRODUK MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/category.html" class="header__nav-link">Semua Produk <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">KATALOG</h4>
-          <ul class="megamenu__list">
-            <li><a href="/category.html">Semua Item</a></li>
-            <li><a href="/category.html?filter=dress">Dress / Homedress</a></li>
-            <li><a href="/category.html?filter=setelan">Setelan</a></li>
-            <li><a href="/category.html?filter=atasan">Atasan</a></li>
-            <li><a href="/category.html?filter=bawahan">Bawahan</a></li>
-            <li><a href="/category.html?filter=new-in">New Arrival ✨</a></li>
-            <li><a href="/category.html?filter=restock">Restock 🔄</a></li>
-            <li><a href="/category.html?filter=viral">Lagi Viral 🔥</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">PILIHAN KAMI</h4>
-          <div class="megamenu__grid megamenu__grid--4">
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png" alt="" /></div>
-              <span>Setelan Nyaman</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-22_95380a0c-9058-49dc-bafa-b6a272ab8fce.png" alt="" /></div>
-              <span>Dress Kasual</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/Untitled_design_29917e1b-5767-46fd-a07a-802abac5ece3.png" alt="" /></div>
-              <span>Piyama Premium</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/Untitled_design-18.png" alt="" /></div>
-              <span>Homedress Santai</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROMO HARI INI MEGA MENU -->
-  <div class="header__nav-item">
-    <a href="/category.html?filter=promo" class="header__nav-link header__nav-link--sale">Promo Hari Ini 💸 <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="min-width: 250px;">
-          <h4 class="megamenu__title">PROMO & DISKON</h4>
-          <ul class="megamenu__list">
-            <li><a href="/category.html?filter=flash-sale">Flash Sale ⚡</a></li>
-            <li><a href="/category.html?filter=diskon-10-30">Diskon 10–30%</a></li>
-            <li><a href="/category.html?filter=diskon-50">Diskon 50%++ 🔥</a></li>
-            <li><a href="/category.html?filter=bundling">Bundling Hemat</a></li>
-            <li><a href="/category.html?filter=clearance">Clearance Sale</a></li>
-          </ul>
-        </div>
-        <div class="megamenu__featured">
-          <h4 class="megamenu__title">SPESIAL DISKON</h4>
-          <div class="megamenu__grid megamenu__grid--4">
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/45964E36-0747-4AB6-8315-23B1C57EA16E.jpg" alt="" /></div>
-              <span>Bundling Hemat</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="" /></div>
-              <span>Clearance -50%</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/12_4c153cfc-80b6-4d22-8abe-0576d6ea0a01.png" alt="" /></div>
-              <span>Flash Sale Item</span>
-            </a>
-            <a href="/product.html" class="megamenu__card">
-              <div class="megamenu__img-wrap"><img src="/images/629F5E92-479F-4E54-AE27-6D738460207B.jpg" alt="" /></div>
-              <span>Gratis Ongkir</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="header__nav-item">
-    <a href="/category.html" class="header__nav-link">EXPLORE <span class="nav-arrow">▼</span></a>
-    <div class="header__megamenu" style="height: max-content;">
-      <div class="megamenu__inner">
-        <div class="megamenu__col" style="border: none;">
-          <h4 class="megamenu__title">EXPLORE</h4>
-          <ul class="megamenu__list">
-            <li><a href="/about-us.html">About us</a></li>
-            <li><a href="/blog-rayon-vs-crinkle-airflow.html" style="color: var(--color-accent); font-weight: bold;">Blog: Rayon vs Crinkle</a></li>
-            <li><a href="/faq.html">FAQs</a></li>
-            <li><a href="/store-locator.html">Store Locator</a></li>
-          </ul>
-        </div>
-      </div>
-  </div>
-</nav>
-</header><main style="padding-top: 160px; min-height: 80vh;">
+<main style="padding-top: 160px; min-height: 80vh;">
   <section class="section shop-category">
     <div class="section__header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
       <div>
-        <h1 class="section__title" style="font-size: 2.5rem; margin-bottom: 8px;">Semua Produk</h1>
+        <h1 class="section__title" id="category-title" style="font-size: 2.5rem; margin-bottom: 8px;">Semua Produk</h1>
         <p id="pagination-count-text" style="color:var(--color-fg-light); margin-bottom: 20px;"></p>
       </div>
       <div class="sort-wrap" style="margin-bottom: 20px;">

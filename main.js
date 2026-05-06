@@ -696,6 +696,7 @@ function initCategoryPagination(products = []) {
   const grid = document.getElementById('category-product-grid');
   const sortSelect = document.getElementById('category-sort');
   const countText = document.getElementById('pagination-count-text');
+  const titleEl = document.getElementById('category-title');
   if (!grid) return;
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -703,10 +704,30 @@ function initCategoryPagination(products = []) {
   
   let filtered = [...products];
   if (filter) {
-    if (filter === 'flash-sale') filtered = products.filter(p => p.discount > 0);
-    else if (filter === 'best-seller') filtered = products.filter(p => p.social_proof?.toLowerCase().includes('terlaris') || p.rating >= 4.5);
-    else if (filter === 'new-in') filtered = products.slice(0, 12);
-    else filtered = products.filter(p => p.category_slug === filter || p.category_id === filter);
+    if (titleEl) {
+      // Set title based on filter
+      const prettyTitle = filter.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      titleEl.textContent = prettyTitle;
+    }
+
+    if (filter === 'flash-sale') {
+      filtered = products.filter(p => p.discount > 0 || (Array.isArray(p.category) && p.category.includes('flash-sale')));
+    } else if (filter === 'best-seller') {
+      filtered = products.filter(p => p.social_proof?.toLowerCase().includes('terlaris') || p.rating >= 4.5 || (Array.isArray(p.category) && p.category.includes('best-seller')));
+    } else if (filter === 'new-in') {
+      filtered = products.filter(p => (Array.isArray(p.category) && p.category.includes('new-in'))).slice(0, 15);
+      if (filtered.length === 0) filtered = products.slice(0, 12);
+    } else {
+      const fLower = filter.toLowerCase();
+      filtered = products.filter(p => {
+        const pCats = Array.isArray(p.category) ? p.category.map(c => c.toLowerCase()) : [];
+        // Match slug, or includes in array, or mapping common names
+        return pCats.includes(fLower) || 
+               (fLower === 'one-set' && pCats.includes('setelan')) ||
+               (fLower === 'dress' && pCats.includes('homedress')) ||
+               (p.category_slug && p.category_slug.toLowerCase() === fLower);
+      });
+    }
   }
 
   const render = (data) => {
