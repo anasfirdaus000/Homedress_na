@@ -12,9 +12,14 @@
   </style>
 </head>
 <body>
+  <!-- HEADER -->
   <header id="header" class="header">
     <div class="header__inner">
-      <a href="/" class="header__logo">HOMEDRESS_NA</a>
+      <div class="header__left"></div>
+      <div class="header__center">
+        <a href="/" class="header__logo">HOMEDRESS_NA</a>
+      </div>
+      <div class="header__right"></div>
     </div>
   </header>
 
@@ -23,9 +28,34 @@
     <p class="subtitle">Temukan jawaban untuk pertanyaan yang paling sering diajukan.</p>
     
     <div id="faq-container">
-      <div style="text-align:center; padding:40px; color:#888;">Memuat FAQ...</div>
+      <!-- FAQ content can be added here -->
+      <div class="faq-item" style="margin-bottom: 24px; border-bottom: 1px solid #eee; padding-bottom: 16px;">
+        <h3 style="margin-bottom: 8px;">Berapa lama waktu pengiriman?</h3>
+        <p style="color: #666; line-height: 1.6;">Pengiriman biasanya memakan waktu 2-4 hari kerja untuk wilayah Jabodetabek, dan 3-7 hari kerja untuk luar wilayah tersebut.</p>
+      </div>
+      <div class="faq-item" style="margin-bottom: 24px; border-bottom: 1px solid #eee; padding-bottom: 16px;">
+        <h3 style="margin-bottom: 8px;">Apakah bisa bayar di tempat (COD)?</h3>
+        <p style="color: #666; line-height: 1.6;">Saat ini kami hanya menerima pembayaran otomatis melalui QRIS dan Virtual Account untuk memastikan pesanan diproses lebih cepat.</p>
+      </div>
     </div>
   </main>
+
+  <footer id="footer" class="footer">
+    <div class="footer__inner">
+      <div class="footer__newsletter">
+        <h3 class="footer__newsletter-title">Newsletter</h3>
+        <p class="footer__newsletter-text">Dapatkan info promo terbaru langsung di email Anda.</p>
+        <form class="footer__newsletter-form">
+          <input type="email" placeholder="Email Address" class="footer__newsletter-input" required />
+          <button type="submit" class="footer__newsletter-btn">Subscribe</button>
+        </form>
+      </div>
+      <div id="dynamic-footer-links" style="display: contents;"></div>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__bottom-center">© 2026 HOMEDRESS_NA</div>
+    </div>
+  </footer>
 
   <script type="module" src="/main.js"></script>
 </body>
