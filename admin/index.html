@@ -227,7 +227,9 @@
         // Stats
         document.getElementById('stat-total-orders').textContent = orders.length;
         document.getElementById('stat-pending').textContent = orders.filter(o => o.status === 'pending').length;
-        const revenue = orders.filter(o => !['cancelled'].includes(o.status)).reduce((sum, o) => sum + o.total, 0);
+        
+        // REVENUE: Exclude pending and cancelled
+        const revenue = orders.filter(o => !['cancelled', 'pending'].includes(o.status)).reduce((sum, o) => sum + o.total, 0);
         document.getElementById('stat-revenue').textContent = 'Rp ' + revenue.toLocaleString('id-ID');
         document.getElementById('stat-products').textContent = products.filter(p => p.is_active).length;
 
@@ -246,7 +248,7 @@
         }).reverse();
 
         const dailyData = last7Days.map(date => {
-          const dayOrders = orders.filter(o => o.created_at.startsWith(date) && o.status !== 'cancelled');
+          const dayOrders = orders.filter(o => o.created_at.startsWith(date) && !['cancelled', 'pending'].includes(o.status));
           return dayOrders.reduce((sum, o) => sum + o.total, 0);
         });
 
@@ -254,7 +256,7 @@
 
         // 2. Best Sellers
         const productSales = {};
-        orders.forEach(o => {
+        orders.filter(o => !['cancelled', 'pending'].includes(o.status)).forEach(o => {
           (o.order_items || []).forEach(item => {
             productSales[item.product_name] = (productSales[item.product_name] || 0) + item.quantity;
           });
@@ -309,4 +311,3 @@
   </script>
 </body>
 </html>
-
