@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsletter Subscribers | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+    .sidebar { width: 260px; background: #0f172a; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
+    
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; margin-bottom: 24px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; padding: 12px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
+    .table td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; }
+    
+    .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; font-size: 0.85rem; }
+    .btn--outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
+    .btn--danger { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2 style="margin-bottom: 40px; font-size: 1.2rem; letter-spacing: 1px;">ADMIN PANEL</h2>
+    <nav style="display: flex; flex-direction: column; gap: 10px;">
+      <a href="/admin/index.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Dashboard</a>
+      <a href="/admin/orders.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pesanan</a>
+      <a href="/admin/products.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Produk</a>
+      <a href="/admin/newsletter.html" class="btn btn--primary" style="text-align: left; background: #2563eb;">Newsletter</a>
+      <a href="/admin/settings.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pengaturan</a>
+    </nav>
+  </div>
+
+  <main class="main-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+      <div>
+        <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0;">Pelanggan Newsletter</h1>
+        <p style="color: #64748b; margin-top: 4px;">Daftar email yang berlangganan newsletter Anda.</p>
+      </div>
+      <button class="btn btn--outline" onclick="exportToCSV()">Export to CSV</button>
+    </div>
+
+    <div class="card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Tanggal Terdaftar</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="subscriber-list">
+          <tr><td colspan="3" style="text-align:center; padding:40px; color:#999;">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    async function loadSubscribers() {
+      const { data, error } = await supabase
+        .from('newsletter_subscribers')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      const tbody = document.getElementById('subscriber-list');
+      if (error || !data) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat data.</td></tr>';
+        return;
+      }
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:40px; color:#999;">Belum ada pelanggan terdaftar.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(s => `
+        <tr>
+          <td><strong>${s.email}</strong></td>
+          <td style="color: #64748b;">${new Date(s.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+          <td>
+            <button class="btn btn--danger" onclick="deleteSubscriber('${s.id}')">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.deleteSubscriber = async (id) => {
+      if (!confirm('Hapus email ini dari daftar?')) return;
+      const { error } = await supabase.from('newsletter_subscribers').delete().eq('id', id);
+      if (!error) loadSubscribers();
+    };
+
+    window.exportToCSV = () => {
+      // Logic for CSV export can be added here
+      alert('Fitur ekspor akan segera hadir!');
+    };
+
+    loadSubscribers();
+  </script>
+</body>
+</html>

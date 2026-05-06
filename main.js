@@ -27,20 +27,54 @@ function createCard(p) {
   const badgeHtml = discount > 0 ? `<div class="product-card__badge product-card__badge--sale">-${discount}% OFF</div>` : '';
   const socialBadge = p.social_proof ? `<div class="product-card__badge product-card__badge--social">${p.social_proof}</div>` : '';
 
+  const cardId = `prod-${Math.random().toString(36).substr(2, 9)}`;
+
   return `
-    <div class="product-card" data-slug="${slug}" onclick="window.location.href='/product.html?slug=${slug}'" style="cursor:pointer;" data-animate>
-      <div class="product-card__image-wrapper">
+    <div class="product-card" id="${cardId}" data-slug="${slug}" data-animate>
+      <div class="product-card__image-wrapper" onclick="window.location.href='/product.html?slug=${slug}'" style="cursor:pointer;">
         <img src="${images[0] || '/images/featured_images.png'}" alt="${p.name}" class="product-card__image" loading="lazy" />
         ${badgeHtml}
         ${socialBadge}
       </div>
       <div class="product-card__info">
         <p class="product-card__brand">${p.brand || 'HOMEDRESS_NA'}</p>
-        <p class="product-card__name">${p.name}</p>
-        <p class="product-card__price">${priceHtml}</p>
+        <p class="product-card__name" onclick="window.location.href='/product.html?slug=${slug}'" style="cursor:pointer;">${p.name}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <p class="product-card__price">${priceHtml}</p>
+          <button class="add-to-cart-quick" style="background:#000; color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:0.3s;" onclick="event.stopPropagation(); window.CART.add({id:'${p.id}', name:'${p.name.replace(/'/g, "\\'")}', price:${price}, images:${JSON.stringify(images).replace(/"/g, '&quot;')}, slug:'${slug}', size:'All Size'}, document.querySelector('#${cardId} .product-card__image'))">+</button>
+        </div>
       </div>
     </div>
   `;
+}
+
+function showSkeletons(containerId, count = 4) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = Array(count).fill(0).map(() => `
+    <div class="product-card">
+      <div class="skeleton skeleton-img"></div>
+      <div class="skeleton skeleton-text skeleton-title" style="margin-top:15px; width:100%;"></div>
+      <div class="skeleton skeleton-text skeleton-price" style="width:60%;"></div>
+    </div>
+  `).join('');
+}
+
+async function initDynamicHome(products = [], featured = []) {
+  const newInGrid = document.getElementById('new-in-grid');
+  const homeNewArrivals = document.getElementById('home-new-arrivals');
+  const flashSaleGrid = document.getElementById('flash-sale-grid');
+  
+  if (newInGrid) {
+    newInGrid.innerHTML = products.slice(0, 10).map(createCard).join('');
+  }
+  if (homeNewArrivals) {
+    homeNewArrivals.innerHTML = products.slice(0, 10).map(createCard).join('');
+  }
+  if (flashSaleGrid) {
+    const saleProds = products.filter(p => p.discount > 0).slice(0, 10);
+    flashSaleGrid.innerHTML = saleProds.length ? saleProds.map(createCard).join('') : '<p>Belum ada promo aktif.</p>';
+  }
 }
 
 function createMegaCard(p) {
@@ -170,6 +204,39 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('is-visible'), 3000);
 }
 
+// ========== UI ANIMATIONS ==========
+function animateFlyToCart(sourceImg) {
+  if (!sourceImg) return;
+  const cartIcon = document.getElementById('cart-toggle');
+  if (!cartIcon) return;
+
+  const rect = sourceImg.getBoundingClientRect();
+  const cartRect = cartIcon.getBoundingClientRect();
+
+  const flyer = sourceImg.cloneNode();
+  flyer.classList.add('fly-to-cart');
+  flyer.style.top = (rect.top + window.scrollY) + 'px';
+  flyer.style.left = rect.left + 'px';
+  flyer.style.width = rect.width + 'px';
+  flyer.style.height = rect.height + 'px';
+
+  document.body.appendChild(flyer);
+
+  requestAnimationFrame(() => {
+    flyer.style.top = (cartRect.top + window.scrollY) + 'px';
+    flyer.style.left = cartRect.left + 'px';
+    flyer.style.width = '20px';
+    flyer.style.height = '20px';
+    flyer.style.opacity = '0';
+  });
+
+  setTimeout(() => {
+    flyer.remove();
+    cartIcon.style.transform = 'scale(1.2)';
+    setTimeout(() => cartIcon.style.transform = 'scale(1)', 200);
+  }, 800);
+}
+
 // ========== CART SYSTEM ==========
 window.CART = {
   items: JSON.parse(localStorage.getItem('hd_cart') || '[]'),
@@ -179,13 +246,20 @@ window.CART = {
     renderCartDrawer();
     window.dispatchEvent(new CustomEvent('cart-updated'));
   },
-  add(item) {
+  add(item, sourceImg = null) {
+    if (sourceImg) animateFlyToCart(sourceImg);
+    
     const existing = this.items.find(i => i.id === item.id && i.size === item.size);
     if (existing) existing.qty += (item.qty || 1);
     else this.items.push({...item, qty: item.qty || 1});
     this.save();
-    showToast('Berhasil ditambah ke keranjang! 🛍️');
-    openCartDrawer();
+    
+    if (sourceImg) {
+      // Optional: don't open drawer immediately if flying
+    } else {
+      showToast('Berhasil ditambah ke keranjang! 🛍️');
+      openCartDrawer();
+    }
   },
   updateQty(idx, delta) {
     if (!this.items[idx]) return;
@@ -730,6 +804,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNewsletter();
   initParallax();
   initScrollAnimations();
+  
+  // Show Skeletons immediately
+  showSkeletons('new-in-grid', 4);
+  showSkeletons('home-new-arrivals', 4);
+  showSkeletons('flash-sale-grid', 4);
   
   CART.updateBadge();
   WISHLIST.updateUI();
