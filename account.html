@@ -165,7 +165,8 @@
           </div>
           <div style="text-align:right;">
             <div class="order-item__status status--${o.status}" style="margin-bottom:8px;">${o.status.toUpperCase()}</div>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; justify-content: flex-end;">
+              ${o.status === 'pending' ? `<a href="/order-confirmation.html?order=${o.order_number}" class="btn-track" style="background:var(--color-accent); color:#fff; border-color:var(--color-accent);">BAYAR SEKARANG</a>` : ''}
               <a href="/track-order.html?order_id=${o.order_number}&phone=${o.customer_phone}" class="btn-track">LACAK</a>
               <button onclick="viewOrderItems('${o.id}')" class="btn-track" style="background:#000;color:#fff;">DETAIL</button>
             </div>
