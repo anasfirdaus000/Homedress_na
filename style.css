@@ -240,6 +240,7 @@ input {
   padding: 8px;
   color: var(--color-fg);
   transition: opacity var(--transition-fast), color 0.3s ease;
+  position: relative;
 }
 
 .header__icon-btn:hover {
