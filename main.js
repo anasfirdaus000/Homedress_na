@@ -560,7 +560,6 @@ async function initEditorialSections() {
   const wrapper = document.getElementById('editorial-wrapper');
   if (!wrapper) return;
 
-  // Default fallback data
   const defaults = [
     { title: 'ELEGANSI<br/>HARIAN', desc: 'Homedress dirancang eksklusif dari bahan premium yang memberikan kilau sutra yang mewah di setiap helai.', bg_image: '/images/hero_editorial.png', product_image: '/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png', link: '/category.html?filter=homedress' },
     { title: 'KENYAMANAN<br/>MAKSIMAL', desc: 'Koleksi One Set dengan bahan rayon organik yang adem dan lembut di kulit.', bg_image: '/images/editorial_bag.png', product_image: '/images/8_4f54fd4f-987c-41db-8642-28fe4c0b8413.png', link: '/category.html?filter=one-set' },
@@ -580,25 +579,40 @@ async function initEditorialSections() {
         return defaults[i];
       });
     }
-  } catch(e) { /* use defaults */ }
+  } catch(e) {}
 
-  wrapper.innerHTML = sections.map((s, i) => `
-    <section class="editorial-pinned" id="pinned-${i+1}">
-      <div class="editorial-pinned__bg">
-        <img src="${s.bg_image}" alt="${s.title.replace(/<br\/?>/g, ' ')}" />
-      </div>
-      <div class="editorial-pinned__container">
-        <div class="editorial-pinned__content">
-          <h2 class="editorial-pinned__title">${s.title}</h2>
-          <p class="editorial-pinned__desc">${s.desc}</p>
-          <a href="${s.link}" class="editorial-pinned__cta">LIHAT PRODUK</a>
+  wrapper.innerHTML = sections.map((s, i) => {
+    const isVideo = s.product_image && (s.product_image.match(/\.(mp4|webm|mov)$/i) || s.product_image.includes('video') || s.product_image.includes('tiktok.com') || s.product_image.includes('youtube.com'));
+    
+    return `
+      <section class="editorial-pinned" id="pinned-${i+1}">
+        <div class="editorial-pinned__bg">
+          <img src="${s.bg_image}" alt="${s.title.replace(/<br\/?>/g, ' ')}" />
         </div>
-        <div class="editorial-pinned__highlight">
-          <img src="${s.product_image}" alt="Detail" />
+        <div class="editorial-pinned__container">
+          <div class="editorial-pinned__content">
+            <h2 class="editorial-pinned__title">${s.title}</h2>
+            <p class="editorial-pinned__desc">${s.desc}</p>
+            <a href="${s.link}" class="editorial-pinned__cta">LIHAT KOLEKSI</a>
+          </div>
+          <div class="editorial-pinned__highlight">
+            ${isVideo 
+              ? `<video src="${s.product_image}" autoplay loop muted playsinline class="editorial-pinned__video"></video>`
+              : `<img src="${s.product_image}" alt="Detail" />`
+            }
+          </div>
         </div>
-      </div>
-    </section>
-  `).join('');
+      </section>
+    `;
+  }).join('');
+
+  // Re-init observer for these new sections
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('is-visible');
+    });
+  }, { threshold: 0.3 });
+  wrapper.querySelectorAll('.editorial-pinned').forEach(el => obs.observe(el));
 }
 
 // ========== MAPS FROM DB ==========
