@@ -143,8 +143,8 @@
 
     // Auth guard
     const { data: { session } } = await supabase.auth.getSession();
-    const ADMIN_EMAIL = 'Homedressnaweb@gmail.com';
-    if (!session || session.user.email !== ADMIN_EMAIL) {
+    const ADMIN_EMAIL = 'homedressnaweb@gmail.com';
+    if (!session || session.user.email.toLowerCase() !== ADMIN_EMAIL) {
       if (session) await supabase.auth.signOut();
       window.location.href = '/admin/login.html?error=unauthorized';
       throw new Error('Unauthorized');

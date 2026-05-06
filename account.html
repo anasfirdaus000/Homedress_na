@@ -122,8 +122,8 @@
 
       currentUser = session.user;
       
-      const ADMIN_EMAIL = 'Homedressnaweb@gmail.com';
-      if (currentUser.email === ADMIN_EMAIL) {
+      const ADMIN_EMAIL = 'homedressnaweb@gmail.com';
+      if (currentUser.email.toLowerCase() === ADMIN_EMAIL) {
         window.location.href = '/admin/';
         return;
       }
