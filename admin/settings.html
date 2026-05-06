@@ -1,233 +1,108 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pengaturan Website | Admin HOMEDRESS_NA</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/admin/admin.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengaturan Toko | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+    .sidebar { width: 260px; background: #0f172a; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
+    
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; margin-bottom: 24px; }
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b; }
+    .form-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; }
+    
+    .btn { padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn--primary { background: #2563eb; color: #fff; }
+    .btn--outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
+  </style>
 </head>
 <body>
-  <div class="admin">
-    <aside class="sidebar">
-      <div class="sidebar__logo">HOMEDRESS_NA</div>
-      <p class="sidebar__subtitle">Admin Panel</p>
-      <nav class="sidebar__nav">
-        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
-        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
-        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
-        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
-        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
-        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
-        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
-        <a href="/admin/settings.html" class="sidebar__link sidebar__link--active">⚙️ Pengaturan Web</a>
-        <hr style="border-color:#333;margin:16px 0;" />
-        <a href="/" class="sidebar__link" target="_blank">🌐 Lihat Website</a>
-        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
-      </nav>
-    </aside>
-
-    <main class="admin-main">
-      <div class="admin-header">
-        <h1>⚙️ Pengaturan Website</h1>
-      </div>
-
-      <!-- ANNOUNCEMENT BAR -->
-      <div class="admin-card">
-        <div class="admin-card__header"><h2>📢 Announcement Bar</h2></div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Teks Pengumuman</label>
-          <input class="admin-form__input" id="set-announcement-text" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label"><input type="checkbox" id="set-announcement-active" /> Aktif</label>
-        </div>
-        <button class="admin-btn admin-btn--primary" onclick="saveSection('announcement_bar')">Simpan</button>
-      </div>
-
-      <!-- HERO BANNER -->
-      <div class="admin-card">
-        <div class="admin-card__header"><h2>🎨 Hero Banner</h2></div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Judul</label>
-          <input class="admin-form__input" id="set-hero-title" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Subtitle</label>
-          <input class="admin-form__input" id="set-hero-subtitle" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">CTA Text</label>
-          <input class="admin-form__input" id="set-hero-cta-text" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">CTA Link</label>
-          <input class="admin-form__input" id="set-hero-cta-link" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Background Image URL</label>
-          <input class="admin-form__input" id="set-hero-bg" />
-        </div>
-        <button class="admin-btn admin-btn--primary" onclick="saveSection('hero_banner')">Simpan</button>
-      </div>
-
-      <!-- FLASH SALE -->
-      <div class="admin-card">
-        <div class="admin-card__header"><h2>⚡ Flash Sale</h2></div>
-        <div class="admin-form__group">
-          <label class="admin-form__label"><input type="checkbox" id="set-flash-active" /> Aktif</label>
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Tanggal Berakhir</label>
-          <input type="datetime-local" class="admin-form__input" id="set-flash-end" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Teks Diskon</label>
-          <input class="admin-form__input" id="set-flash-text" />
-        </div>
-        <button class="admin-btn admin-btn--primary" onclick="saveSection('flash_sale')">Simpan</button>
-      </div>
-
-      <!-- PROMO POPUP -->
-      <div class="admin-card">
-        <div class="admin-card__header"><h2>🎁 Promo Popup</h2></div>
-        <div class="admin-form__group">
-          <label class="admin-form__label"><input type="checkbox" id="set-popup-active" /> Aktif</label>
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Judul</label>
-          <input class="admin-form__input" id="set-popup-title" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Deskripsi</label>
-          <input class="admin-form__input" id="set-popup-text" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">URL Gambar</label>
-          <input class="admin-form__input" id="set-popup-image" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Link / URL Tujuan</label>
-          <input class="admin-form__input" id="set-popup-link" placeholder="/product.html?id=... atau URL lengkap" />
-        </div>
-        <button class="admin-btn admin-btn--primary" onclick="saveSection('promo_popup')">Simpan</button>
-      </div>
-
-      <!-- SOCIAL LINKS -->
-      <div class="admin-card">
-        <div class="admin-card__header"><h2>🔗 Social Media</h2></div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">TikTok URL</label>
-          <input class="admin-form__input" id="set-social-tiktok" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">Instagram URL</label>
-          <input class="admin-form__input" id="set-social-instagram" />
-        </div>
-        <div class="admin-form__group">
-          <label class="admin-form__label">WhatsApp Number</label>
-          <input class="admin-form__input" id="set-social-whatsapp" />
-        </div>
-        <button class="admin-btn admin-btn--primary" onclick="saveSection('social_links')">Simpan</button>
-      </div>
-    </main>
+  <div class="sidebar">
+    <h2 style="margin-bottom: 40px; font-size: 1.2rem; letter-spacing: 1px;">ADMIN PANEL</h2>
+    <nav style="display: flex; flex-direction: column; gap: 10px;">
+      <a href="/admin/index.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Dashboard</a>
+      <a href="/admin/products.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Produk</a>
+      <a href="/admin/orders.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pesanan</a>
+      <a href="/admin/shipping.html" class="btn btn--outline" style="text-align: left; color: #fff; border-color: #334155;">Pengiriman</a>
+      <a href="/admin/settings.html" class="btn btn--primary" style="text-align: left;">Pengaturan</a>
+    </nav>
   </div>
+
+  <main class="main-content">
+    <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 32px;">Pengaturan Situs & Lokasi Toko</h1>
+
+    <div class="card">
+      <h2 style="margin-top: 0; margin-bottom: 24px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Alamat Asal Toko (Origin)
+      </h2>
+      <p style="color: #64748b; margin-bottom: 24px;">Alamat ini akan digunakan sebagai titik awal kalkulasi ongkir ke pembeli.</p>
+      
+      <form id="settings-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="form-group">
+            <label class="form-label">Provinsi Asal</label>
+            <input type="text" id="store_origin_province" class="form-input" placeholder="Contoh: Jawa Timur" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kota Asal</label>
+            <input type="text" id="store_origin_city" class="form-input" placeholder="Contoh: Malang" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teks Pengumuman (Announcement Bar)</label>
+          <input type="text" id="announcement_text" class="form-input" placeholder="Contoh: Diskon 50% untuk semua produk!" required />
+        </div>
+
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 24px; margin-top: 24px;">
+          <button type="submit" class="btn btn--primary" id="btn-save">Simpan Pengaturan</button>
+        </div>
+      </form>
+    </div>
+  </main>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '/admin/login.html'; throw new Error('Not auth'); }
-    const token = session.access_token;
-
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      window.location.href = '/admin/login.html';
-    });
-
-    let settings = {};
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
 
     async function loadSettings() {
-      const res = await fetch('/api/admin/settings');
-      const data = await res.json();
-      settings = data.settings || {};
-
-      // Announcement
-      const ann = settings.announcement_bar || {};
-      document.getElementById('set-announcement-text').value = ann.text || '';
-      document.getElementById('set-announcement-active').checked = ann.is_active !== false;
-
-      // Hero
-      const hero = settings.hero_banner || {};
-      document.getElementById('set-hero-title').value = hero.title || '';
-      document.getElementById('set-hero-subtitle').value = hero.subtitle || '';
-      document.getElementById('set-hero-cta-text').value = hero.cta_text || '';
-      document.getElementById('set-hero-cta-link').value = hero.cta_link || '';
-      document.getElementById('set-hero-bg').value = hero.bg_image || '';
-
-      // Flash sale
-      const flash = settings.flash_sale || {};
-      document.getElementById('set-flash-active').checked = flash.is_active !== false;
-      document.getElementById('set-flash-end').value = flash.end_date ? flash.end_date.substring(0, 16) : '';
-      document.getElementById('set-flash-text').value = flash.discount_text || '';
-
-      // Promo popup
-      const popup = settings.promo_popup || {};
-      document.getElementById('set-popup-active').checked = popup.is_active !== false;
-      document.getElementById('set-popup-title').value = popup.title || '';
-      document.getElementById('set-popup-text').value = popup.text || '';
-      document.getElementById('set-popup-image').value = popup.image || '';
-      document.getElementById('set-popup-link').value = popup.link || '';
-
-      // Social
-      const social = settings.social_links || {};
-      document.getElementById('set-social-tiktok').value = social.tiktok || '';
-      document.getElementById('set-social-instagram').value = social.instagram || '';
-      document.getElementById('set-social-whatsapp').value = social.whatsapp || '';
+      const { data } = await supabase.from('site_settings').select('key, value');
+      if (data) {
+        data.forEach(s => {
+          const el = document.getElementById(s.key);
+          if (el) el.value = s.value;
+        });
+      }
     }
 
-    window.saveSection = async function(key) {
-      let value = {};
+    document.getElementById('settings-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save');
+      btn.textContent = 'Menyimpan...';
+      btn.disabled = true;
 
-      if (key === 'announcement_bar') {
-        value = { text: document.getElementById('set-announcement-text').value, is_active: document.getElementById('set-announcement-active').checked };
-      } else if (key === 'hero_banner') {
-        value = { title: document.getElementById('set-hero-title').value, subtitle: document.getElementById('set-hero-subtitle').value, cta_text: document.getElementById('set-hero-cta-text').value, cta_link: document.getElementById('set-hero-cta-link').value, bg_image: document.getElementById('set-hero-bg').value };
-      } else if (key === 'flash_sale') {
-        value = { is_active: document.getElementById('set-flash-active').checked, end_date: document.getElementById('set-flash-end').value, discount_text: document.getElementById('set-flash-text').value };
-      } else if (key === 'promo_popup') {
-        value = { 
-          is_active: document.getElementById('set-popup-active').checked, 
-          title: document.getElementById('set-popup-title').value, 
-          text: document.getElementById('set-popup-text').value, 
-          image: document.getElementById('set-popup-image').value,
-          link: document.getElementById('set-popup-link').value 
-        };
-      } else if (key === 'social_links') {
-        value = { tiktok: document.getElementById('set-social-tiktok').value, instagram: document.getElementById('set-social-instagram').value, whatsapp: document.getElementById('set-social-whatsapp').value };
+      const keys = ['store_origin_province', 'store_origin_city', 'announcement_text'];
+      const updates = keys.map(k => ({
+        key: k,
+        value: document.getElementById(k).value
+      }));
+
+      for (const item of updates) {
+        await supabase.from('site_settings').upsert(item, { onConflict: 'key' });
       }
 
-      const res = await fetch('/api/admin/settings', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, value })
-      });
-
-      if (res.ok) { showToast('Pengaturan disimpan!'); }
-      else { const err = await res.json(); alert('Error: ' + err.error); }
+      alert('Pengaturan berhasil disimpan!');
+      btn.textContent = 'Simpan Pengaturan';
+      btn.disabled = false;
     };
-
-    function showToast(msg) {
-      const t = document.createElement('div');
-      t.className = 'admin-toast';
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
 
     loadSettings();
   </script>
 </body>
 </html>
-
