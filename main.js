@@ -980,33 +980,48 @@ async function initCheckoutPage() {
   let currentProvince = '';
 
   const fetchShippingOptions = async (province = '') => {
-    if (shippingContainer) shippingContainer.innerHTML = '<p style="color: #888;">Menghitung ongkir...</p>';
+    if (shippingContainer) shippingContainer.innerHTML = '<p style="color: #64748b; font-size: 0.95rem;">⏳ Menghitung ongkir...</p>';
     
     try {
       // Fetch base methods
-      const { data: methods } = await window.supabase.from('shipping_methods').select('*').eq('is_active', true);
+      const { data: methods, error: mError } = await window.supabase.from('shipping_methods').select('*').eq('is_active', true);
+      const { data: rates, error: rError } = await window.supabase.from('shipping_rates').select('*').eq('province', province || 'Jawa Timur');
       
-      // Fetch rates for province
-      const { data: rates } = await window.supabase.from('shipping_rates').select('*').eq('province', province || 'Jawa Timur');
-      
-      shippingMethods = (methods || []).map(m => {
-        const rate = (rates || []).find(r => r.courier_id === m.id) || (rates || []).find(r => r.province === 'Luar Jawa' && r.courier_id === m.id);
-        return {
-          ...m,
-          final_cost: parseFloat(m.base_cost) + (rate ? parseFloat(rate.additional_cost) : 0),
-          estimation: rate ? rate.estimated_days : '3-5 hari'
-        };
-      });
+      let finalMethods = [];
+
+      // If database is configured and has methods
+      if (methods && methods.length > 0) {
+        finalMethods = methods.map(m => {
+          const rate = (rates || []).find(r => r.courier_id === m.id) || (rates || []).find(r => r.province === 'Luar Jawa' && r.courier_id === m.id);
+          return {
+            ...m,
+            final_cost: parseFloat(m.base_cost) + (rate ? parseFloat(rate.additional_cost) : 0),
+            estimation: rate ? rate.estimated_days : '3-5 hari'
+          };
+        });
+      } else {
+        // FALLBACK: If database is not yet set up by admin, provide default methods
+        finalMethods = [
+          { code: 'jne_reg', name: 'JNE Reguler', final_cost: 15000, estimation: '2-3 hari' },
+          { code: 'jnt_ez', name: 'J&T Express', final_cost: 17000, estimation: '1-3 hari' }
+        ];
+        // Slight cost addition for non-java if using fallback (simple logic)
+        if (province && !province.toLowerCase().includes('jawa') && !province.toLowerCase().includes('jakarta') && !province.toLowerCase().includes('banten') && !province.toLowerCase().includes('bali')) {
+          finalMethods.forEach(m => m.final_cost += 20000);
+        }
+      }
+
+      shippingMethods = finalMethods;
 
       if (shippingContainer && shippingMethods.length > 0) {
         shippingContainer.innerHTML = shippingMethods.map((m, i) => `
-          <label class="shipping-option" style="display:flex; align-items:center; gap:12px; padding:16px; border:1px solid #eee; border-radius:8px; margin-bottom:12px; cursor:pointer;">
-            <input type="radio" name="shipping_method" value="${m.code}" ${i===0?'checked':''} data-cost="${m.final_cost}" />
+          <label class="shipping-option" style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:12px; cursor:pointer; transition: 0.2s;">
+            <input type="radio" name="shipping_method" value="${m.code}" ${i===0?'checked':''} data-cost="${m.final_cost}" style="accent-color: var(--color-accent); transform: scale(1.2);" />
             <div style="flex:1;">
-              <p style="font-weight:600; margin:0;">${m.name}</p>
-              <p style="font-size:0.85rem; color:#888; margin:0;">Estimasi ${m.estimation}</p>
+              <p style="font-weight:600; margin:0; font-size:1.05rem;">${m.name}</p>
+              <p style="font-size:0.85rem; color:#64748b; margin:4px 0 0 0;">Estimasi pengiriman ${m.estimation}</p>
             </div>
-            <span style="font-weight:600;">Rp ${parseInt(m.final_cost).toLocaleString('id-ID')}</span>
+            <span style="font-weight:700; font-size:1.1rem; color:var(--color-fg);">Rp ${parseInt(m.final_cost).toLocaleString('id-ID')}</span>
           </label>
         `).join('');
 
@@ -1019,7 +1034,10 @@ async function initCheckoutPage() {
         selectedShipping = shippingMethods[0];
         renderSummary();
       }
-    } catch (e) { console.error('Error fetching shipping:', e); }
+    } catch (e) { 
+      console.error('Error fetching shipping:', e); 
+      if (shippingContainer) shippingContainer.innerHTML = '<p style="color: #ef4444;">Gagal memuat metode pengiriman. Silakan muat ulang halaman.</p>';
+    }
   };
 
   // Listen for province change
