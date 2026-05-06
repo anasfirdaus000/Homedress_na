@@ -34,6 +34,9 @@ export default defineConfig({
         adminFeatured: 'admin/featured.html',
         adminMenus: 'admin/menus.html',
         adminSettings: 'admin/settings.html',
+        adminHero: 'admin/hero.html',
+        adminNewsletter: 'admin/newsletter.html',
+        adminShipping: 'admin/shipping.html',
       }
     }
   },

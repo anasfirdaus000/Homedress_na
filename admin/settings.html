@@ -102,11 +102,21 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div class="admin-form__group">
                 <label class="admin-form__label">URL Gambar Background</label>
-                <input class="admin-form__input" id="ed1-bg" placeholder="https://..." />
+                <div style="display:flex;gap:8px;">
+                  <input class="admin-form__input" id="ed1-bg" placeholder="https://..." style="flex:1;" />
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('upload-ed1-bg').click()">Upload</button>
+                  <input type="file" id="upload-ed1-bg" accept="image/*,video/*" style="display:none;" onchange="uploadMedia(this, 'ed1-bg', 'bg-status-1')" />
+                </div>
+                <span id="bg-status-1" style="font-size:0.8rem;"></span>
               </div>
               <div class="admin-form__group">
                 <label class="admin-form__label">URL Gambar Produk</label>
-                <input class="admin-form__input" id="ed1-img" placeholder="https://..." />
+                <div style="display:flex;gap:8px;">
+                  <input class="admin-form__input" id="ed1-img" placeholder="https://..." style="flex:1;" />
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('upload-ed1-img').click()">Upload</button>
+                  <input type="file" id="upload-ed1-img" accept="image/*,video/*" style="display:none;" onchange="uploadMedia(this, 'ed1-img', 'img-status-1')" />
+                </div>
+                <span id="img-status-1" style="font-size:0.8rem;"></span>
               </div>
             </div>
           </div>
@@ -130,11 +140,21 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div class="admin-form__group">
                 <label class="admin-form__label">URL Gambar Background</label>
-                <input class="admin-form__input" id="ed2-bg" />
+                <div style="display:flex;gap:8px;">
+                  <input class="admin-form__input" id="ed2-bg" style="flex:1;" />
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('upload-ed2-bg').click()">Upload</button>
+                  <input type="file" id="upload-ed2-bg" accept="image/*,video/*" style="display:none;" onchange="uploadMedia(this, 'ed2-bg', 'bg-status-2')" />
+                </div>
+                <span id="bg-status-2" style="font-size:0.8rem;"></span>
               </div>
               <div class="admin-form__group">
                 <label class="admin-form__label">URL Gambar Produk</label>
-                <input class="admin-form__input" id="ed2-img" />
+                <div style="display:flex;gap:8px;">
+                  <input class="admin-form__input" id="ed2-img" style="flex:1;" />
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('upload-ed2-img').click()">Upload</button>
+                  <input type="file" id="upload-ed2-img" accept="image/*,video/*" style="display:none;" onchange="uploadMedia(this, 'ed2-img', 'img-status-2')" />
+                </div>
+                <span id="img-status-2" style="font-size:0.8rem;"></span>
               </div>
             </div>
           </div>
@@ -158,11 +178,21 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div class="admin-form__group">
                 <label class="admin-form__label">URL Gambar Background</label>
-                <input class="admin-form__input" id="ed3-bg" />
+                <div style="display:flex;gap:8px;">
+                  <input class="admin-form__input" id="ed3-bg" style="flex:1;" />
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('upload-ed3-bg').click()">Upload</button>
+                  <input type="file" id="upload-ed3-bg" accept="image/*,video/*" style="display:none;" onchange="uploadMedia(this, 'ed3-bg', 'bg-status-3')" />
+                </div>
+                <span id="bg-status-3" style="font-size:0.8rem;"></span>
               </div>
               <div class="admin-form__group">
                 <label class="admin-form__label">URL Gambar Produk</label>
-                <input class="admin-form__input" id="ed3-img" />
+                <div style="display:flex;gap:8px;">
+                  <input class="admin-form__input" id="ed3-img" style="flex:1;" />
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('upload-ed3-img').click()">Upload</button>
+                  <input type="file" id="upload-ed3-img" accept="image/*,video/*" style="display:none;" onchange="uploadMedia(this, 'ed3-img', 'img-status-3')" />
+                </div>
+                <span id="img-status-3" style="font-size:0.8rem;"></span>
               </div>
             </div>
           </div>
@@ -171,28 +201,7 @@
         </form>
       </div>
 
-      <!-- SECTION 4: Brand Logos -->
-      <div class="settings-section">
-        <h3>🏷️ Logo Brand (Marquee Homepage)</h3>
-        <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Kelola logo brand yang muncul di homepage. Upload gambar logo via Cloudinary lalu paste URL-nya.</p>
-        <div id="logos-list" style="margin-bottom:16px;"></div>
-        <div style="display:flex;gap:8px;align-items:flex-end;">
-          <div class="admin-form__group" style="flex:1;margin:0;">
-            <label class="admin-form__label">URL Logo Baru</label>
-            <input class="admin-form__input" id="new-logo-url" placeholder="https://res.cloudinary.com/..." />
-          </div>
-          <div class="admin-form__group" style="width:180px;margin:0;">
-            <label class="admin-form__label">Alt Text</label>
-            <input class="admin-form__input" id="new-logo-alt" placeholder="Brand Name" />
-          </div>
-          <button class="admin-btn admin-btn--primary" id="add-logo-btn" style="height:42px;">+ Tambah</button>
-        </div>
-        <div style="margin-top:12px;">
-          <input type="file" id="logo-file-upload" accept="image/*" style="display:none;" />
-          <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('logo-file-upload').click()">📁 Upload File Logo</button>
-          <span id="logo-upload-status" style="font-size:0.8rem;margin-left:8px;"></span>
-        </div>
-      </div>
+
 
     </main>
   </div>
@@ -283,52 +292,11 @@
       alert('✅ Editorial sections disimpan!');
     };
 
-    // ========== BRAND LOGOS ==========
-    let _logos = [];
-
-    async function loadLogos() {
-      const val = await loadSetting('brand_logos');
-      _logos = val || [];
-      renderLogos();
-    }
-
-    function renderLogos() {
-      const list = document.getElementById('logos-list');
-      if (_logos.length === 0) {
-        list.innerHTML = '<p style="color:#888;">Belum ada logo. Tambahkan via form di bawah.</p>';
-        return;
-      }
-      list.innerHTML = _logos.map((l, i) => `
-        <div class="logo-item">
-          <img src="${l.url}" alt="${l.alt}" />
-          <span style="font-size:0.8rem;color:#888;">${l.alt}</span>
-          <button class="admin-btn admin-btn--danger admin-btn--small" onclick="removeLogo(${i})" style="padding:2px 8px;font-size:0.7rem;">✕</button>
-        </div>
-      `).join('');
-    }
-
-    window.removeLogo = async (index) => {
-      _logos.splice(index, 1);
-      await saveSetting('brand_logos', _logos);
-      renderLogos();
-    };
-
-    document.getElementById('add-logo-btn').addEventListener('click', async () => {
-      const url = document.getElementById('new-logo-url').value.trim();
-      const alt = document.getElementById('new-logo-alt').value.trim() || 'Brand';
-      if (!url) { alert('URL logo wajib diisi'); return; }
-      _logos.push({ url, alt });
-      await saveSetting('brand_logos', _logos);
-      document.getElementById('new-logo-url').value = '';
-      document.getElementById('new-logo-alt').value = '';
-      renderLogos();
-    });
-
-    // Logo Upload via Cloudinary
-    document.getElementById('logo-file-upload').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
+    // Media Upload via Cloudinary
+    window.uploadMedia = async (inputEl, targetId, statusId) => {
+      const file = inputEl.files[0];
       if (!file) return;
-      const statusEl = document.getElementById('logo-upload-status');
+      const statusEl = document.getElementById(statusId);
       statusEl.textContent = '⏳ Mengupload...';
       statusEl.style.color = '#f39c12';
       try {
@@ -338,25 +306,25 @@
           const res = await fetch('/api/admin/upload', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ file: reader.result, folder: 'homedress_na/logos' })
+            body: JSON.stringify({ file: reader.result, folder: 'homedress_na/editorial' })
           });
           const data = await res.json();
           if (data.url) {
-            document.getElementById('new-logo-url').value = data.url;
-            statusEl.textContent = '✅ Upload berhasil! Klik "+ Tambah" untuk menyimpan.';
+            document.getElementById(targetId).value = data.url;
+            statusEl.textContent = '✅ Upload berhasil!';
             statusEl.style.color = '#27ae60';
           } else {
-            throw new Error(data.error || 'Gagal');
+            throw new Error(data.error || 'Gagal upload');
           }
         };
       } catch(err) {
         statusEl.textContent = '❌ ' + err.message;
         statusEl.style.color = '#e74c3c';
       }
-    });
+    };
 
     // ========== INIT ALL ==========
-    await Promise.all([loadGeneral(), loadMaps(), loadEditorial(), loadLogos()]);
+    await Promise.all([loadGeneral(), loadMaps(), loadEditorial()]);
   </script>
 </body>
 </html>
