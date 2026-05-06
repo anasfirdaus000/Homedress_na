@@ -115,6 +115,55 @@
     document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
     document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
 
+    // Cloudinary Upload Logic for Categories
+    const imageInput = document.getElementById('cat-img');
+    const uploadBtnHTML = `
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="file" id="cat-image-upload" accept="image/*" style="display:none;" />
+        <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('cat-image-upload').click()">📁 Pilih File</button>
+        <button type="button" class="admin-btn admin-btn--primary admin-btn--small" id="btn-upload-cat">⬆️ Upload ke Cloudinary</button>
+      </div>
+      <p id="cat-upload-status" style="font-size:0.8rem; margin-top:4px;"></p>
+    `;
+    imageInput.insertAdjacentHTML('afterend', uploadBtnHTML);
+
+    document.getElementById('btn-upload-cat').addEventListener('click', async () => {
+      const fileInput = document.getElementById('cat-image-upload');
+      const statusEl = document.getElementById('cat-upload-status');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        statusEl.textContent = '❌ Pilih file dulu';
+        return;
+      }
+
+      statusEl.textContent = '⏳ Mengupload...';
+      statusEl.style.color = '#f39c12';
+
+      try {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: reader.result, folder: 'homedress_na/categories' })
+          });
+          const data = await res.json();
+          if (data.url) {
+            imageInput.value = data.url;
+            statusEl.textContent = '✅ Berhasil!';
+            statusEl.style.color = '#27ae60';
+          } else {
+            throw new Error(data.error || 'Gagal');
+          }
+        };
+      } catch (err) {
+        statusEl.textContent = '❌ ' + err.message;
+        statusEl.style.color = '#e74c3c';
+      }
+    });
+
     async function loadCategories() {
       const res = await fetch('/api/admin/categories', { headers: { 'Authorization': `Bearer ${token}` }});
       const data = await res.json();

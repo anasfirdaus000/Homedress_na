@@ -464,10 +464,11 @@
       if (res.ok) {
         modal.style.display = 'none';
         loadProducts();
-        showToast(id ? 'Produk diupdate!' : 'Produk ditambahkan!');
+        showToast(id ? '✅ Produk diupdate!' : '✅ Produk ditambahkan!');
       } else {
         const err = await res.json();
-        alert('Error: ' + (err.error || 'Gagal menyimpan'));
+        console.error('Save Error:', err);
+        alert('❌ Gagal menyimpan: ' + (err.error || 'Terjadi kesalahan sistem'));
       }
     });
 

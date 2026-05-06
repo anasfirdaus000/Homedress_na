@@ -63,12 +63,16 @@ export default async function handler(req, res) {
 
     let result;
     if (id) {
-      result = await supabaseAdmin.from('hero_slides').update(payload).eq('id', id).select().single();
+      const { id: slideId, ...updateData } = req.body;
+      result = await supabaseAdmin.from('hero_slides').update(updateData).eq('id', id).select().single();
     } else {
       result = await supabaseAdmin.from('hero_slides').insert([payload]).select().single();
     }
 
-    if (result.error) return res.status(500).json({ error: result.error.message });
+    if (result.error) {
+      console.error('Hero Save Error:', result.error);
+      return res.status(500).json({ error: result.error.message });
+    }
     return res.status(200).json({ slide: result.data });
   }
 

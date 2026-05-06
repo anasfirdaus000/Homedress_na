@@ -16,17 +16,17 @@ async function checkData() {
   else console.log(products);
 
   console.log('--- CATEGORIES ---');
-  const { data: categories, error: cError } = await supabase.from('categories').select('slug, name');
+  const { data: categories, error: cError } = await supabase.from('categories').select('*');
   if (cError) console.error(cError);
   else console.log(categories);
 
   console.log('--- HERO SLIDES ---');
-  const { data: hero, error: hError } = await supabase.from('hero_slides').select('title, is_active');
+  const { data: hero, error: hError } = await supabase.from('hero_slides').select('*');
   if (hError) console.error(hError);
   else console.log(hero);
 
   console.log('--- FEATURED SECTIONS ---');
-  const { data: featured, error: fError } = await supabase.from('featured_sections').select('title, is_active');
+  const { data: featured, error: fError } = await supabase.from('featured_sections').select('*');
   if (fError) console.error(fError);
   else console.log(featured);
 

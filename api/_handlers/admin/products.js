@@ -51,14 +51,18 @@ export default async function handler(req, res) {
     }
 
     if (product.id) {
+      const { id, ...updateData } = product;
       // Update existing
       const { data, error } = await supabaseAdmin
         .from('products')
-        .update({ ...product, updated_at: new Date().toISOString() })
-        .eq('id', product.id)
+        .update({ ...updateData, updated_at: new Date().toISOString() })
+        .eq('id', id)
         .select()
         .single();
-      if (error) return res.status(500).json({ error: error.message });
+      if (error) {
+        console.error('Update Product Error:', error);
+        return res.status(500).json({ error: error.message });
+      }
       return res.status(200).json({ success: true, product: data });
     } else {
       // Insert new
