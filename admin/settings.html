@@ -249,11 +249,26 @@
 
     document.getElementById('general-form').onsubmit = async (e) => {
       e.preventDefault();
-      const keys = ['store_origin_province', 'store_origin_city', 'announcement_text'];
-      for (const k of keys) {
-        await saveSetting(k, document.getElementById(k).value);
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+      
+      try {
+        const keys = ['store_origin_province', 'store_origin_city', 'announcement_text'];
+        for (const k of keys) {
+          const { error } = await supabase.from('site_settings').upsert({ 
+            key: k, 
+            value: JSON.stringify(document.getElementById(k).value) 
+          }, { onConflict: 'key' });
+          if (error) throw error;
+        }
+        alert('✅ Pengaturan umum disimpan!');
+      } catch (err) {
+        alert('❌ Gagal menyimpan: ' + (err.message || 'Izin ditolak'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Pengaturan Umum';
       }
-      alert('✅ Pengaturan umum disimpan!');
     };
 
     // ========== MAPS ==========
@@ -284,17 +299,34 @@
 
     document.getElementById('editorial-form').onsubmit = async (e) => {
       e.preventDefault();
-      for (let i = 1; i <= 3; i++) {
-        const data = {
-          title: document.getElementById(`ed${i}-title`).value,
-          desc: document.getElementById(`ed${i}-desc`).value,
-          link: document.getElementById(`ed${i}-link`).value,
-          bg_image: document.getElementById(`ed${i}-bg`).value,
-          product_image: document.getElementById(`ed${i}-img`).value
-        };
-        await saveSetting(`editorial_${i}`, data);
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+
+      try {
+        for (let i = 1; i <= 3; i++) {
+          const data = {
+            title: document.getElementById(`ed${i}-title`).value,
+            desc: document.getElementById(`ed${i}-desc`).value,
+            link: document.getElementById(`ed${i}-link`).value,
+            bg_image: document.getElementById(`ed${i}-bg`).value,
+            product_image: document.getElementById(`ed${i}-img`).value
+          };
+          const { error } = await supabase.from('site_settings').upsert({ 
+            key: `editorial_${i}`, 
+            value: JSON.stringify(data) 
+          }, { onConflict: 'key' });
+          
+          if (error) throw error;
+        }
+        alert('✅ Editorial sections berhasil disimpan!');
+      } catch (err) {
+        console.error('Save error:', err);
+        alert('❌ Gagal menyimpan: ' + (err.message || 'Izin ditolak oleh database'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Editorial';
       }
-      alert('✅ Editorial sections disimpan!');
     };
 
     // Media Upload via Cloudinary
