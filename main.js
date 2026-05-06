@@ -60,22 +60,7 @@ function showSkeletons(containerId, count = 4) {
   `).join('');
 }
 
-async function initDynamicHome(products = [], featured = []) {
-  const newInGrid = document.getElementById('new-in-grid');
-  const homeNewArrivals = document.getElementById('home-new-arrivals');
-  const flashSaleGrid = document.getElementById('flash-sale-grid');
-  
-  if (newInGrid) {
-    newInGrid.innerHTML = products.slice(0, 10).map(createCard).join('');
-  }
-  if (homeNewArrivals) {
-    homeNewArrivals.innerHTML = products.slice(0, 10).map(createCard).join('');
-  }
-  if (flashSaleGrid) {
-    const saleProds = products.filter(p => p.discount > 0).slice(0, 10);
-    flashSaleGrid.innerHTML = saleProds.length ? saleProds.map(createCard).join('') : '<p>Belum ada promo aktif.</p>';
-  }
-}
+
 
 function createMegaCard(p) {
   if (!p) return '';
