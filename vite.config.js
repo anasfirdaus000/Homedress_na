@@ -25,6 +25,10 @@ export default defineConfig({
         account: 'account.html',
         login: 'login.html',
         register: 'register.html',
+        cantikaLP: 'setelan-wanita-batwing-rayon-salur.html',
+        jessySet: 'product-jessy-set.html',
+        tasyaCargo: 'tasya-setelan-wanita-kekinian-cargo.html',
+        koreaSet: 'setelan-wanita-korea-kekinian-terbaru.html',
         // Admin pages
         adminLogin: 'admin/login.html',
         adminDashboard: 'admin/index.html',
