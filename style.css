@@ -231,15 +231,39 @@ input {
 
 @media (max-width: 1024px) {
   .header__inner {
-    padding: 10px 20px;
-    grid-template-columns: auto 1fr auto; /* [Hamb] [Logo] [Cart] */
-    gap: 15px;
+    padding: 10px 15px;
+    grid-template-columns: 1fr auto 1fr; /* [Hamb] [Logo] [Icons] */
+    gap: 10px;
+    display: grid;
+    align-items: center;
+    width: 100%;
   }
+  .header__left { justify-self: start; }
+  .header__center { justify-self: center; }
+  .header__right { justify-self: end; }
 }
 
 .header__left {
   display: flex;
   align-items: center;
+}
+
+.header__center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+@media (max-width: 1024px) {
+  .header__right { gap: 8px; }
+  .header__currency { display: none; }
 }
 
 .header__icon-btn {
