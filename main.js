@@ -101,10 +101,43 @@ function injectUI() {
     document.body.appendChild(drawer);
 
     // Overlay as sibling (matches CSS: .cart-drawer.is-open ~ .drawer-overlay)
+    // Overlay as sibling (matches CSS: .cart-drawer.is-open ~ .drawer-overlay)
     const overlay = document.createElement('div');
     overlay.id = 'cart-drawer-overlay';
     overlay.className = 'drawer-overlay';
     document.body.appendChild(overlay);
+  }
+
+  // 2. Mobile Menu Sidebar
+  if (!document.getElementById('mobile-menu')) {
+    const mMenu = document.createElement('div');
+    mMenu.id = 'mobile-menu';
+    mMenu.className = 'mobile-menu';
+    mMenu.innerHTML = `
+      <div class="mobile-menu__header">
+        <a href="/" class="header__logo">HOMEDRESS_NA</a>
+        <button id="mobile-menu-close" style="font-size:2rem; padding:10px;">✕</button>
+      </div>
+      <nav class="mobile-menu__nav" id="mobile-menu-content">
+        <div class="mobile-menu__loading">Memuat menu...</div>
+      </nav>
+    `;
+    document.body.appendChild(mMenu);
+
+    const mOverlay = document.createElement('div');
+    mOverlay.id = 'mobile-menu-overlay';
+    mOverlay.className = 'mobile-menu__overlay';
+    document.body.appendChild(mOverlay);
+  }
+
+  // 3. Hamburger Button (Inject into header if missing)
+  const hInner = document.querySelector('.header__inner');
+  if (hInner && !document.querySelector('.mobile-nav-toggle')) {
+    const toggle = document.createElement('div');
+    toggle.className = 'mobile-nav-toggle';
+    toggle.id = 'mobile-nav-toggle';
+    toggle.innerHTML = '<span></span><span></span><span></span>';
+    hInner.prepend(toggle);
   }
 
   // 2. Wishlist Drawer
@@ -167,6 +200,23 @@ function injectUI() {
     const b = document.getElementById(c.btn); if (b) b.onclick = c.fn;
     const o = document.getElementById(c.overlay); if (o) o.onclick = c.fn;
   });
+
+  // Mobile Menu Logic
+  const mobileToggle = document.getElementById('mobile-nav-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const mobileOverlay = document.getElementById('mobile-menu-overlay');
+  const mobileClose = document.getElementById('mobile-menu-close');
+
+  const toggleMobile = () => {
+    mobileMenu.classList.toggle('is-active');
+    mobileOverlay.classList.toggle('is-active');
+    mobileToggle.classList.toggle('is-active');
+    document.body.style.overflow = mobileMenu.classList.contains('is-active') ? 'hidden' : '';
+  };
+
+  if (mobileToggle) mobileToggle.onclick = toggleMobile;
+  if (mobileClose) mobileClose.onclick = toggleMobile;
+  if (mobileOverlay) mobileOverlay.onclick = toggleMobile;
 }
 
 function openCartDrawer() {
@@ -775,6 +825,29 @@ async function initDynamicMenus(products = []) {
         }).join('');
         
         navs.forEach(nav => nav.innerHTML = html);
+
+        // Populate Mobile Menu
+        const mobileContent = document.getElementById('mobile-menu-content');
+        if (mobileContent) {
+          mobileContent.innerHTML = `<ul class="mobile-menu__list">
+            ${rootMenus.map(m => {
+              const children = menus.filter(c => c.parent_id === m.id);
+              const hasChildren = children.length > 0;
+              return `
+                <li class="mobile-menu__item">
+                  <a href="${m.custom_url || '#'}" class="mobile-menu__link ${m.label.toLowerCase().includes('sale') ? 'mobile-menu__link--sale' : ''}">
+                    ${m.label} ${hasChildren ? '<span>+</span>' : ''}
+                  </a>
+                  ${hasChildren ? `
+                    <ul class="mobile-menu__submenu">
+                      ${children.map(c => `<li><a href="${c.custom_url || `/category.html?filter=${c.category_slug}`}" class="mobile-menu__sublink">${c.label}</a></li>`).join('')}
+                    </ul>
+                  ` : ''}
+                </li>
+              `;
+            }).join('')}
+          </ul>`;
+        }
       }
 
       // 2. Footer Nav

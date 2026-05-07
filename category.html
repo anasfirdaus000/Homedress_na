@@ -33,17 +33,26 @@
   <!-- HEADER -->
   <header id="header" class="header header--transparent">
     <div class="header__inner">
-      <div class="header__left"></div>
+      <div class="header__left">
+        <div class="header__search-bar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search products..." class="header__search-input" />
+        </div>
+      </div>
       <div class="header__center">
         <a href="/" id="logo" class="header__logo">HOMEDRESS_NA</a>
       </div>
       <div class="header__right">
         <span class="header__currency">Rp IDR</span>
-        <a href="/account.html" class="header__icon-btn" aria-label="Account">
+        <button class="header__icon-btn" aria-label="Account">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </a>
-        <button id="cart-toggle" class="header__icon-btn header__cart-btn" aria-label="Cart">
+        </button>
+        <button class="header__icon-btn" aria-label="Wishlist">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <button id="cart-toggle" class="header__icon-btn" aria-label="Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="header-badge" id="cart-count">0</span>
         </button>
       </div>
     </div>
