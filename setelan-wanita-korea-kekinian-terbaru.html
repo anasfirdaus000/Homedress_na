@@ -20,7 +20,7 @@
       --color-black: #000000;
       --color-white: #FFFFFF;
       --color-accent: #ff4757;
-      --color-korean-bg: #fdfdfd; /* Neutral whitespaces */
+      --color-korean-bg: #fdfdfd;
       --color-korean-soft: #f7f7f7;
     }
     
@@ -94,7 +94,7 @@
       width: 100%;
       height: 100%;
       z-index: 1;
-      opacity: 0.12;
+      opacity: 0.15;
     }
     
     .lp-hero__bg img {
@@ -135,7 +135,7 @@
       overflow: hidden;
     }
     
-    .lp-split__img img {
+    .lp-split__img img, .lp-split__img video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -178,6 +178,28 @@
       left: 0;
       color: var(--color-black);
       font-weight: bold;
+    }
+
+    .lp-video-section {
+      padding: 100px 20px;
+      background: #fafafa;
+      text-align: center;
+    }
+    
+    .lp-video-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    
+    .lp-video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .lp-gallery {
@@ -324,7 +346,7 @@
     <!-- HERO SECTION -->
     <section class="lp-hero">
       <div class="lp-hero__bg">
-        <img src="/images/Untitled_design-22_95380a0c-9058-49dc-bafa-b6a272ab8fce.png" alt="setelan wanita korea kekinian" />
+        <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/08ca1faf73694d4292563fb34949ea95~tplv-aphluv4xwc-crop-webp:1200:1200.webp?dr=15592&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=my&from=2378011839" alt="setelan wanita korea kekinian" />
       </div>
       <div class="lp-hero__content">
         <div class="lp-badge" style="background: var(--color-accent);">TRENDING KOREA STYLE</div>
@@ -340,7 +362,7 @@
     <!-- KEUNGGULAN SECTION -->
     <section class="lp-split">
       <div class="lp-split__img">
-        <img src="/images/Untitled_design_29917e1b-5767-46fd-a07a-802abac5ece3.png" alt="outfit wanita korea style terbaru" />
+        <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/0bc4e7e219aa476cbe2591aa303ad161~tplv-aphluv4xwc-origin-jpeg.jpeg?dr=15568&t=555f072d&ps=933b5bde&shp=a3510d86&shcp=6ce186a1&idc=my&from=2739998086" alt="outfit wanita korea style terbaru" />
       </div>
       <div class="lp-split__content">
         <h2 class="lp-split__title">Kenapa Harus Pilih Jessy Set?</h2>
@@ -356,10 +378,24 @@
       </div>
     </section>
 
+    <!-- VIDEO SECTION -->
+    <section class="lp-video-section">
+      <div class="lp-seo-text__container" style="color: #000; margin-bottom: 40px;">
+        <h2 style="font-size: 2.5rem; text-transform: uppercase;">Lihat Jessy Set Beraksi</h2>
+        <p style="color: #666;">Kenyamanan dan gaya dalam satu paket. Lihat bagaimana bahan crinkle airflow kami bergerak indah.</p>
+      </div>
+      <div class="lp-video-container">
+        <video controls loop muted autoplay playsinline>
+          <source src="https://v16m-default.tiktokcdn.com/3864c7f27709120fec98174392af9642/69f7aabf/video/tos/alisg/tos-alisg-v-f466fc-sg/oIIF2QnDPW3va1KRDBQiiaFbCZYBigf5EfCcyc/?a=0&bti=PDM8QDI2M2A%3D&&bt=527&ft=cApXJCz7ThWH-bFI1GZmo0P&mime_type=video_mp4&rc=ZDo3Ojw3Z2lpZzc3MzZoZUBpams4eHY5cmdpdzMzODRmNEAuXzItLy0wXzYxNmIzY2IuYSMvL15vMmRjb2hgLS1kLy1zcw%3D%3D&vvpl=1&l=202605032206127E191729ED02C96AEDA5&btag=e00070000" type="video/mp4">
+          Browser Anda tidak mendukung tag video.
+        </video>
+      </div>
+    </section>
+
     <!-- DETAIL PRODUK SECTION -->
     <section class="lp-split lp-split--reverse">
       <div class="lp-split__img">
-        <img src="/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png" alt="setelan wanita kekinian remaja" />
+        <img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/5b999058360e43729a79b276e5218f16~tplv-aphluv4xwc-origin-jpeg.jpeg?dr=15568&t=555f072d&ps=933b5bde&shp=a3510d86&shcp=6ce186a1&idc=my&from=2739998086" alt="setelan wanita kekinian remaja" />
       </div>
       <div class="lp-split__content">
         <div class="lp-badge">📌 INFORMASI PRODUK</div>
@@ -399,10 +435,10 @@
     <!-- GALLERY SECTION -->
     <section class="lp-gallery">
       <div class="lp-gallery__grid">
-        <div class="lp-gallery__item"><img src="/images/Untitled_design-22_95380a0c-9058-49dc-bafa-b6a272ab8fce.png" alt="Detail Jessy Set Korean Style" /></div>
-        <div class="lp-gallery__item"><img src="/images/1_0d097d33-95ec-49db-909b-b31fb077219f.png" alt="Jessy Set Crinkle Airflow" /></div>
-        <div class="lp-gallery__item"><img src="/images/3_7612f55d-46a6-49ac-9791-b1a123d4c6e8.png" alt="Setelan Wanita Kekinian" /></div>
-        <div class="lp-gallery__item"><img src="/images/17_35192b6b-4ccc-4e6a-9773-1db1109d9287.png" alt="Outfit Korea Remaja" /></div>
+        <div class="lp-gallery__item"><img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/5bd32b1a04cb4122aec64041ae5ffaa7~tplv-aphluv4xwc-origin-jpeg.jpeg?dr=15568&t=555f072d&ps=933b5bde&shp=a3510d86&shcp=6ce186a1&idc=my&from=2739998086" alt="Detail Jessy Set" /></div>
+        <div class="lp-gallery__item"><img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/1ed40638d84e4d9d82b2b79dce256741~tplv-aphluv4xwc-origin-jpeg.jpeg?dr=15568&t=555f072d&ps=933b5bde&shp=a3510d86&shcp=6ce186a1&idc=my&from=2739998086" alt="Jessy Set Korean Look" /></div>
+        <div class="lp-gallery__item"><img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/0bc4e7e219aa476cbe2591aa303ad161~tplv-aphluv4xwc-origin-jpeg.jpeg?dr=15568&t=555f072d&ps=933b5bde&shp=a3510d86&shcp=6ce186a1&idc=my&from=2739998086" alt="Setelan Crinkle Airflow" /></div>
+        <div class="lp-gallery__item"><img src="https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/5b999058360e43729a79b276e5218f16~tplv-aphluv4xwc-origin-jpeg.jpeg?dr=15568&t=555f072d&ps=933b5bde&shp=a3510d86&shcp=6ce186a1&idc=my&from=2739998086" alt="Style Remaja Korea" /></div>
       </div>
     </section>
 
