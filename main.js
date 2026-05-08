@@ -218,6 +218,53 @@ function injectUI() {
   if (mobileToggle) mobileToggle.onclick = toggleMobile;
   if (mobileClose) mobileClose.onclick = toggleMobile;
   if (mobileOverlay) mobileOverlay.onclick = toggleMobile;
+
+  // 4. Global Footer Contact Injection
+  injectFooterContact();
+}
+
+function injectFooterContact() {
+  let footerInner = document.querySelector('.footer__inner');
+  const footer = document.querySelector('.footer');
+  
+  if (!footerInner && footer) {
+    // If footer exists but inner is missing (dynamic footer case)
+    footerInner = document.createElement('div');
+    footerInner.className = 'footer__inner';
+    footer.appendChild(footerInner);
+  }
+  
+  if (!footerInner) return;
+
+  // Check if Hubungi Kami already exists
+  const existing = Array.from(footerInner.querySelectorAll('.footer__links-title')).find(el => el.textContent.includes('HUBUNGI KAMI'));
+  if (existing) {
+    // Ensure the container has the correct ID if it exists but is missing the ID
+    const container = existing.parentElement.querySelector('.footer__map-container');
+    if (container && !container.id) container.id = 'footer-map-container';
+    return;
+  }
+
+  // Inject if missing
+  const contactSection = document.createElement('div');
+  contactSection.className = 'footer__links-group';
+  contactSection.style.flex = '1.5';
+  contactSection.innerHTML = `
+    <h4 class="footer__links-title">HUBUNGI KAMI</h4>
+    <p style="color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px;">
+      <strong>HOMEDRESS_NA</strong><br>
+      Sindangmulih RT.004/004, sukamenak, purbaratu,<br>
+      kota tasikmalaya
+    </p>
+    <p style="color: #888; font-size: 0.9rem; line-height: 1.6;">
+      <strong>WhatsApp:</strong><br>
+      <a href="https://wa.me/62895405204744" target="_blank" style="color: var(--color-accent); text-decoration: none;">+62 895-4052-04744</a>
+    </p>
+    <div class="footer__map-container" id="footer-map-container">
+      <div style="width:100%; height:150px; background:#eee; display:flex; align-items:center; justify-content:center; color:#999; font-size:0.8rem;">Memuat peta...</div>
+    </div>
+  `;
+  footerInner.appendChild(contactSection);
 }
 
 function openCartDrawer() {
