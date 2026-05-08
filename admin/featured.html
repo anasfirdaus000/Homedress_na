@@ -131,6 +131,73 @@
     document.getElementById('close-modal').addEventListener('click', () => modal.style.display = 'none');
     document.getElementById('close-modal-2').addEventListener('click', () => modal.style.display = 'none');
 
+    // Unified Upload Logic
+    window.handleFeatUpload = async function(fileInputId, targetInputId, statusId) {
+      const fileInput = document.getElementById(fileInputId);
+      const targetInput = document.getElementById(targetInputId);
+      const statusEl = document.getElementById(statusId);
+      
+      if (!fileInput.files || fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        statusEl.textContent = '❌ Max 10MB';
+        statusEl.style.color = '#e74c3c';
+        return;
+      }
+
+      statusEl.textContent = '⏳ Mengupload...';
+      statusEl.style.color = '#f39c12';
+
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          try {
+            const res = await fetch('/api/admin/upload', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ file: reader.result, folder: 'homedress_na/featured' })
+            });
+            const data = await res.json();
+            if (data.url) {
+              targetInput.value = data.url;
+              statusEl.textContent = '✅ Berhasil!';
+              statusEl.style.color = '#27ae60';
+            } else {
+              throw new Error(data.error || 'Gagal');
+            }
+          } catch (err) {
+            statusEl.textContent = '❌ Gagal upload';
+            statusEl.style.color = '#e74c3c';
+          }
+        };
+      } catch (err) {
+        statusEl.textContent = '❌ Error';
+        statusEl.style.color = '#e74c3c';
+      }
+    };
+
+    // Inject Upload UI
+    const imgInp = document.getElementById('feat-img');
+    const vidInp = document.getElementById('feat-vid');
+    
+    imgInp.insertAdjacentHTML('afterend', `
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="file" id="feat-img-upload" accept="image/*" style="display:none;" onchange="handleFeatUpload('feat-img-upload', 'feat-img', 'feat-img-status')" />
+        <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('feat-img-upload').click()">📁 Upload Gambar</button>
+      </div>
+      <p id="feat-img-status" style="font-size:0.8rem; margin-top:4px;"></p>
+    `);
+
+    vidInp.insertAdjacentHTML('afterend', `
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="file" id="feat-vid-upload" accept="video/*" style="display:none;" onchange="handleFeatUpload('feat-vid-upload', 'feat-vid', 'feat-vid-status')" />
+        <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('feat-vid-upload').click()">📁 Upload Video</button>
+      </div>
+      <p id="feat-vid-status" style="font-size:0.8rem; margin-top:4px;"></p>
+    `);
+
     async function loadFeatured() {
       const res = await fetch('/api/admin/featured', { headers: { 'Authorization': `Bearer ${token}` }});
       const data = await res.json();

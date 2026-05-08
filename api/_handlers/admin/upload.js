@@ -50,12 +50,13 @@ export default async function handler(req, res) {
 
   try {
     // 3. Upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(file, {
+    const uploadOptions = {
       folder: folder || 'homedress_na/products',
-      // Optional: automatically convert and compress
-      format: 'webp',
+      resource_type: 'auto', // Detect if image or video automatically
       quality: 'auto'
-    });
+    };
+
+    const uploadResult = await cloudinary.uploader.upload(file, uploadOptions);
 
     // 4. Return the secure URL
     return res.status(200).json({ 

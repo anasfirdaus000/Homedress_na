@@ -405,7 +405,11 @@
 
       try {
         for (const file of files) {
-          if (file.size > 5 * 1024 * 1024) continue;
+          // Increased limit to 10MB
+          if (file.size > 10 * 1024 * 1024) {
+            console.warn('File too large:', file.name);
+            continue;
+          }
 
           const base64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -431,7 +435,7 @@
         statusEl.style.color = '#27ae60';
         fileInput.value = '';
       } catch (err) {
-        statusEl.textContent = '❌ Upload gagal';
+        statusEl.textContent = '❌ Upload gagal: ' + err.message;
         statusEl.style.color = '#e74c3c';
       } finally {
         document.getElementById('btn-upload-image').disabled = false;

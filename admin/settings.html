@@ -404,26 +404,45 @@
     window.uploadMedia = async (inputEl, targetId, statusId) => {
       const file = inputEl.files[0];
       if (!file) return;
+
       const statusEl = document.getElementById(statusId);
+      
+      // Limit file size (10MB for base64 over API is pushing it, but let's try)
+      if (file.size > 10 * 1024 * 1024) {
+        statusEl.textContent = '❌ File terlalu besar (Max 10MB)';
+        statusEl.style.color = '#e74c3c';
+        return;
+      }
+
       statusEl.textContent = '⏳ Mengupload...';
       statusEl.style.color = '#f39c12';
+      
       try {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
-          const res = await fetch('/api/admin/upload', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ file: reader.result, folder: 'homedress_na/editorial' })
-          });
-          const data = await res.json();
-          if (data.url) {
-            document.getElementById(targetId).value = data.url;
-            statusEl.textContent = '✅ Upload berhasil!';
-            statusEl.style.color = '#27ae60';
-          } else {
-            throw new Error(data.error || 'Gagal upload');
+          try {
+            const res = await fetch('/api/admin/upload', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ file: reader.result, folder: 'homedress_na/editorial' })
+            });
+            const data = await res.json();
+            if (data.url) {
+              document.getElementById(targetId).value = data.url;
+              statusEl.textContent = '✅ Upload berhasil!';
+              statusEl.style.color = '#27ae60';
+            } else {
+              throw new Error(data.error || 'Gagal upload');
+            }
+          } catch (innerErr) {
+            statusEl.textContent = '❌ ' + (innerErr.message || 'Gagal koneksi');
+            statusEl.style.color = '#e74c3c';
           }
+        };
+        reader.onerror = () => {
+          statusEl.textContent = '❌ Gagal membaca file';
+          statusEl.style.color = '#e74c3c';
         };
       } catch(err) {
         statusEl.textContent = '❌ ' + err.message;
