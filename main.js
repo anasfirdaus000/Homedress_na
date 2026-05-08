@@ -1318,6 +1318,8 @@ async function initBlogPage() {
       grid.innerHTML = data.map(b => `
         <a href="/blog.html?slug=${b.slug}" class="blog-card" style="display: block; text-decoration: none; color: inherit; transition: transform 0.3s ease;">
           <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; margin-bottom: 16px;">
+        <a href="/blog.html?slug=${b.slug}" class="blog-card" style="display: block; text-decoration: none; color: inherit; transition: transform 0.3s ease;">
+          <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; margin-bottom: 16px;">
             <img src="${b.image_url}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"/>
           </div>
           <h3 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 8px;">${b.title}</h3>
@@ -1329,18 +1331,54 @@ async function initBlogPage() {
   }
 }
 
-function initPromoPopup() {
+async function initPromoPopup() {
   const popup = document.getElementById('promo-popup');
   const closeBtn = document.getElementById('promo-close');
   if (!popup) return;
 
-  // Show after 3 seconds
-  setTimeout(() => {
-    // Only show if user hasn't closed it in this session
-    if (!sessionStorage.getItem('promo-closed')) {
-      popup.classList.add('is-visible');
+  try {
+    // 1. Get settings
+    const { data: settings } = await window.supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'promo_popup_data')
+      .single();
+
+    if (!settings) return;
+    const config = typeof settings.value === 'string' ? JSON.parse(settings.value) : settings.value;
+    if (!config.product_slug) return;
+
+    // 2. Get product details
+    const { data: p } = await window.supabase
+      .from('products')
+      .select('*')
+      .eq('slug', config.product_slug)
+      .single();
+
+    if (!p) return;
+
+    // 3. Inject content
+    let images = p.images || [];
+    if (typeof images === 'string') {
+      try { images = JSON.parse(images); } catch(e) { images = [images]; }
     }
-  }, 3000);
+
+    popup.querySelector('.promo-popup__img img').src = images[0] || '/images/placeholder.jpg';
+    popup.querySelector('h4').textContent = config.header || 'SPESIAL UNTUK ANDA';
+    popup.querySelector('p').textContent = config.description || p.name;
+    popup.querySelector('.promo-popup__btn').href = `/product.html?slug=${p.slug}`;
+    popup.querySelector('.promo-popup__btn').textContent = 'LIHAT PRODUK';
+
+    // 4. Show after 3 seconds
+    setTimeout(() => {
+      if (!sessionStorage.getItem('promo-closed')) {
+        popup.classList.add('is-visible');
+      }
+    }, 3000);
+
+  } catch (e) {
+    console.error('Promo popup error:', e);
+  }
 
   if (closeBtn) {
     closeBtn.onclick = () => {

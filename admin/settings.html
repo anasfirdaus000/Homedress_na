@@ -80,6 +80,31 @@
         </form>
       </div>
 
+      <!-- SECTION: Popup Promo -->
+      <div class="settings-section">
+        <h3>🎁 Popup Promo (Halaman Depan)</h3>
+        <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Pilih produk yang ingin ditampilkan pada popup promo saat pengunjung membuka website.</p>
+        <form id="promo-popup-form">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="admin-form__group">
+              <label class="admin-form__label">Pilih Produk Unggulan</label>
+              <select class="admin-form__input" id="promo_product_slug">
+                <option value="">-- Pilih Produk --</option>
+              </select>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Judul Promo (Header)</label>
+              <input class="admin-form__input" id="promo_header" placeholder="SPESIAL HARI INI" />
+            </div>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Teks Deskripsi Promo</label>
+            <input class="admin-form__input" id="promo_description" placeholder="Diskon besar untuk produk ini! Klik sekarang." />
+          </div>
+          <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Popup Promo</button>
+        </form>
+      </div>
+
       <!-- SECTION 3: Editorial Banners -->
       <div class="settings-section">
         <h3>🎨 Section Editorial (Homepage)</h3>
@@ -331,6 +356,50 @@
       }
     };
 
+    // ========== POPUP PROMO ==========
+    async function loadPromoPopup() {
+      // 1. Fetch all products to populate select
+      const { data: products } = await supabase.from('products').select('name, slug').order('name');
+      const select = document.getElementById('promo_product_slug');
+      if (products) {
+        products.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.slug;
+          opt.textContent = p.name;
+          select.appendChild(opt);
+        });
+      }
+
+      // 2. Load current setting
+      const val = await loadSetting('promo_popup_data');
+      if (val) {
+        document.getElementById('promo_product_slug').value = val.product_slug || '';
+        document.getElementById('promo_header').value = val.header || '';
+        document.getElementById('promo_description').value = val.description || '';
+      }
+    }
+
+    document.getElementById('promo-popup-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+      try {
+        const data = {
+          product_slug: document.getElementById('promo_product_slug').value,
+          header: document.getElementById('promo_header').value,
+          description: document.getElementById('promo_description').value
+        };
+        await saveSetting('promo_popup_data', data);
+        alert('✅ Popup promo berhasil disimpan!');
+      } catch (err) {
+        alert('❌ Gagal menyimpan: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Popup Promo';
+      }
+    };
+
     // Media Upload via Cloudinary
     window.uploadMedia = async (inputEl, targetId, statusId) => {
       const file = inputEl.files[0];
@@ -363,7 +432,7 @@
     };
 
     // ========== INIT ALL ==========
-    await Promise.all([loadGeneral(), loadMaps(), loadEditorial()]);
+    await Promise.all([loadGeneral(), loadMaps(), loadEditorial(), loadPromoPopup()]);
   </script>
 </body>
 </html>
