@@ -406,45 +406,48 @@
       if (!file) return;
 
       const statusEl = document.getElementById(statusId);
-      
-      // Limit file size (10MB for base64 over API is pushing it, but let's try)
-      if (file.size > 10 * 1024 * 1024) {
-        statusEl.textContent = '❌ File terlalu besar (Max 10MB)';
-        statusEl.style.color = '#e74c3c';
-        return;
-      }
-
-      statusEl.textContent = '⏳ Mengupload...';
+      statusEl.textContent = '⏳ Menyiapkan upload...';
       statusEl.style.color = '#f39c12';
       
       try {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-          try {
-            const res = await fetch('/api/admin/upload', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ file: reader.result, folder: 'homedress_na/editorial' })
-            });
-            const data = await res.json();
-            if (data.url) {
-              document.getElementById(targetId).value = data.url;
-              statusEl.textContent = '✅ Upload berhasil!';
-              statusEl.style.color = '#27ae60';
-            } else {
-              throw new Error(data.error || 'Gagal upload');
-            }
-          } catch (innerErr) {
-            statusEl.textContent = '❌ ' + (innerErr.message || 'Gagal koneksi');
-            statusEl.style.color = '#e74c3c';
-          }
-        };
-        reader.onerror = () => {
-          statusEl.textContent = '❌ Gagal membaca file';
-          statusEl.style.color = '#e74c3c';
-        };
+        // 1. Get Signature from our server
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        const folder = 'homedress_na/editorial';
+        
+        const signRes = await fetch('/api/admin/cloudinary-sign', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ timestamp, folder })
+        });
+        
+        const { signature, api_key, cloud_name } = await signRes.json();
+        if (!signature) throw new Error('Gagal mendapatkan izin upload');
+
+        // 2. Upload DIRECTLY to Cloudinary
+        statusEl.textContent = '⏳ Mengirim ke Cloudinary...';
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('api_key', api_key);
+        formData.append('timestamp', timestamp);
+        formData.append('signature', signature);
+        formData.append('folder', folder);
+
+        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await uploadRes.json();
+        if (data.secure_url) {
+          document.getElementById(targetId).value = data.secure_url;
+          statusEl.textContent = '✅ Berhasil diunggah!';
+          statusEl.style.color = '#27ae60';
+        } else {
+          throw new Error(data.error?.message || 'Gagal upload ke Cloudinary');
+        }
       } catch(err) {
+        console.error('Upload Error:', err);
         statusEl.textContent = '❌ ' + err.message;
         statusEl.style.color = '#e74c3c';
       }

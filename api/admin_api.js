@@ -6,6 +6,7 @@ import featuredHandler from './_handlers/admin/featured.js';
 import menusHandler from './_handlers/admin/menus.js';
 import settingsHandler from './_handlers/admin/settings.js';
 import uploadHandler from './_handlers/admin/upload.js';
+import cloudinarySignHandler from './_handlers/admin/cloudinary_sign.js';
 
 export default async function handler(req, res) {
   const url = req.url || '';
@@ -17,6 +18,7 @@ export default async function handler(req, res) {
   if (url.includes('/api/admin/menus')) return menusHandler(req, res);
   if (url.includes('/api/admin/settings')) return settingsHandler(req, res);
   if (url.includes('/api/admin/upload')) return uploadHandler(req, res);
+  if (url.includes('/api/admin/cloudinary-sign')) return cloudinarySignHandler(req, res);
 
   return res.status(404).json({ error: 'Route not found in admin' });
 }

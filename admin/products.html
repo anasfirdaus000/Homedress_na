@@ -404,31 +404,36 @@
       document.getElementById('btn-upload-image').disabled = true;
 
       try {
+        // 1. Get Signature once for the batch
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        const folder = 'homedress_na/products';
+        const signRes = await fetch('/api/admin/cloudinary-sign', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ timestamp, folder })
+        });
+        const { signature, api_key, cloud_name } = await signRes.json();
+
         for (const file of files) {
-          // Increased limit to 10MB
-          if (file.size > 10 * 1024 * 1024) {
-            console.warn('File too large:', file.name);
-            continue;
-          }
+          statusEl.textContent = `⏳ Mengirim ${file.name}...`;
+          
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('api_key', api_key);
+          formData.append('timestamp', timestamp);
+          formData.append('signature', signature);
+          formData.append('folder', folder);
 
-          const base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-
-          const res = await fetch('/api/admin/upload', {
+          const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ file: base64, folder: 'homedress_na/products' })
+            body: formData
           });
 
-          if (res.ok) {
-            const data = await res.json();
+          if (uploadRes.ok) {
+            const data = await uploadRes.json();
             const textArea = document.getElementById('prod-images');
             const currentVal = textArea.value.trim();
-            textArea.value = currentVal ? currentVal + '\n' + data.url : data.url;
+            textArea.value = currentVal ? currentVal + '\n' + data.secure_url : data.secure_url;
           }
         }
         statusEl.textContent = '✅ Berhasil upload semua!';

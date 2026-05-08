@@ -140,38 +140,42 @@
       if (!fileInput.files || fileInput.files.length === 0) return;
 
       const file = fileInput.files[0];
-      if (file.size > 10 * 1024 * 1024) {
-        statusEl.textContent = '❌ File terlalu besar (Max 10MB)';
-        statusEl.style.color = '#e74c3c';
-        return;
-      }
-
-      statusEl.textContent = '⏳ Mengupload...';
+      statusEl.textContent = '⏳ Menyiapkan...';
       statusEl.style.color = '#f39c12';
 
       try {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-          try {
-            const res = await fetch('/api/admin/upload', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ file: reader.result, folder: 'homedress_na/hero' })
-            });
-            const data = await res.json();
-            if (data.url) {
-              targetInput.value = data.url;
-              statusEl.textContent = '✅ Berhasil!';
-              statusEl.style.color = '#27ae60';
-            } else {
-              throw new Error(data.error || 'Gagal');
-            }
-          } catch (err) {
-            statusEl.textContent = '❌ ' + (err.message || 'Gagal koneksi');
-            statusEl.style.color = '#e74c3c';
-          }
-        };
+        // 1. Get Signature
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        const folder = 'homedress_na/hero';
+        const signRes = await fetch('/api/admin/cloudinary-sign', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ timestamp, folder })
+        });
+        const { signature, api_key, cloud_name } = await signRes.json();
+
+        // 2. Direct Upload
+        statusEl.textContent = '⏳ Mengirim...';
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('api_key', api_key);
+        formData.append('timestamp', timestamp);
+        formData.append('signature', signature);
+        formData.append('folder', folder);
+
+        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await uploadRes.json();
+        if (data.secure_url) {
+          targetInput.value = data.secure_url;
+          statusEl.textContent = '✅ Berhasil!';
+          statusEl.style.color = '#27ae60';
+        } else {
+          throw new Error(data.error?.message || 'Gagal');
+        }
       } catch (err) {
         statusEl.textContent = '❌ ' + err.message;
         statusEl.style.color = '#e74c3c';
