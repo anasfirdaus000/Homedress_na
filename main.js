@@ -1095,7 +1095,12 @@ function initCategoryPagination(products = []) {
         filtered = products.filter(p => p.discount > 0);
       }
     } else if (filter === 'best-seller') {
-      filtered = products.filter(p => p.social_proof?.toLowerCase().includes('terlaris') || p.rating >= 4.5 || (Array.isArray(p.category) && p.category.includes('best-seller')));
+      const bestKeywords = ['terlaris', 'best seller', 'laris'];
+      filtered = products.filter(p => 
+        bestKeywords.some(k => p.social_proof?.toLowerCase().includes(k)) || 
+        (p.rating && p.rating >= 4.5) || 
+        (Array.isArray(p.category) && p.category.includes('best-seller'))
+      );
     } else if (filter === 'new-in') {
       // Show products with manual 'new-in' tag OR show the latest 20 products
       filtered = products.filter(p => (Array.isArray(p.category) && p.category.includes('new-in')));
