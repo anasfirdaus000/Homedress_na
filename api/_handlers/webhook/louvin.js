@@ -47,27 +47,50 @@ export default async function handler(req, res) {
       
       console.log(`[Louvin Webhook] Order ${orderRef} updated to ${newStatus}`);
 
-      // 2. Notify Customer if settled
+        // 2. STOCK REDUCTION & NOTIFICATIONS if settled
       if (event === 'payment.settled' || event === 'payment.success') {
         const { data: fullOrder } = await supabaseAdmin
           .from('orders')
-          .select('*')
+          .select('*, order_items(*)')
           .eq('order_number', orderRef)
           .single();
 
-        if (fullOrder && fullOrder.customer_phone) {
-          const msg = formatPaymentSuccessNotification(fullOrder);
-          const result = await sendWhatsApp(fullOrder.customer_phone, msg);
-          
-          await supabaseAdmin.from('notifications_log').insert({
-            order_id: fullOrder.id,
-            channel: 'whatsapp',
-            provider: 'fonnte',
-            recipient: fullOrder.customer_phone,
-            status: result.success ? 'sent' : 'failed',
-            error_message: result.error || null
-          });
-          console.log(`[Louvin Webhook] WA notification sent to ${fullOrder.customer_phone}`);
+        if (fullOrder) {
+          // --- A. REDUCE STOCK ---
+          if (fullOrder.order_items) {
+            for (const item of fullOrder.order_items) {
+              if (item.product_id) {
+                const { data: p } = await supabaseAdmin.from('products').select('stock').eq('id', item.product_id).single();
+                if (p && p.stock !== undefined) {
+                  const newStock = Math.max(0, p.stock - (item.quantity || 1));
+                  await supabaseAdmin.from('products').update({ stock: newStock }).eq('id', item.product_id);
+                }
+              }
+            }
+          }
+
+          // --- B. NOTIFY CUSTOMER ---
+          if (fullOrder.customer_phone) {
+            const msg = formatPaymentSuccessNotification(fullOrder);
+            const result = await sendWhatsApp(fullOrder.customer_phone, msg);
+            await supabaseAdmin.from('notifications_log').insert({
+              order_id: fullOrder.id, channel: 'whatsapp', provider: 'fonnte',
+              recipient: fullOrder.customer_phone, status: result.success ? 'sent' : 'failed',
+              error_message: result.error || null
+            });
+          }
+
+          // --- C. NOTIFY ADMIN ---
+          const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
+          if (adminPhone) {
+            const adminMsg = `✅ *PEMBAYARAN DITERIMA*\n\nOrder *${fullOrder.order_number}* oleh *${fullOrder.customer_name}* telah lunas!\nTotal: Rp ${fullOrder.total.toLocaleString('id-ID')}\n\nSilakan segera diproses di Admin Panel.`;
+            const adminRes = await sendWhatsApp(adminPhone, adminMsg);
+            await supabaseAdmin.from('notifications_log').insert({
+              order_id: fullOrder.id, channel: 'whatsapp', provider: 'fonnte',
+              recipient: adminPhone, status: adminRes.success ? 'sent' : 'failed',
+              error_message: adminRes.error || null
+            });
+          }
         }
       }
     } else {
