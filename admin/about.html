@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Tentang Kami | Admin HOMEDRESS_NA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+  <style>
+    .settings-section { background:#222; border:1px solid #333; border-radius:16px; padding:28px; margin-bottom:24px; }
+    .settings-section h3 { margin:0 0 20px; font-size:1.1rem; display:flex; align-items:center; gap:8px; }
+    .mission-item { display:flex; gap:10px; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+  <div class="admin">
+    <aside class="sidebar">
+      <div class="sidebar__logo">HOMEDRESS_NA</div>
+      <p class="sidebar__subtitle">Admin Panel</p>
+      <nav class="sidebar__nav" id="admin-sidebar-nav">
+        <!-- Will be populated or I'll just hardcode for now -->
+        <a href="/admin/" class="sidebar__link">📊 Dashboard</a>
+        <a href="/admin/orders.html" class="sidebar__link">📦 Pesanan</a>
+        <a href="/admin/products.html" class="sidebar__link">🛍️ Produk</a>
+        <a href="/admin/categories.html" class="sidebar__link">📁 Kategori</a>
+        <a href="/admin/menus.html" class="sidebar__link">🔗 Menu Navigasi</a>
+        <a href="/admin/hero.html" class="sidebar__link">🖼️ Hero Slider</a>
+        <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
+        <a href="/admin/about.html" class="sidebar__link sidebar__link--active">📖 Tentang Kami</a>
+        <a href="/admin/newsletter.html" class="sidebar__link">📧 Newsletter</a>
+        <a href="/admin/shipping.html" class="sidebar__link">🚚 Pengiriman</a>
+        <a href="/admin/settings.html" class="sidebar__link">⚙️ Pengaturan Web</a>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <a href="/" class="sidebar__link" target="_blank">🌐 Lihat Website</a>
+        <button class="sidebar__link sidebar__logout" id="logout-btn">🚪 Logout</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <h1>📖 Edit Halaman Tentang Kami</h1>
+      </div>
+
+      <form id="about-form">
+        <!-- HERO SECTION -->
+        <div class="settings-section">
+          <h3>🖼️ Hero Section</h3>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Judul Hero</label>
+            <input class="admin-form__input" id="hero_title" required />
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Sub-judul Hero</label>
+            <textarea class="admin-form__textarea" id="hero_subtitle" rows="3" required></textarea>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Gambar Hero</label>
+            <div style="display:flex;gap:8px;">
+              <input class="admin-form__input" id="hero_image" placeholder="https://..." style="flex:1;" required />
+              <button type="button" class="admin-btn admin-btn--outline" onclick="document.getElementById('upload-hero').click()">Upload</button>
+              <input type="file" id="upload-hero" accept="image/*" style="display:none;" onchange="uploadMedia(this, 'hero_image', 'hero-status')" />
+            </div>
+            <span id="hero-status" style="font-size:0.8rem;"></span>
+          </div>
+        </div>
+
+        <!-- VISION SECTION -->
+        <div class="settings-section">
+          <h3>👁️ Visi Kami</h3>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Judul Visi</label>
+            <input class="admin-form__input" id="vision_title" required />
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Teks Visi (Utama)</label>
+            <textarea class="admin-form__textarea" id="vision_text" rows="3" required></textarea>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Teks Visi (Tambahan)</label>
+            <textarea class="admin-form__textarea" id="vision_subtext" rows="4"></textarea>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Gambar Visi</label>
+            <div style="display:flex;gap:8px;">
+              <input class="admin-form__input" id="vision_image" placeholder="https://..." style="flex:1;" required />
+              <button type="button" class="admin-btn admin-btn--outline" onclick="document.getElementById('upload-vision').click()">Upload</button>
+              <input type="file" id="upload-vision" accept="image/*" style="display:none;" onchange="uploadMedia(this, 'vision_image', 'vision-status')" />
+            </div>
+            <span id="vision-status" style="font-size:0.8rem;"></span>
+          </div>
+        </div>
+
+        <!-- MISSION SECTION -->
+        <div class="settings-section">
+          <h3>🎯 Misi Kami</h3>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Judul Misi</label>
+            <input class="admin-form__input" id="mission_title" required />
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Teks Misi</label>
+            <textarea class="admin-form__textarea" id="mission_text" rows="3" required></textarea>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Poin-poin Misi</label>
+            <div id="mission-list-container">
+              <!-- Dynamically added inputs -->
+            </div>
+            <button type="button" class="admin-btn admin-btn--outline admin-btn--small" id="add-mission-item" style="margin-top:10px;">+ Tambah Poin</button>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Gambar Misi</label>
+            <div style="display:flex;gap:8px;">
+              <input class="admin-form__input" id="mission_image" placeholder="https://..." style="flex:1;" required />
+              <button type="button" class="admin-btn admin-btn--outline" onclick="document.getElementById('upload-mission').click()">Upload</button>
+              <input type="file" id="upload-mission" accept="image/*" style="display:none;" onchange="uploadMedia(this, 'mission_image', 'mission-status')" />
+            </div>
+            <span id="mission-status" style="font-size:0.8rem;"></span>
+          </div>
+        </div>
+
+        <button type="submit" class="admin-btn admin-btn--primary" style="width:100%; padding:16px; font-size:1.1rem;">💾 Simpan Halaman Tentang Kami</button>
+      </form>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const ADMIN_EMAIL = 'homedressnaweb@gmail.com';
+    if (!session || session.user.email.toLowerCase() !== ADMIN_EMAIL) {
+      if (session) await supabase.auth.signOut();
+      window.location.href = '/admin/login.html?error=unauthorized';
+      throw new Error('Unauthorized');
+    }
+    const token = session.access_token;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/admin/login.html';
+    });
+
+    const missionContainer = document.getElementById('mission-list-container');
+    const addMissionBtn = document.getElementById('add-mission-item');
+
+    function createMissionInput(value = '') {
+      const div = document.createElement('div');
+      div.className = 'mission-item';
+      div.innerHTML = `
+        <input class="admin-form__input" value="${value}" placeholder="Contoh: Menyediakan produk berkualitas..." style="flex:1;" />
+        <button type="button" class="admin-btn admin-btn--danger" onclick="this.parentElement.remove()">✕</button>
+      `;
+      missionContainer.appendChild(div);
+    }
+
+    addMissionBtn.onclick = () => createMissionInput();
+
+    // Load Data
+    async function loadData() {
+      const { data, error } = await supabase.from('site_settings').select('value').eq('key', 'about_us').single();
+      if (data) {
+        const val = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        document.getElementById('hero_title').value = val.hero_title || '';
+        document.getElementById('hero_subtitle').value = val.hero_subtitle || '';
+        document.getElementById('hero_image').value = val.hero_image || '';
+        document.getElementById('vision_title').value = val.vision_title || '';
+        document.getElementById('vision_text').value = val.vision_text || '';
+        document.getElementById('vision_subtext').value = val.vision_subtext || '';
+        document.getElementById('vision_image').value = val.vision_image || '';
+        document.getElementById('mission_title').value = val.mission_title || '';
+        document.getElementById('mission_text').value = val.mission_text || '';
+        document.getElementById('mission_image').value = val.mission_image || '';
+        
+        missionContainer.innerHTML = '';
+        if (val.mission_list && Array.isArray(val.mission_list)) {
+          val.mission_list.forEach(item => createMissionInput(item));
+        } else {
+          createMissionInput();
+        }
+      } else {
+        createMissionInput();
+      }
+    }
+
+    document.getElementById('about-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+
+      const missionItems = Array.from(missionContainer.querySelectorAll('input')).map(i => i.value).filter(v => v.trim() !== '');
+
+      const aboutData = {
+        hero_title: document.getElementById('hero_title').value,
+        hero_subtitle: document.getElementById('hero_subtitle').value,
+        hero_image: document.getElementById('hero_image').value,
+        vision_title: document.getElementById('vision_title').value,
+        vision_text: document.getElementById('vision_text').value,
+        vision_subtext: document.getElementById('vision_subtext').value,
+        vision_image: document.getElementById('vision_image').value,
+        mission_title: document.getElementById('mission_title').value,
+        mission_text: document.getElementById('mission_text').value,
+        mission_image: document.getElementById('mission_image').value,
+        mission_list: missionItems
+      };
+
+      try {
+        const { error } = await supabase.from('site_settings').upsert({ 
+          key: 'about_us', 
+          value: JSON.stringify(aboutData) 
+        }, { onConflict: 'key' });
+        
+        if (error) throw error;
+        alert('✅ Halaman Tentang Kami berhasil disimpan!');
+      } catch (err) {
+        alert('❌ Gagal menyimpan: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Halaman Tentang Kami';
+      }
+    };
+
+    window.uploadMedia = async (inputEl, targetId, statusId) => {
+      const file = inputEl.files[0];
+      if (!file) return;
+      const statusEl = document.getElementById(statusId);
+      statusEl.textContent = '⏳ Mengupload...';
+      statusEl.style.color = '#f39c12';
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: reader.result, folder: 'homedress_na/about' })
+          });
+          const data = await res.json();
+          if (data.url) {
+            document.getElementById(targetId).value = data.url;
+            statusEl.textContent = '✅ Upload berhasil!';
+            statusEl.style.color = '#27ae60';
+          } else {
+            throw new Error(data.error || 'Gagal upload');
+          }
+        };
+      } catch(err) {
+        statusEl.textContent = '❌ ' + err.message;
+        statusEl.style.color = '#e74c3c';
+      }
+    };
+
+    await loadData();
+  </script>
+</body>
+</html>
