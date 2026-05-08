@@ -670,13 +670,15 @@ async function initEditorialSections() {
 
 // ========== MAPS FROM DB ==========
 async function initMapsFromDB() {
-  const container = document.getElementById('footer-map-container');
-  if (!container) return;
+  const containers = document.querySelectorAll('#footer-map-container, #contact-map-container');
+  if (containers.length === 0) return;
   try {
     const { data } = await window.supabase.from('site_settings').select('value').eq('key', 'google_maps_url').single();
     if (data && data.value) {
       const url = typeof data.value === 'string' && data.value.startsWith('"') ? JSON.parse(data.value) : data.value;
-      container.innerHTML = `<iframe src="${url}" class="footer__map-iframe" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+      containers.forEach(container => {
+        container.innerHTML = `<iframe src="${url}" class="footer__map-iframe" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+      });
     }
   } catch(e) { /* keep default */ }
 }
