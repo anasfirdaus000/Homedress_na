@@ -213,7 +213,7 @@
     const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
 
     const { data: { session } } = await supabase.auth.getSession();
-    const ADMIN_EMAIL = 'homedressnaweb@gmail.com';
+    const ADMIN_EMAIL = 'Homedressnaweb@gmail.com';
     if (!session || session.user.email.toLowerCase() !== ADMIN_EMAIL) {
       if (session) await supabase.auth.signOut();
       window.location.href = '/admin/login.html?error=unauthorized';

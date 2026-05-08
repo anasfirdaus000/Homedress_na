@@ -10,7 +10,7 @@ export async function verifyAdmin(req) {
   if (error || !user) return null;
 
   // STRICT EMAIL CHECK (Case-insensitive)
-  const adminEmail = (process.env.VITE_ADMIN_EMAIL || 'homedressnaweb@gmail.com').toLowerCase();
+  const adminEmail = (process.env.VITE_ADMIN_EMAIL || 'Homedressnaweb@gmail.com').toLowerCase();
   if (user.email.toLowerCase() !== adminEmail) {
     console.warn(`Unauthorized admin access attempt by ${user.email}`);
     return null;
