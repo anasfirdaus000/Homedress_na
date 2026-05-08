@@ -1033,13 +1033,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const fData = featured?.featured || [];
   const hData = hero?.slides || [];
 
+  // Load About Us immediately if on the page
+  initAboutUsPage();
+
   await Promise.all([
     initHeroSlider(hData),
     initShopByCategory(cData),
     initDynamicHome(pData, fData),
     initDynamicMenus(pData),
     initEditorialSections(),
-    initAboutUsPage(),
     initMapsFromDB()
   ]);
 
