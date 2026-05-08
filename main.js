@@ -655,6 +655,7 @@ async function initShopByCategory(categories = []) {
 
 // ========== EDITORIAL SECTIONS (DB-driven) ==========
 async function initEditorialSections() {
+  console.log('🎬 Initializing Editorial Sections...');
   const wrapper = document.getElementById('editorial-wrapper');
   if (!wrapper) return;
 
@@ -682,7 +683,13 @@ async function initEditorialSections() {
   } catch(e) {}
 
   wrapper.innerHTML = sections.map((s, i) => {
-    const isVideo = s.product_image && (s.product_image.match(/\.(mp4|webm|mov)$/i) || s.product_image.includes('video') || s.product_image.includes('tiktok.com') || s.product_image.includes('youtube.com'));
+    const isVideo = s.product_image && (
+      s.product_image.match(/\.(mp4|webm|mov|ogg)$/i) || 
+      s.product_image.includes('video') || 
+      s.product_image.includes('tiktokcdn.com') || 
+      s.product_image.includes('tiktok.com') || 
+      s.product_image.includes('googlevideo.com')
+    );
     
     return `
       <section class="editorial-pinned" id="pinned-${i+1}">
@@ -697,7 +704,7 @@ async function initEditorialSections() {
           </div>
           <div class="editorial-pinned__highlight">
             ${isVideo 
-              ? `<video src="${s.product_image}" autoplay loop muted playsinline class="editorial-pinned__video"></video>`
+              ? `<video src="${s.product_image}" autoplay loop muted playsinline class="editorial-pinned__video" onerror="this.parentElement.innerHTML='<img src=&quot;${s.bg_image}&quot; alt=&quot;Detail&quot; />'"></video>`
               : `<img src="${s.product_image}" alt="Detail" />`
             }
           </div>
@@ -711,7 +718,7 @@ async function initEditorialSections() {
     entries.forEach(e => {
       if (e.isIntersecting) e.target.classList.add('is-visible');
     });
-  }, { threshold: 0.3 });
+  }, { threshold: 0.1 }); // Lowered from 0.3 for better reliability
   wrapper.querySelectorAll('.editorial-pinned').forEach(el => obs.observe(el));
 }
 
