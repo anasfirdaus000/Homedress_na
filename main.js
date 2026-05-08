@@ -625,7 +625,9 @@ async function initEditorialSections() {
       sections = keys.map((k, i) => {
         const found = data.find(d => d.key === k);
         if (found) {
-          try { return JSON.parse(found.value); } catch(e) { return defaults[i]; }
+          const val = found.value;
+          if (typeof val === 'object' && val !== null) return val;
+          try { return JSON.parse(val); } catch(e) { return defaults[i]; }
         }
         return defaults[i];
       });
@@ -638,7 +640,7 @@ async function initEditorialSections() {
     return `
       <section class="editorial-pinned" id="pinned-${i+1}">
         <div class="editorial-pinned__bg">
-          <img src="${s.bg_image}" alt="${s.title.replace(/<br\/?>/g, ' ')}" />
+          <img src="${s.bg_image}" alt="" />
         </div>
         <div class="editorial-pinned__container">
           <div class="editorial-pinned__content">
