@@ -6,4 +6,4 @@ Disallow: /checkout.html
 Disallow: /order-confirmation.html
 Disallow: /account.html
 
-Sitemap: https://homedress-na.vercel.app/sitemap.xml
+Sitemap: https://www.homedressna.com/sitemap.xml

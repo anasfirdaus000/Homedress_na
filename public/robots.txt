@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://homedress-na.vercel.app/sitemap.xml
+Sitemap: https://www.homedressna.com/sitemap.xml
 
 # Block admin pages from indexing
 User-agent: *

@@ -1,7 +1,7 @@
 import { supabaseAdmin } from './_lib/supabase.js';
 
 export default async function handler(req, res) {
-  const baseUrl = 'https://homedress-na.vercel.app';
+  const baseUrl = 'https://www.homedressna.com';
   
   // 1. Static Pages
   const staticPages = [

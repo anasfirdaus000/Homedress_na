@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://homedress-na.vercel.app/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/category.html</loc><priority>0.9</priority><changefreq>daily</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/new-in.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/promo.html</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/flash-sale.html</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/best-seller.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/setelan.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/dress.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/atasan.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/bawahan.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://www.homedressna.com/category.html</loc><priority>0.9</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://www.homedressna.com/new-in.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/promo.html</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://www.homedressna.com/flash-sale.html</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://www.homedressna.com/best-seller.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/setelan.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/dress.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/atasan.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/bawahan.html</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
 
   <!-- Landing Pages (SEO Priority) -->
-  <url><loc>https://homedress-na.vercel.app/setelan-wanita-batwing-rayon-salur.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/setelan-wanita-korea-kekinian-terbaru.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/setelan-wanita-batwing-rayon-salur.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/setelan-wanita-korea-kekinian-terbaru.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
 
   <!-- Blog (SEO Content) -->
-  <url><loc>https://homedress-na.vercel.app/blog-rayon-vs-crinkle-airflow.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/blog.html</loc><priority>0.6</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.homedressna.com/blog-rayon-vs-crinkle-airflow.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/blog.html</loc><priority>0.6</priority><changefreq>weekly</changefreq></url>
 
   <!-- Info Pages -->
-  <url><loc>https://homedress-na.vercel.app/about-us.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/faq.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/store-locator.html</loc><priority>0.4</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/track-order.html</loc><priority>0.4</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/about-us.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/faq.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/contact.html</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/store-locator.html</loc><priority>0.4</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.homedressna.com/track-order.html</loc><priority>0.4</priority><changefreq>monthly</changefreq></url>
 
   <!-- Legal -->
-  <url><loc>https://homedress-na.vercel.app/shipping-policy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/return-policy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/terms.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
-  <url><loc>https://homedress-na.vercel.app/privacy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://www.homedressna.com/shipping-policy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://www.homedressna.com/return-policy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://www.homedressna.com/terms.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://www.homedressna.com/privacy.html</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
 </urlset>

@@ -90,7 +90,7 @@ Status: ⏳ Menunggu Pembayaran
 
 Silakan lakukan pembayaran sesuai metode yang dipilih (${order.payment_method}).
 Jika memerlukan instruksi pembayaran atau QRIS, silakan cek di sini:
-🔗 https://homedress-na.vercel.app/track-order.html?order_id=${order.order_number}&phone=${order.customer_phone}
+🔗 https://www.homedressna.com/track-order.html?order_id=${order.order_number}&phone=${order.customer_phone}
 
 Kami akan memproses pesanan kamu setelah pembayaran dikonfirmasi.
 
@@ -106,7 +106,7 @@ export function formatPaymentSuccessNotification(order) {
 Halo kak *${order.customer_name}*, pembayaran untuk order *${order.order_number}* sebesar *Rp ${order.total.toLocaleString('id-ID')}* telah kami terima.
 
 Pesanan kakak sedang kami siapkan dan akan segera dikirim. Kakak bisa cek status pesanan secara berkala di sini:
-🔗 https://homedress-na.vercel.app/track-order.html?order_id=${order.order_number}&phone=${order.customer_phone}
+🔗 https://www.homedressna.com/track-order.html?order_id=${order.order_number}&phone=${order.customer_phone}
 
 Terima kasih telah berbelanja di *HOMEDRESS_NA*! 🙏`;
 }
