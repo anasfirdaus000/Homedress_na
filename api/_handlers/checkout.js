@@ -196,7 +196,7 @@ export default async function handler(req, res) {
             amount: total,
             payment_type: sanitized.payment_method,
             customer_name: sanitized.customer_name,
-            customer_email: sanitized.customer_email || 'customer@homedress-na.com',
+            customer_email: sanitized.customer_email || 'customer@homedressna.com',
             description: `Order ${orderNumber}`,
             reference: orderNumber
           })
