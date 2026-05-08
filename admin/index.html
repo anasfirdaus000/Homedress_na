@@ -294,14 +294,34 @@
         }
 
         // Failed notifications
-        const failedNotifs = orders.flatMap(o => (o.notifications || []).filter(n => n.status === 'failed'));
+        // Only show failed notifications for orders that are NOT cancelled or completed
+        const failedNotifs = orders
+          .filter(o => !['cancelled', 'completed'].includes(o.status))
+          .flatMap(o => (o.notifications || [])
+            .filter(n => n.status === 'failed')
+            .map(n => ({ ...n, order_number: o.order_number }))
+          );
+
         if (failedNotifs.length > 0) {
           document.getElementById('notif-card').style.display = 'block';
-          document.getElementById('failed-notifs').innerHTML = failedNotifs.map(n => `
-            <div style="padding:8px 12px;background:#2a1a1a;border-radius:8px;margin-bottom:8px;font-size:0.85rem;">
-              📍 ${n.recipient} — ${n.error_message || 'Unknown error'} <small style="color:#888">(${new Date(n.created_at).toLocaleString('id-ID')})</small>
+          document.getElementById('failed-notifs').innerHTML = `
+            <div style="margin-bottom:12px; font-size:0.9rem; color:#888;">
+              Ditemukan ${failedNotifs.length} notif yang gagal terkirim pada pesanan aktif. 
+              <br><small>💡 Pastikan perangkat Fonnte Anda terhubung (Connected).</small>
             </div>
-          `).join('');
+            ${failedNotifs.map(n => `
+              <div style="padding:12px; background:#2a1a1a; border-left:4px solid #ff4757; border-radius:8px; margin-bottom:8px; font-size:0.85rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <strong>Order ${n.order_number}</strong>
+                  <span style="color:#888">${new Date(n.created_at).toLocaleTimeString('id-ID')}</span>
+                </div>
+                <div style="color:#ffb8b8;">📍 Ke: ${n.recipient}</div>
+                <div style="color:#888; margin-top:4px;">⚠️ Error: ${n.error_message || 'Unknown error'}</div>
+              </div>
+            `).join('')}
+          `;
+        } else {
+          document.getElementById('notif-card').style.display = 'none';
         }
 
       } catch (err) {
