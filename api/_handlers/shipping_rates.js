@@ -27,6 +27,8 @@ export default async function handler(req, res) {
       quantity: parseInt(item.quantity) || 1
     }));
 
+    console.log('Fetching rates for:', { origin_area_id, destination_area_id, weight: cleansedItems.reduce((a,b) => a + (b.weight*b.quantity), 0) });
+
     const response = await fetch('https://api.biteship.com/v1/rates/couriers', {
       method: 'POST',
       headers: {
@@ -44,13 +46,16 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!data.success) {
-      return res.status(400).json({ error: data.error || 'Failed to fetch rates' });
+      console.error('Biteship API Error:', data);
+      return res.status(400).json({ 
+        error: data.error || 'Biteship rejected the request',
+        details: data.errors || []
+      });
     }
 
-    // Return the pricing options
     return res.status(200).json({ pricings: data.pricing || [] });
   } catch (err) {
-    console.error('Biteship Rates Error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Server Error:', err);
+    return res.status(500).json({ error: 'Internal server error', message: err.message });
   }
 }
