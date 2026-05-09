@@ -1153,7 +1153,7 @@ function initCategoryPagination(products = []) {
   render(filtered);
 }
 
-// ========== CHECKOUT PAGE ==========
+// ========== CHECKOUT PAGE (Biteship Test Mode) ==========
 async function initCheckoutPage() {
   const form = document.getElementById('checkout-form');
   const summary = document.getElementById('checkout-summary');
