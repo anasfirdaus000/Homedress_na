@@ -32,8 +32,16 @@
     <main class="admin-main">
       <div class="admin-header">
         <h1>📦 Kelola Pesanan</h1>
-        <div style="display:flex;gap:8px;">
-          <select id="filter-status" class="admin-form__select" style="width:auto;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <label style="font-size:0.85rem;color:#888;">Dari:</label>
+            <input type="date" id="filter-date-start" class="admin-form__input" style="width:auto;margin:0;" />
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <label style="font-size:0.85rem;color:#888;">Sampai:</label>
+            <input type="date" id="filter-date-end" class="admin-form__input" style="width:auto;margin:0;" />
+          </div>
+          <select id="filter-status" class="admin-form__select" style="width:auto;margin:0;">
             <option value="">Semua Status</option>
             <option value="pending">⏳ Pending</option>
             <option value="confirmed">✅ Konfirmasi</option>
@@ -42,6 +50,8 @@
             <option value="completed">🎉 Selesai</option>
             <option value="cancelled">❌ Batal</option>
           </select>
+          <button class="admin-btn admin-btn--primary admin-btn--small" onclick="renderOrders()">🔍 Filter</button>
+          <button class="admin-btn admin-btn--outline admin-btn--small" onclick="resetFilters()">🔄 Reset</button>
         </div>
       </div>
 
@@ -111,12 +121,28 @@
     }
 
     function renderOrders() {
-      const filterVal = document.getElementById('filter-status').value;
-      const filtered = filterVal ? allOrders.filter(o => o.status === filterVal) : allOrders;
-      const tbody = document.getElementById('orders-table');
+      const statusVal = document.getElementById('filter-status').value;
+      const startVal = document.getElementById('filter-date-start').value;
+      const endVal = document.getElementById('filter-date-end').value;
+      
+      let filtered = allOrders;
 
+      if (statusVal) filtered = filtered.filter(o => o.status === statusVal);
+      
+      if (startVal) {
+        const start = new Date(startVal);
+        start.setHours(0,0,0,0);
+        filtered = filtered.filter(o => new Date(o.created_at) >= start);
+      }
+      if (endVal) {
+        const end = new Date(endVal);
+        end.setHours(23,59,59,999);
+        filtered = filtered.filter(o => new Date(o.created_at) <= end);
+      }
+
+      const tbody = document.getElementById('orders-table');
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;">Tidak ada pesanan</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;">Tidak ada pesanan ditemukan</td></tr>';
         return;
       }
 
@@ -250,6 +276,13 @@
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 3000);
     }
+
+    window.resetFilters = function() {
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-date-start').value = '';
+      document.getElementById('filter-date-end').value = '';
+      renderOrders();
+    };
 
     document.getElementById('filter-status').addEventListener('change', renderOrders);
     loadOrders();
