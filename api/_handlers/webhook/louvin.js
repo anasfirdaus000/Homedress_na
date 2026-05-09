@@ -5,8 +5,11 @@
 import { supabaseAdmin } from '../../_lib/supabase.js';
 import { sendWhatsApp, formatPaymentSuccessNotification } from '../../_lib/notify.js';
 
+import { supabaseAdmin } from '../../_lib/supabase.js';
+import { sendWhatsApp, formatPaymentSuccessNotification } from '../../_lib/notify.js';
+import { autoCreateShipment } from '../../_lib/shipment.js';
+
 export default async function handler(req, res) {
-  // CORS (Louvin might need it or not, but good to have)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,94 +18,76 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { event, data } = req.body;
-  console.log(`[Louvin Webhook] Event: ${event} for Order: ${data?.order_id}`);
+  console.log(`[Louvin Webhook] Event: ${event} for Order: ${data?.reference || data?.order_id}`);
 
   try {
-    // Louvin usually sends the order number in 'reference' or 'external_id'
     const orderRef = data?.reference || data?.order_id || data?.external_id;
+    if (!orderRef) return res.status(200).json({ success: true, message: 'No reference' });
 
-    if (!orderRef) {
-      console.warn('[Louvin Webhook] No order reference found in payload, but acknowledging event.');
-      return res.status(200).json({ success: true, message: 'Awaiting reference' });
-    }
-
-    // 1. Update Order Status
-    let newStatus = null;
     if (event === 'payment.settled' || event === 'payment.success') {
-      newStatus = 'confirmed'; // Payment received
-    } else if (event === 'payment.failed' || event === 'payment.expired') {
-      newStatus = 'cancelled'; // Payment expired or failed
-    }
-
-    if (newStatus) {
-      const { error: updateError } = await supabaseAdmin
+      // 1. Fetch Order with Items
+      const { data: order } = await supabaseAdmin
         .from('orders')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString() 
-        })
-        .eq('order_number', orderRef);
+        .select('*, order_items(*)')
+        .eq('order_number', orderRef)
+        .single();
 
-      if (updateError) throw new Error('Failed to update order status: ' + updateError.message);
-      
-      console.log(`[Louvin Webhook] Order ${orderRef} updated to ${newStatus}`);
+      if (!order) throw new Error('Order not found');
+      if (order.status === 'shipped' || order.status === 'completed') {
+        return res.status(200).json({ success: true, message: 'Already processed' });
+      }
 
-        // 2. STOCK REDUCTION & NOTIFICATIONS if settled
-      if (event === 'payment.settled' || event === 'payment.success') {
-        const { data: fullOrder } = await supabaseAdmin
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('order_number', orderRef)
-          .single();
-
-        if (fullOrder) {
-          // --- A. REDUCE STOCK ---
-          if (fullOrder.order_items) {
-            for (const item of fullOrder.order_items) {
-              if (item.product_id) {
-                const { data: p } = await supabaseAdmin.from('products').select('stock').eq('id', item.product_id).single();
-                if (p && p.stock !== undefined) {
-                  const newStock = Math.max(0, p.stock - (item.quantity || 1));
-                  await supabaseAdmin.from('products').update({ stock: newStock }).eq('id', item.product_id);
-                }
-              }
-            }
-          }
-
-          // --- B. NOTIFY CUSTOMER ---
-          if (fullOrder.customer_phone) {
-            const msg = formatPaymentSuccessNotification(fullOrder);
-            const result = await sendWhatsApp(fullOrder.customer_phone, msg);
-            await supabaseAdmin.from('notifications_log').insert({
-              order_id: fullOrder.id, channel: 'whatsapp', provider: 'fonnte',
-              recipient: fullOrder.customer_phone, status: result.success ? 'sent' : 'failed',
-              error_message: result.error || null
-            });
-          }
-
-          // --- C. NOTIFY ADMIN ---
-          const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
-          if (adminPhone) {
-            const adminMsg = `✅ *PEMBAYARAN DITERIMA*\n\nOrder *${fullOrder.order_number}* oleh *${fullOrder.customer_name}* telah lunas!\nTotal: Rp ${fullOrder.total.toLocaleString('id-ID')}\n\nSilakan segera diproses di Admin Panel.`;
-            const adminRes = await sendWhatsApp(adminPhone, adminMsg);
-            await supabaseAdmin.from('notifications_log').insert({
-              order_id: fullOrder.id, channel: 'whatsapp', provider: 'fonnte',
-              recipient: adminPhone, status: adminRes.success ? 'sent' : 'failed',
-              error_message: adminRes.error || null
-            });
+      // 2. Reduce Stock
+      if (order.order_items) {
+        for (const item of order.order_items) {
+          const { data: p } = await supabaseAdmin.from('products').select('stock').eq('id', item.product_id).single();
+          if (p && p.stock !== undefined) {
+            const newStock = Math.max(0, p.stock - (item.quantity || 1));
+            await supabaseAdmin.from('products').update({ stock: newStock }).eq('id', item.product_id);
+            console.log(`[Stock] Reduced stock for ${item.product_name} to ${newStock}`);
           }
         }
       }
-    } else {
-      console.log(`[Louvin Webhook] Event ${event} ignored (not a final status).`);
+
+      // 3. Generate Auto Resi (Biteship)
+      let resi = null;
+      try {
+        resi = await autoCreateShipment(order.id);
+        console.log(`[Biteship] Auto Resi generated: ${resi}`);
+      } catch (shipErr) {
+        console.error('[Biteship Error] Failed auto-shipment:', shipErr.message);
+        // We still continue to notify the user even if resi fails (they paid anyway)
+      }
+
+      // 4. Update Status to Shipped (if resi success) or Confirmed
+      const { error: updateError } = await supabaseAdmin
+        .from('orders')
+        .update({ 
+          status: resi ? 'shipped' : 'confirmed',
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', order.id);
+
+      // 5. Notify Customer via WhatsApp
+      if (order.customer_phone) {
+        let msg = formatPaymentSuccessNotification(order);
+        if (resi) {
+          msg += `\n\n🚚 *INFO PENGIRIMAN*\nNomor Resi: *${resi}*\nStatus: Paket sedang disiapkan untuk kurir.\n\nAnda bisa melacak paket langsung di menu 'Akun Saya' pada website kami.`;
+        }
+        await sendWhatsApp(order.customer_phone, msg);
+      }
+
+      // 6. Notify Admin
+      const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
+      if (adminPhone) {
+        const adminMsg = `✅ *PEMBAYARAN LUNAS & AUTO-RESI*\n\nOrder: *${order.order_number}*\nCustomer: *${order.customer_name}*\nResi: *${resi || 'GAGAL GENERATE'}*\n\nStok sudah terpotong otomatis.`;
+        await sendWhatsApp(adminPhone, adminMsg);
+      }
     }
 
-    // Always return 200 to Louvin
-    return res.status(200).json({ success: true, received: true });
-
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.error('[Louvin Webhook Error]:', err.message);
-    // Even if it fails internally, Louvin expects 200 if the endpoint is reachable
     return res.status(200).json({ success: false, error: err.message });
   }
 }
