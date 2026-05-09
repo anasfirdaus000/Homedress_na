@@ -31,7 +31,6 @@
         <a href="/admin/featured.html" class="sidebar__link">✨ Promo & Banner</a>
         <a href="/admin/about.html" class="sidebar__link">📖 Tentang Kami</a>
         <a href="/admin/newsletter.html" class="sidebar__link">📧 Newsletter</a>
-        <a href="/admin/shipping.html" class="sidebar__link">🚚 Pengiriman</a>
         <a href="/admin/settings.html" class="sidebar__link sidebar__link--active">⚙️ Pengaturan Web</a>
         <hr style="border-color:#333;margin:16px 0;" />
         <a href="/" class="sidebar__link" target="_blank">🌐 Lihat Website</a>
@@ -70,6 +69,7 @@
       <div class="settings-section">
         <h3>🚚 Pengaturan Asal Pengiriman (Biteship)</h3>
         <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Masukkan ID Area Biteship untuk lokasi asal pengiriman toko Anda.</p>
+        <form id="shipping-origin-form">
           <div style="margin-bottom:16px;">
             <label class="admin-form__label">🔍 Cari Kecamatan Asal (Ketik nama kecamatan toko Anda)</label>
             <div style="position:relative;">
@@ -253,9 +253,6 @@
           <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Editorial</button>
         </form>
       </div>
-
-
-
     </main>
   </div>
 
@@ -280,7 +277,8 @@
     // ========== HELPER: Save setting ==========
     async function saveSetting(key, value) {
       const jsonVal = JSON.stringify(value);
-      await supabase.from('site_settings').upsert({ key, value: jsonVal }, { onConflict: 'key' });
+      const { error } = await supabase.from('site_settings').upsert({ key, value: jsonVal }, { onConflict: 'key' });
+      if (error) throw error;
     }
 
     async function loadSetting(key) {
@@ -305,15 +303,10 @@
       const btn = e.target.querySelector('button[type="submit"]');
       btn.disabled = true;
       btn.textContent = '⏳ Menyimpan...';
-      
       try {
         const keys = ['store_origin_province', 'store_origin_city', 'announcement_text'];
         for (const k of keys) {
-          const { error } = await supabase.from('site_settings').upsert({ 
-            key: k, 
-            value: JSON.stringify(document.getElementById(k).value) 
-          }, { onConflict: 'key' });
-          if (error) throw error;
+          await saveSetting(k, document.getElementById(k).value);
         }
         alert('✅ Pengaturan umum disimpan!');
       } catch (err) {
@@ -338,12 +331,67 @@
 
     // ========== SHIPPING ORIGIN ==========
     async function loadShippingOrigin() {
-      document.getElementById('google_maps_url').value = await loadSetting('google_maps_url') || '';
-      
       const shipOrigin = await loadSetting('shipping_origin_data');
       if (shipOrigin) {
         document.getElementById('shipping_origin_id').value = shipOrigin.id || '';
         document.getElementById('shipping_origin_name').value = shipOrigin.name || '';
+      }
+    };
+
+    // Shipping Origin Search Logic
+    let originSearchTimeout = null;
+    window.searchOrigin = async (query) => {
+      const resultsDiv = document.getElementById('origin_results');
+      if (query.length < 3) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+      clearTimeout(originSearchTimeout);
+      originSearchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/shipping/areas?input=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          const areas = data.areas || [];
+          if (areas.length > 0) {
+            resultsDiv.innerHTML = areas.map(a => `
+              <div style="padding:12px; cursor:pointer; border-bottom:1px solid #333; font-size:0.9rem;" onclick="selectOrigin('${a.id}', '${a.name}')">
+                <div style="font-weight:600; color:#fff;">${a.name}</div>
+                <div style="font-size:0.75rem; color:#888;">${a.id}</div>
+              </div>
+            `).join('');
+            resultsDiv.style.display = 'block';
+          } else {
+            resultsDiv.innerHTML = '<div style="padding:12px; color:#888;">Kecamatan tidak ditemukan.</div>';
+            resultsDiv.style.display = 'block';
+          }
+        } catch(err) { console.error('Search error:', err); }
+      }, 500);
+    };
+
+    window.selectOrigin = (id, name) => {
+      document.getElementById('shipping_origin_id').value = id;
+      document.getElementById('shipping_origin_name').value = name;
+      document.getElementById('search_origin_input').value = name;
+      document.getElementById('origin_results').style.display = 'none';
+    };
+
+    document.getElementById('shipping-origin-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+      try {
+        const data = {
+          id: document.getElementById('shipping_origin_id').value,
+          name: document.getElementById('shipping_origin_name').value
+        };
+        await saveSetting('shipping_origin_data', data);
+        alert('✅ Lokasi asal pengiriman berhasil disimpan!');
+      } catch (err) {
+        alert('❌ Gagal menyimpan: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Lokasi Asal';
       }
     };
 
@@ -366,7 +414,6 @@
       const btn = e.target.querySelector('button[type="submit"]');
       btn.disabled = true;
       btn.textContent = '⏳ Menyimpan...';
-
       try {
         for (let i = 1; i <= 3; i++) {
           const data = {
@@ -376,17 +423,11 @@
             bg_image: document.getElementById(`ed${i}-bg`).value,
             product_image: document.getElementById(`ed${i}-img`).value
           };
-          const { error } = await supabase.from('site_settings').upsert({ 
-            key: `editorial_${i}`, 
-            value: JSON.stringify(data) 
-          }, { onConflict: 'key' });
-          
-          if (error) throw error;
+          await saveSetting(`editorial_${i}`, data);
         }
         alert('✅ Editorial sections berhasil disimpan!');
       } catch (err) {
-        console.error('Save error:', err);
-        alert('❌ Gagal menyimpan: ' + (err.message || 'Izin ditolak oleh database'));
+        alert('❌ Gagal menyimpan: ' + err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = '💾 Simpan Editorial';
@@ -395,7 +436,6 @@
 
     // ========== POPUP PROMO ==========
     async function loadPromoPopup() {
-      // 1. Fetch all products to populate select
       const { data: products } = await supabase.from('products').select('name, slug').order('name');
       const select = document.getElementById('promo_product_slug');
       if (products) {
@@ -406,8 +446,6 @@
           select.appendChild(opt);
         });
       }
-
-      // 2. Load current setting
       const val = await loadSetting('promo_popup_data');
       if (val) {
         document.getElementById('promo_product_slug').value = val.product_slug || '';
@@ -437,122 +475,54 @@
       }
     };
 
-    // Media Upload via Cloudinary
+    // Media Upload Logic
     window.uploadMedia = async (inputEl, targetId, statusId) => {
       const file = inputEl.files[0];
       if (!file) return;
-
       const statusEl = document.getElementById(statusId);
-      statusEl.textContent = '⏳ Menyiapkan upload...';
+      statusEl.textContent = '⏳ Mengunggah...';
       statusEl.style.color = '#f39c12';
-      
       try {
-        // 1. Get Signature from our server
         const timestamp = Math.round(new Date().getTime() / 1000);
         const folder = 'homedress_na/editorial';
-        
         const signRes = await fetch('/api/admin/cloudinary-sign', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ timestamp, folder })
         });
-        
         const { signature, api_key, cloud_name } = await signRes.json();
-        if (!signature) throw new Error('Gagal mendapatkan izin upload');
-
-        // 2. Upload DIRECTLY to Cloudinary
-        statusEl.textContent = '⏳ Mengirim ke Cloudinary...';
-        
         const formData = new FormData();
         formData.append('file', file);
         formData.append('api_key', api_key);
         formData.append('timestamp', timestamp);
         formData.append('signature', signature);
         formData.append('folder', folder);
-
         const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
           method: 'POST',
           body: formData
         });
-
         const data = await uploadRes.json();
         if (data.secure_url) {
           document.getElementById(targetId).value = data.secure_url;
-          statusEl.textContent = '✅ Berhasil diunggah!';
+          statusEl.textContent = '✅ Berhasil!';
           statusEl.style.color = '#27ae60';
-        } else {
-          throw new Error(data.error?.message || 'Gagal upload ke Cloudinary');
-        }
+        } else throw new Error(data.error?.message || 'Upload gagal');
       } catch(err) {
-        console.error('Upload Error:', err);
-        statusEl.textContent = '❌ ' + err.message;
+        statusEl.textContent = '❌ Error';
         statusEl.style.color = '#e74c3c';
       }
     };
 
-    // Shipping Origin Search
-    let originSearchTimeout = null;
-    window.searchOrigin = async (query) => {
-      const resultsDiv = document.getElementById('origin_results');
-      if (query.length < 3) {
-        resultsDiv.style.display = 'none';
-        return;
-      }
+    // ========== INITIALIZE ALL ==========
+    async function init() {
+      await loadGeneral();
+      await loadMaps();
+      await loadShippingOrigin();
+      await loadEditorial();
+      await loadPromoPopup();
+    }
+    init();
 
-      clearTimeout(originSearchTimeout);
-      originSearchTimeout = setTimeout(async () => {
-        try {
-          const res = await fetch(`/api/shipping/areas?input=${encodeURIComponent(query)}`);
-          const data = await res.json();
-          const areas = data.areas || [];
-          
-          if (areas.length > 0) {
-            resultsDiv.innerHTML = areas.map(a => `
-              <div style="padding:12px; cursor:pointer; border-bottom:1px solid #333; font-size:0.9rem;" onclick="selectOrigin('${a.id}', '${a.name}')">
-                <div style="font-weight:600; color:#fff;">${a.name}</div>
-                <div style="font-size:0.75rem; color:#888;">${a.id}</div>
-              </div>
-            `).join('');
-            resultsDiv.style.display = 'block';
-          } else {
-            resultsDiv.innerHTML = '<div style="padding:12px; color:#888;">Kecamatan tidak ditemukan.</div>';
-            resultsDiv.style.display = 'block';
-          }
-        } catch(err) {
-          console.error('Search error:', err);
-        }
-      }, 500);
-    };
-
-    window.selectOrigin = (id, name) => {
-      document.getElementById('shipping_origin_id').value = id;
-      document.getElementById('shipping_origin_name').value = name;
-      document.getElementById('search_origin_input').value = name;
-      document.getElementById('origin_results').style.display = 'none';
-    };
-
-    document.getElementById('shipping-origin-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector('button[type="submit"]');
-      btn.disabled = true;
-      btn.textContent = '⏳ Menyimpan...';
-      try {
-        const data = {
-          id: document.getElementById('shipping_origin_id').value.trim(),
-          name: document.getElementById('shipping_origin_name').value.trim()
-        };
-        await saveSetting('shipping_origin_data', data);
-        alert('✅ Lokasi asal pengiriman berhasil disimpan!');
-      } catch (err) {
-        alert('❌ Gagal menyimpan: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '💾 Simpan Lokasi Asal';
-      }
-    };
-
-    // ========== INIT ALL ==========
-    await Promise.all([loadGeneral(), loadMaps(), loadShippingOrigin(), loadEditorial(), loadPromoPopup()]);
   </script>
 </body>
 </html>
