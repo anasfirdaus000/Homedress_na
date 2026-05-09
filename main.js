@@ -1158,6 +1158,16 @@ async function initCheckoutPage() {
   const form = document.getElementById('checkout-form');
   const summary = document.getElementById('checkout-summary');
   const shippingContainer = document.getElementById('shipping-options');
+  // 1. Fetch Shipping Origin from DB
+  let originAreaId = '';
+  try {
+    const { data: setting } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
+    if (setting) {
+      const val = typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value;
+      originAreaId = val.id;
+    }
+  } catch (e) { console.error('Failed to load origin:', e); }
+
   const searchInput = document.getElementById('kecamatan-search');
   const resultsDiv = document.getElementById('search-results');
   const weightInfo = document.getElementById('weight-info');
@@ -1217,17 +1227,17 @@ async function initCheckoutPage() {
 
   // 3. Fetch Rates Logic
   const fetchRates = async () => {
-    if (!destinationData || !originData) return;
+    if (!destinationData || !originAreaId) return;
     shippingContainer.innerHTML = '<p style="color: #64748b; font-size: 0.95rem;">⏳ Menghitung ongkir...</p>';
     
     const items = CART.items.map(i => ({
       name: i.name,
       value: i.price,
-      weight: i.weight || 300,
-      quantity: i.qty
+      weight: parseInt(i.weight) || 300,
+      quantity: parseInt(i.qty) || 1
     }));
 
-    const totalWeight = items.reduce((acc, i) => acc + (parseInt(i.weight) * parseInt(i.quantity)), 0);
+    const totalWeight = items.reduce((acc, i) => acc + (i.weight * i.quantity), 0);
     if (weightInfo) weightInfo.textContent = `Berat Total: ${(totalWeight/1000).toFixed(2)} kg (${totalWeight}g)`;
 
     try {
@@ -1235,7 +1245,7 @@ async function initCheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          origin_area_id: originData.id,
+          origin_area_id: originAreaId,
           destination_area_id: destinationData.id,
           items: items
         })
