@@ -70,16 +70,22 @@
       <div class="settings-section">
         <h3>🚚 Pengaturan Asal Pengiriman (Biteship)</h3>
         <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Masukkan ID Area Biteship untuk lokasi asal pengiriman toko Anda.</p>
-        <form id="shipping-origin-form">
+          <div style="margin-bottom:16px;">
+            <label class="admin-form__label">🔍 Cari Kecamatan Asal (Ketik nama kecamatan toko Anda)</label>
+            <div style="position:relative;">
+              <input class="admin-form__input" id="search_origin_input" placeholder="Contoh: Tanah Abang atau Kebayoran..." oninput="searchOrigin(this.value)" />
+              <div id="origin_results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#222;border:1px solid #444;border-top:none;z-index:100;max-height:200px;overflow-y:auto;border-radius:0 0 8px 8px;box-shadow:0 10px 20px rgba(0,0,0,0.5);"></div>
+            </div>
+            <small style="color:#888;">Gunakan kolom ini untuk mencari ID Area secara otomatis.</small>
+          </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
             <div class="admin-form__group">
-              <label class="admin-form__label">ID Area Asal (Biteship ID)</label>
-              <input class="admin-form__input" id="shipping_origin_id" placeholder="Cth: IDNP6CL10" required />
-              <small style="color:#888;">ID Area bisa didapat dari Dashboard Biteship atau dokumentasi.</small>
+              <label class="admin-form__label">ID Area Asal (Terisi Otomatis)</label>
+              <input class="admin-form__input" id="shipping_origin_id" placeholder="Cth: IDNP6CL10" required readonly style="background:#222; color:#888;" />
             </div>
             <div class="admin-form__group">
               <label class="admin-form__label">Nama Area / Kecamatan</label>
-              <input class="admin-form__input" id="shipping_origin_name" placeholder="Cth: Kebayoran Baru, Jakarta Selatan" required />
+              <input class="admin-form__input" id="shipping_origin_name" placeholder="Cth: Kebayoran Baru, Jakarta Selatan" required readonly style="background:#222; color:#888;" />
             </div>
           </div>
           <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Lokasi Asal</button>
@@ -482,6 +488,47 @@
         statusEl.textContent = '❌ ' + err.message;
         statusEl.style.color = '#e74c3c';
       }
+    };
+
+    // Shipping Origin Search
+    let originSearchTimeout = null;
+    window.searchOrigin = async (query) => {
+      const resultsDiv = document.getElementById('origin_results');
+      if (query.length < 3) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+
+      clearTimeout(originSearchTimeout);
+      originSearchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/shipping/areas?input=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          const areas = data.areas || [];
+          
+          if (areas.length > 0) {
+            resultsDiv.innerHTML = areas.map(a => `
+              <div style="padding:12px; cursor:pointer; border-bottom:1px solid #333; font-size:0.9rem;" onclick="selectOrigin('${a.id}', '${a.name}')">
+                <div style="font-weight:600; color:#fff;">${a.name}</div>
+                <div style="font-size:0.75rem; color:#888;">${a.id}</div>
+              </div>
+            `).join('');
+            resultsDiv.style.display = 'block';
+          } else {
+            resultsDiv.innerHTML = '<div style="padding:12px; color:#888;">Kecamatan tidak ditemukan.</div>';
+            resultsDiv.style.display = 'block';
+          }
+        } catch(err) {
+          console.error('Search error:', err);
+        }
+      }, 500);
+    };
+
+    window.selectOrigin = (id, name) => {
+      document.getElementById('shipping_origin_id').value = id;
+      document.getElementById('shipping_origin_name').value = name;
+      document.getElementById('search_origin_input').value = name;
+      document.getElementById('origin_results').style.display = 'none';
     };
 
     document.getElementById('shipping-origin-form').onsubmit = async (e) => {
