@@ -38,7 +38,6 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         origin_area_id,
         destination_area_id,
-        couriers: 'jne,jnt,sicepat',
         items: cleansedItems
       })
     });
