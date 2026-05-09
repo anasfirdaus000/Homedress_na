@@ -9,6 +9,14 @@ export async function sendWhatsApp(phone, message) {
     return { success: false, error: 'API key not configured' };
   }
 
+  // Clean phone number: remove non-digits and handle 08/62 prefix
+  let cleanPhone = phone.replace(/\D/g, '');
+  if (cleanPhone.startsWith('0')) {
+    cleanPhone = '62' + cleanPhone.substring(1);
+  } else if (!cleanPhone.startsWith('62')) {
+    cleanPhone = '62' + cleanPhone;
+  }
+
   try {
     const response = await fetch('https://api.fonnte.com/send', {
       method: 'POST',
@@ -17,9 +25,8 @@ export async function sendWhatsApp(phone, message) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        target: phone,
-        message: message,
-        countryCode: '62'
+        target: cleanPhone,
+        message: message
       })
     });
 
