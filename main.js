@@ -1180,15 +1180,16 @@ async function initCheckoutPage() {
   const weightInfo = document.getElementById('weight-info');
   if (!form || !summary) return;
 
-  let selectedShipping = null;
-  let originData = null;
-  let destinationData = null;
-
-  // 1. Get Origin Data from Settings
+  // 1. Load Origin & Configuration
+  let originAreaId = '';
   const loadOrigin = async () => {
     try {
       const { data } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
-      if (data) originData = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+      if (data) {
+        const val = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        originAreaId = val.id;
+        console.log('✅ Origin ID Loaded:', originAreaId);
+      }
     } catch (e) { console.error('Error loading origin:', e); }
   };
   await loadOrigin();
@@ -1208,10 +1209,10 @@ async function initCheckoutPage() {
         
         if (areas.length > 0) {
           resultsDiv.innerHTML = areas.map(a => `
-            <div class="search-item" data-id="${a.id}" data-name="${a.name}" data-city="${a.city_name}" data-postal="${a.postal_code || ''}" 
-                 style="padding:12px; cursor:pointer; border-bottom:1px solid #f1f5f9; hover:background:#f8fafc;">
-              <p style="margin:0; font-weight:600; font-size:0.95rem;">${a.name}</p>
-              <p style="margin:0; font-size:0.8rem; color:#64748b;">${a.city_name}, ${a.administrative_division_level_1_name}</p>
+            <div class="search-item" data-id="${a.id}" data-name="${a.name}" data-city="${a.administrative_division_level_2_name}" data-postal="${a.postal_code || ''}" 
+                 style="padding:14px; cursor:pointer; border-bottom:1px solid #f1f5f9; hover:background:#f8fafc;">
+              <div style="font-weight:600; color:#1e293b;">${a.name}</div>
+              <div style="font-size:0.8rem; color:#64748b;">${a.administrative_division_level_2_name}, ${a.administrative_division_level_1_name}</div>
             </div>
           `).join('');
           resultsDiv.style.display = 'block';
@@ -1228,14 +1229,24 @@ async function initCheckoutPage() {
             };
           });
         }
-      } catch (e) {}
+      } catch (e) { console.error('Search error:', e); }
     }, 500);
   };
 
   // 3. Fetch Rates Logic
   const fetchRates = async () => {
-    if (!destinationData || !originAreaId) return;
-    shippingContainer.innerHTML = '<p style="color: #64748b; font-size: 0.95rem;">⏳ Menghitung ongkir...</p>';
+    if (!destinationData) return;
+    if (!originAreaId) {
+      shippingContainer.innerHTML = `
+        <div style="background:#fff1f2; border:1px solid #fda4af; padding:16px; border-radius:12px; color:#9f1239;">
+          <strong>⚠️ Konfigurasi Toko Belum Lengkap</strong><br>
+          Admin belum mengatur Lokasi Asal Toko. Mohon atur di Admin > Pengaturan Web.
+        </div>
+      `;
+      return;
+    }
+
+    shippingContainer.innerHTML = '<p style="color: #64748b; font-size: 0.95rem;">⏳ Sedang menghitung ongkir...</p>';
     
     const items = CART.items.map(i => ({
       name: i.name,
@@ -1263,14 +1274,14 @@ async function initCheckoutPage() {
 
       if (pricings.length > 0) {
         shippingContainer.innerHTML = pricings.map((p, i) => `
-          <label class="shipping-option" style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; cursor:pointer; transition: 0.2s;">
+          <label class="shipping-option" style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; cursor:pointer; transition: 0.2s; margin-bottom:8px;">
             <input type="radio" name="shipping_method" value="${p.courier_code}_${p.courier_service_code}" ${i===0?'checked':''} 
                    data-cost="${p.price}" data-name="${p.courier_name} ${p.courier_service_name}" style="accent-color: var(--color-accent); transform: scale(1.2);" />
             <div style="flex:1;">
-              <p style="font-weight:600; margin:0; font-size:1.05rem;">${p.courier_name} - ${p.courier_service_name}</p>
+              <p style="font-weight:700; margin:0; font-size:1.05rem; color:#1e293b;">${p.courier_name} (${p.courier_service_name})</p>
               <p style="font-size:0.85rem; color:#64748b; margin:4px 0 0 0;">Estimasi: ${p.duration}</p>
             </div>
-            <span style="font-weight:700; font-size:1.1rem; color:var(--color-fg);">Rp ${p.price.toLocaleString('id-ID')}</span>
+            <span style="font-weight:700; font-size:1.1rem; color:var(--color-accent);">Rp ${p.price.toLocaleString('id-ID')}</span>
           </label>
         `).join('');
 
@@ -1286,18 +1297,31 @@ async function initCheckoutPage() {
         });
         
         const first = shippingContainer.querySelector('input:checked');
-        selectedShipping = {
-          code: first.value,
-          name: first.dataset.name,
-          price: parseInt(first.dataset.cost)
-        };
-        renderSummary();
+        if (first) {
+          selectedShipping = {
+            code: first.value,
+            name: first.dataset.name,
+            price: parseInt(first.dataset.cost)
+          };
+          renderSummary();
+        }
       } else {
-        shippingContainer.innerHTML = '<p style="color: #ef4444;">Tidak ada kurir yang menjangkau lokasi ini.</p>';
+        shippingContainer.innerHTML = `
+          <div style="background:#fff7ed; border:1px solid #fed7aa; padding:16px; border-radius:12px; color:#9a3412;">
+            <p style="margin:0; font-weight:700;">🚫 Tidak ada kurir tersedia untuk rute ini.</p>
+            <p style="margin:8px 0 0 0; font-size:0.85rem;">Saran perbaikan:</p>
+            <ul style="margin:4px 0 0 0; padding-left:20px; font-size:0.85rem;">
+              <li>Cek apakah Kecamatan tujuan Anda sudah benar.</li>
+              <li>Pastikan Admin sudah menyimpan "Kecamatan" (bukan Kota) di Pengaturan Web.</li>
+            </ul>
+          </div>
+        `;
       }
     } catch (e) {
-      shippingContainer.innerHTML = '<p style="color: #ef4444;">Gagal mengambil tarif. Pastikan koneksi internet lancar.</p>';
+      console.error('Rates Error:', e);
+      shippingContainer.innerHTML = '<p style="color: #ef4444;">❌ Gagal mengambil tarif. Silakan coba lagi.</p>';
     }
+  };
   };
 
   const renderSummary = () => {
