@@ -21,10 +21,10 @@ export default async function handler(req, res) {
   try {
     // Ensure items have correct types for Biteship
     const cleansedItems = items.map(item => ({
-      name: item.name || 'Produk',
-      value: parseInt(item.value) || 0,
+      name: item.name || 'Produk Fashion',
+      value: parseInt(item.value || item.price) || 100000,
       weight: parseInt(item.weight) || 300,
-      quantity: parseInt(item.quantity) || 1
+      quantity: parseInt(item.quantity || item.qty) || 1
     }));
 
     console.log('Fetching rates for:', { origin_area_id, destination_area_id, weight: cleansedItems.reduce((a,b) => a + (b.weight*b.quantity), 0) });
