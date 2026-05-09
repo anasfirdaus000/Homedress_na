@@ -39,8 +39,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        origin_area_id,
+        origin_area_id: origin_area_id || 'IDNP6IDNC148IDND838IDZ12110', // Fallback to Tasikmalaya if missing
         destination_area_id,
+        couriers: 'jne,jnt,sicepat,tiki,anteraja,wahana',
         items: cleansedItems
       })
     });
