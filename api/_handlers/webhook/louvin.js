@@ -4,9 +4,6 @@
  */
 import { supabaseAdmin } from '../../_lib/supabase.js';
 import { sendWhatsApp, formatPaymentSuccessNotification } from '../../_lib/notify.js';
-
-import { supabaseAdmin } from '../../_lib/supabase.js';
-import { sendWhatsApp, formatPaymentSuccessNotification } from '../../_lib/notify.js';
 import { autoCreateShipment } from '../../_lib/shipment.js';
 
 export default async function handler(req, res) {
