@@ -1161,12 +1161,19 @@ async function initCheckoutPage() {
   // 1. Fetch Shipping Origin from DB
   let originAreaId = '';
   try {
-    const { data: setting } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
+    const { data: setting, error: fetchErr } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
     if (setting) {
       const val = typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value;
       originAreaId = val.id;
+      console.log('✅ Origin Loaded:', originAreaId);
+    } else {
+      console.warn('⚠️ Origin NOT FOUND in DB. Please set it in Admin Settings.');
+      shippingContainer.innerHTML = '<p style="color: #ef4444; font-size: 0.95rem;">⚠️ Pengaturan Toko Belum Lengkap. Mohon hubungi Admin (Lokasi Asal Belum Diset).</p>';
     }
-  } catch (e) { console.error('Failed to load origin:', e); }
+  } catch (e) { 
+    console.error('Failed to load origin:', e);
+    shippingContainer.innerHTML = '<p style="color: #ef4444; font-size: 0.95rem;">❌ Gagal memuat data pengiriman.</p>';
+  }
 
   const searchInput = document.getElementById('kecamatan-search');
   const resultsDiv = document.getElementById('search-results');
