@@ -45,32 +45,47 @@
             <div class="checkout-section" style="background:#fff; padding:32px; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:24px;">
               <h3 style="margin-top:0; margin-bottom:20px; font-size:1.2rem; font-weight:600;">Informasi Kontak</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                 <input type="text" name="customer_name" placeholder="Nama Lengkap" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none; transition:border-color 0.2s;"/>
-                 <input type="tel" name="customer_phone" placeholder="Nomor WhatsApp" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none; transition:border-color 0.2s;"/>
+                <div class="checkout-field">
+                  <label for="customer_name" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Nama Lengkap *</label>
+                  <input type="text" id="customer_name" name="customer_name" placeholder="Contoh: Siti Aminah" autocomplete="name" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+                </div>
+                <div class="checkout-field">
+                  <label for="customer_phone" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Nomor WhatsApp *</label>
+                  <input type="tel" id="customer_phone" name="customer_phone" placeholder="Contoh: 08123456789" autocomplete="tel" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+                </div>
               </div>
-              <input type="email" name="customer_email" placeholder="Email (Opsional)" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; margin-top:16px; font-size:1rem; outline:none;"/>
+              <div class="checkout-field" style="margin-top:16px;">
+                <label for="customer_email" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Email (Opsional)</label>
+                <input type="email" id="customer_email" name="customer_email" placeholder="email@contoh.com" autocomplete="email" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+              </div>
             </div>
 
             <!-- Alamat Pengiriman -->
             <div class="checkout-section" style="background:#fff; padding:32px; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:24px;">
               <h3 style="margin-top:0; margin-bottom:20px; font-size:1.2rem; font-weight:600;">Alamat Pengiriman</h3>
               
-              <div class="admin-form__group" style="position:relative; margin-bottom:16px;">
-                <label style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Cari Kecamatan / Kota *</label>
-                <input type="text" id="kecamatan-search" placeholder="Ketik minimal 3 huruf (Cth: Kebayoran Baru)" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+              <div class="checkout-field" style="position:relative; margin-bottom:16px;">
+                <label for="kecamatan-search" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Cari Kecamatan / Kota *</label>
+                <input type="text" id="kecamatan-search" placeholder="Ketik minimal 3 huruf (Cth: Kebayoran Baru)" required autocomplete="off" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
                 <input type="hidden" name="destination_area_id" id="destination_area_id" required />
                 
-                <!-- Search Results Dropdown -->
-                <div id="search-results" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); z-index:100; max-height:250px; overflow-y:auto; margin-top:4px;">
-                  <!-- Results will be injected here -->
-                </div>
+                <div id="search-results" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); z-index:100; max-height:250px; overflow-y:auto; margin-top:4px;"></div>
               </div>
 
-              <textarea name="shipping_address" placeholder="Alamat Lengkap (Nama Jalan, No Rumah, RT/RW)" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; min-height:80px; margin-bottom:16px; outline:none; font-family:inherit;"></textarea>
+              <div class="checkout-field" style="margin-bottom:16px;">
+                <label for="shipping_address" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Alamat Lengkap *</label>
+                <textarea id="shipping_address" name="shipping_address" placeholder="Nama Jalan, Nomor Rumah, RT/RW, Patokan" autocomplete="shipping address-line1" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; min-height:80px; outline:none; font-family:inherit;"></textarea>
+              </div>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                 <input type="text" name="city" id="checkout-city" placeholder="Kota/Kabupaten" readonly required style="width:100%; padding:14px; border:1px solid #f1f5f9; background:#f1f5f9; border-radius:8px; font-size:1rem; outline:none; color:#64748b;"/>
-                 <input type="text" name="postal_code" id="checkout-postal" placeholder="Kode Pos" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+                <div class="checkout-field">
+                  <label for="checkout-city" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Kota/Kabupaten</label>
+                  <input type="text" id="checkout-city" name="city" placeholder="Terisi Otomatis" readonly required style="width:100%; padding:14px; border:1px solid #f1f5f9; background:#f1f5f9; border-radius:8px; font-size:1rem; outline:none; color:#64748b;"/>
+                </div>
+                <div class="checkout-field">
+                  <label for="checkout-postal" style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Kode Pos *</label>
+                  <input type="text" id="checkout-postal" name="postal_code" placeholder="Cth: 12345" autocomplete="postal-code" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+                </div>
               </div>
             </div>
 
@@ -88,7 +103,10 @@
             <!-- Catatan -->
             <div class="checkout-section" style="background:#fff; padding:32px; border-radius:16px; border:1px solid #e2e8f0;">
               <h3 style="margin-top:0; margin-bottom:16px; font-size:1.2rem; font-weight:600;">Catatan Pesanan (Opsional)</h3>
-              <textarea name="notes" placeholder="Contoh: Tolong bungkus warna hitam ya..." style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none; font-family:inherit; min-height:80px;"></textarea>
+              <div class="checkout-field">
+                <label for="notes" class="sr-only" style="display:none;">Catatan Pesanan</label>
+                <textarea id="notes" name="notes" placeholder="Contoh: Tolong bungkus warna hitam ya..." style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none; font-family:inherit; min-height:80px;"></textarea>
+              </div>
             </div>
 
           </div>
@@ -99,34 +117,30 @@
             <div style="background:#fff; padding:32px; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
               <h3 style="margin-top:0; margin-bottom:20px; font-size:1.2rem; font-weight:600; border-bottom: 1px solid #e2e8f0; padding-bottom:16px;">Ringkasan Pesanan</h3>
               
-              <!-- Dynamic items inserted here by main.js -->
               <div id="checkout-summary"></div>
               
-              <!-- Payment Method -->
               <h3 style="margin-top:24px; margin-bottom:16px; font-size:1.1rem; font-weight:600;">Metode Pembayaran</h3>
               <div class="checkout-payment-opt" style="display:flex; flex-direction:column; gap:12px;">
-                <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
+                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
                   <input type="radio" name="payment_method" value="qris" checked style="accent-color:var(--color-accent);"/>
                   <span style="font-weight:500;">QRIS (Otomatis)</span>
                 </label>
-                <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
+                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
                   <input type="radio" name="payment_method" value="bni_va" style="accent-color:var(--color-accent);"/>
                   <span style="font-weight:500;">BNI Virtual Account</span>
                 </label>
-                <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
+                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
                   <input type="radio" name="payment_method" value="bri_va" style="accent-color:var(--color-accent);"/>
                   <span style="font-weight:500;">BRI Virtual Account</span>
                 </label>
-                <label style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
+                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
                   <input type="radio" name="payment_method" value="gopay" style="accent-color:var(--color-accent);"/>
                   <span style="font-weight:500;">GoPay</span>
                 </label>
               </div>
 
-              <!-- Error Box -->
               <div id="checkout-error" style="background:#fef2f2; color:#ef4444; padding:12px 16px; border-radius:8px; margin-top:20px; font-size:0.9rem; display:none; border:1px solid #fecaca;"></div>
               
-              <!-- Submit Button -->
               <button type="submit" id="btn-submit-checkout" class="btn" style="width:100%; padding:18px; margin-top:24px; font-weight:700; font-size:1.1rem; border-radius:8px; background:#0f172a; color:#fff; cursor:pointer; border:none; transition:0.2s;">
                 BUAT PESANAN SEKARANG
               </button>
