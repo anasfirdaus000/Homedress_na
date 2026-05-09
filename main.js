@@ -1322,7 +1322,6 @@ async function initCheckoutPage() {
       shippingContainer.innerHTML = '<p style="color: #ef4444;">❌ Gagal mengambil tarif. Silakan coba lagi.</p>';
     }
   };
-  };
 
   const renderSummary = () => {
     const items = CART.items;
