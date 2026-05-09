@@ -1158,30 +1158,17 @@ async function initCheckoutPage() {
   const form = document.getElementById('checkout-form');
   const summary = document.getElementById('checkout-summary');
   const shippingContainer = document.getElementById('shipping-options');
-  // 1. Fetch Shipping Origin from DB
   let originAreaId = '';
-  try {
-    const { data: setting, error: fetchErr } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
-    if (setting) {
-      const val = typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value;
-      originAreaId = val.id;
-      console.log('✅ Origin Loaded:', originAreaId);
-    } else {
-      console.warn('⚠️ Origin NOT FOUND in DB. Please set it in Admin Settings.');
-      shippingContainer.innerHTML = '<p style="color: #ef4444; font-size: 0.95rem;">⚠️ Pengaturan Toko Belum Lengkap. Mohon hubungi Admin (Lokasi Asal Belum Diset).</p>';
-    }
-  } catch (e) { 
-    console.error('Failed to load origin:', e);
-    shippingContainer.innerHTML = '<p style="color: #ef4444; font-size: 0.95rem;">❌ Gagal memuat data pengiriman.</p>';
-  }
+  let destinationData = null;
+  let selectedShipping = null;
 
   const searchInput = document.getElementById('kecamatan-search');
   const resultsDiv = document.getElementById('search-results');
   const weightInfo = document.getElementById('weight-info');
-  if (!form || !summary) return;
+
+  if (!form || !summary || !searchInput) return;
 
   // 1. Load Origin & Configuration
-  let originAreaId = '';
   const loadOrigin = async () => {
     try {
       const { data } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
