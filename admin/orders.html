@@ -181,7 +181,9 @@
               ${(o.status === 'processing' && !o.tracking_number) ? 
                 `<button class="admin-btn admin-btn--primary admin-btn--small" onclick="generateBiteshipResi('${o.id}')" style="background: linear-gradient(135deg, #6366f1, #a855f7);">🚀 AUTO RESI</button>` : ''
               }
-              <button class="admin-btn admin-btn--outline admin-btn--small" onclick="printLabel('${o.id}')">🖨️ CETAK</button>
+              ${(o.status === 'shipped' || o.status === 'completed' || o.tracking_number) ?
+                `<button class="admin-btn admin-btn--outline admin-btn--small" onclick="printLabel('${o.id}')">🖨️ CETAK</button>` : ''
+              }
               ${waBtn}
             </div>
           </td>
