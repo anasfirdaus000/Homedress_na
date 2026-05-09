@@ -43,7 +43,10 @@ export async function autoCreateShipment(orderId) {
         description: `Size: ${i.size}`,
         value: i.price_at_time,
         weight: i.weight || 300,
-        quantity: i.quantity
+        quantity: i.quantity,
+        length: 10,
+        width: 10,
+        height: 10
       }))
     };
 

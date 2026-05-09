@@ -24,7 +24,10 @@ export default async function handler(req, res) {
       name: item.name || 'Produk Fashion',
       value: parseInt(item.value || item.price) || 100000,
       weight: parseInt(item.weight) || 300,
-      quantity: parseInt(item.quantity || item.qty) || 1
+      quantity: parseInt(item.quantity || item.qty) || 1,
+      length: 10,
+      width: 10,
+      height: 10
     }));
 
     console.log('Fetching rates for:', { origin_area_id, destination_area_id, weight: cleansedItems.reduce((a,b) => a + (b.weight*b.quantity), 0) });
