@@ -9,12 +9,22 @@ import { supabaseAdmin } from '../_lib/supabase.js';
 
 const STATUS_LABELS = {
   pending: { label: 'Menunggu Pembayaran', icon: '⏳', step: 1 },
-  paid: { label: 'Pembayaran Diterima', icon: '✅', step: 2 },
+  paid: { label: 'Pembayaran Diterima', icon: '✅', step: 1 },
   confirmed: { label: 'Pesanan Dikonfirmasi', icon: '📦', step: 2 },
-  processing: { label: 'Sedang Diproses', icon: '⚙️', step: 3 },
-  shipped: { label: 'Dalam Pengiriman', icon: '🚚', step: 4 },
+  processing: { label: 'Sedang Diproses', icon: '⚙️', step: 2 },
+  shipped: { label: 'Dalam Pengiriman', icon: '🚚', step: 3 },
   completed: { label: 'Pesanan Selesai', icon: '🎉', step: 5 },
   cancelled: { label: 'Dibatalkan', icon: '❌', step: -1 }
+};
+
+const BITESHIP_STATUS_MAP = {
+  'confirmed': { label: 'Menunggu Kurir', step: 3 },
+  'allocated': { label: 'Kurir Dialokasikan', step: 3 },
+  'picking_up': { label: 'Kurir Menuju Lokasi', step: 4 },
+  'picked': { label: 'Paket Dibawa Kurir', step: 4 },
+  'dropping_off': { label: 'Paket Sedang Diantar', step: 4 },
+  'delivered': { label: 'Paket Diterima', step: 5 },
+  'on_hold': { label: 'Paket Tertunda', step: 4 }
 };
 
 export default async function handler(req, res) {
@@ -45,7 +55,7 @@ export default async function handler(req, res) {
     // Find order by number + phone (if provided)
     let query = supabaseAdmin
       .from('orders')
-      .select('id, order_number, customer_name, status, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry')
+      .select('id, order_number, customer_name, status, shipping_status, tracking_number, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry')
       .eq('order_number', finalOrderNumber);
 
     if (phone) {
@@ -64,7 +74,17 @@ export default async function handler(req, res) {
       .select('product_name, product_image, size, quantity, price_at_time')
       .eq('order_id', order.id);
 
-    const statusInfo = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
+    let statusLabel = STATUS_LABELS[order.status]?.label || order.status;
+    let statusStep = STATUS_LABELS[order.status]?.step || 1;
+    let statusIcon = STATUS_LABELS[order.status]?.icon || '📦';
+
+    // If there's a specific shipping status from Biteship, override labels
+    if (order.shipping_status && BITESHIP_STATUS_MAP[order.shipping_status]) {
+      const bitStatus = BITESHIP_STATUS_MAP[order.shipping_status];
+      statusLabel = bitStatus.label;
+      statusStep = bitStatus.step;
+      statusIcon = '🚚';
+    }
 
     return res.status(200).json({
       success: true,
@@ -72,9 +92,9 @@ export default async function handler(req, res) {
         order_number: order.order_number,
         customer_name: order.customer_name,
         status: order.status,
-        status_label: statusInfo.label,
-        status_icon: statusInfo.icon,
-        status_step: statusInfo.step,
+        status_label: statusLabel,
+        status_icon: statusIcon,
+        status_step: statusStep,
         subtotal: order.subtotal,
         shipping_cost: order.shipping_cost,
         total: order.total,

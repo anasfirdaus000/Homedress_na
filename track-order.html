@@ -93,20 +93,20 @@
 
           <div class="track-steps" id="track-steps">
             <div class="track-step" data-step="1">
-              <div class="track-step__circle">⏳</div>
-              <div class="track-step__label">Pending</div>
+              <div class="track-step__circle">💳</div>
+              <div class="track-step__label">Bayar</div>
             </div>
             <div class="track-step" data-step="2">
-              <div class="track-step__circle">✅</div>
-              <div class="track-step__label">Konfirmasi</div>
-            </div>
-            <div class="track-step" data-step="3">
               <div class="track-step__circle">📦</div>
               <div class="track-step__label">Proses</div>
             </div>
-            <div class="track-step" data-step="4">
+            <div class="track-step" data-step="3">
               <div class="track-step__circle">🚚</div>
-              <div class="track-step__label">Kirim</div>
+              <div class="track-step__label">Siap Kirim</div>
+            </div>
+            <div class="track-step" data-step="4">
+              <div class="track-step__circle">🛣️</div>
+              <div class="track-step__label">Perjalanan</div>
             </div>
             <div class="track-step" data-step="5">
               <div class="track-step__circle">🎉</div>
@@ -117,9 +117,7 @@
           <h3 style="margin-bottom:12px;">Detail Pesanan</h3>
           <div id="result-items"></div>
 
-          <div id="result-payment" style="display:none; margin-top:24px; padding:20px; background:#fff; border:1px solid #eee; border-radius:12px;">
-             <!-- Payment instructions -->
-          </div>
+          <div id="result-payment" style="display:none; margin-top:24px; padding:20px; background:#fff; border:1px solid #eee; border-radius:12px;"></div>
 
           <div id="payment-guide" style="display:none; margin-top:16px; font-size:0.9rem; color:#666;">
             <details style="cursor:pointer; background:#f9f9f9; padding:12px; border-radius:8px;">
@@ -169,103 +167,43 @@
         });
 
         const data = await res.json();
-
         if (!res.ok || !data.success) {
           throw new Error(data.error || 'Pesanan tidak ditemukan');
         }
 
         const order = data.order;
-
-        // Fill order info
         document.getElementById('result-order').textContent = order.order_number;
         
         const statusEl = document.getElementById('result-status');
-        statusEl.textContent = `${order.status_icon} ${order.status_label}`;
+        statusEl.textContent = `${order.status_icon || '📦'} ${order.status_label || order.status}`;
         statusEl.className = `track-result__status track-result__status--${order.status}`;
 
-        // Progress steps
-        document.querySelectorAll('.track-step').forEach(step => {
-          const stepNum = parseInt(step.dataset.step);
+        // Progress steps logic
+        const steps = document.querySelectorAll('.track-step');
+        steps.forEach(step => {
+          const s = parseInt(step.dataset.step);
           step.classList.remove('is-active', 'is-done');
-          if (order.status_step === -1) return; // cancelled
-          if (stepNum < order.status_step) step.classList.add('is-done');
-          if (stepNum === order.status_step) step.classList.add('is-active');
+          if (order.status_step >= s) step.classList.add('is-done');
+          if (order.status_step === s) step.classList.add('is-active');
         });
 
         // Items
         const itemsHtml = (order.items || []).map(item => `
           <div class="track-item">
-            <img class="track-item__img" src="${item.product_image || '/images/featured_images.png'}" alt="" loading="lazy" />
+            <img class="track-item__img" src="${item.product_image || '/favicon.png'}" />
             <div class="track-item__info">
               <div class="track-item__name">${item.product_name}</div>
-              <div class="track-item__detail">${item.size ? `Ukuran: ${item.size} · ` : ''}${item.quantity}x Rp ${item.price_at_time.toLocaleString('id-ID')}</div>
+              <div class="track-item__detail">${item.size ? `Size: ${item.size} · ` : ''}${item.quantity}x Rp ${item.price_at_time.toLocaleString('id-ID')}</div>
             </div>
           </div>
         `).join('');
         document.getElementById('result-items').innerHTML = itemsHtml;
 
-        // Totals
         document.getElementById('result-subtotal').textContent = 'Rp ' + order.subtotal.toLocaleString('id-ID');
-        document.getElementById('result-shipping').textContent = order.shipping_cost === 0 ? 'GRATIS' : 'Rp ' + order.shipping_cost.toLocaleString('id-ID');
+        document.getElementById('result-shipping').textContent = 'Rp ' + order.shipping_cost.toLocaleString('id-ID');
         document.getElementById('result-total').textContent = 'Rp ' + order.total.toLocaleString('id-ID');
 
-        // Payment Info
-        const paymentEl = document.getElementById('result-payment');
-        if (order.status === 'pending' && (order.payment_qr || order.payment_va)) {
-          paymentEl.style.display = 'block';
-          paymentEl.innerHTML = `
-            <h4 style="margin-bottom:10px;">💳 Selesaikan Pembayaran</h4>
-            ${order.payment_qr ? `
-              <div style="text-align:center;">
-                <p style="font-size:0.9rem; margin-bottom:10px;">Silakan scan QRIS berikut:</p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(order.payment_qr)}" alt="QRIS" style="display:inline-block; border:1px solid #eee; padding:5px;"/>
-              </div>
-            ` : ''}
-            ${order.payment_va ? `
-              <div>
-                <p style="font-size:0.9rem; margin-bottom:5px;">Transfer ke Virtual Account:</p>
-                <p style="font-size:1.2rem; font-weight:700; color:var(--color-accent);">${order.payment_va}</p>
-                <p style="font-size:0.8rem; color:#888;">Metode: ${order.payment_method.toUpperCase()}</p>
-              </div>
-            ` : ''}
-            <div style="margin-top:15px; padding:10px; background:#fff3cd; border-radius:4px; font-size:0.8rem; color:#856404;">
-              Bayar sebelum: <strong>${new Date(order.payment_expiry).toLocaleString('id-ID')}</strong>
-            </div>
-          `;
-          document.getElementById('payment-guide').style.display = 'block';
-        } else {
-          paymentEl.style.display = 'none';
-          document.getElementById('payment-guide').style.display = 'none';
-        }
-
-        // Re-order button for cancelled/completed
-        if (order.status === 'cancelled' || order.status === 'completed') {
-          const reorderHtml = `
-            <div style="margin-top:24px; text-align:center;">
-              <button id="btn-reorder" class="btn btn--primary" style="width:100%; padding:16px;">🛒 PESAN LAGI (RE-ORDER)</button>
-              <p style="font-size:0.9rem; color:#888; margin-top:12px;">Pesan produk yang sama lagi dengan cepat.</p>
-            </div>
-          `;
-          resultEl.querySelector('.track-result__total').insertAdjacentHTML('afterend', reorderHtml);
-          
-          document.getElementById('btn-reorder').onclick = () => {
-            if (confirm('Ingin memesan produk yang sama lagi?')) {
-              CART.items = order.items.map(i => ({
-                id: i.product_slug || i.product_name.toLowerCase().replace(/ /g, '-'), // fallback if slug missing
-                name: i.product_name,
-                price: i.price_at_time,
-                qty: i.quantity,
-                size: i.size,
-                image: i.product_image
-              }));
-              CART.save();
-              window.location.href = '/checkout.html';
-            }
-          };
-        }
-
         resultEl.classList.add('is-visible');
-
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
