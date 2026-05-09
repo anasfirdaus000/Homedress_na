@@ -54,71 +54,34 @@
             <!-- Alamat Pengiriman -->
             <div class="checkout-section" style="background:#fff; padding:32px; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:24px;">
               <h3 style="margin-top:0; margin-bottom:20px; font-size:1.2rem; font-weight:600;">Alamat Pengiriman</h3>
-              <textarea name="shipping_address" placeholder="Alamat Lengkap (Nama Jalan, No Rumah, RT/RW, Kec/Kel)" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; min-height:100px; margin-bottom:16px; outline:none; font-family:inherit;"></textarea>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                 <input type="text" name="city" placeholder="Kota/Kabupaten" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
-                 <input type="text" name="postal_code" placeholder="Kode Pos" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+              
+              <div class="admin-form__group" style="position:relative; margin-bottom:16px;">
+                <label style="display:block; margin-bottom:8px; font-size:0.9rem; font-weight:500; color:#64748b;">Cari Kecamatan / Kota *</label>
+                <input type="text" id="kecamatan-search" placeholder="Ketik minimal 3 huruf (Cth: Kebayoran Baru)" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+                <input type="hidden" name="destination_area_id" id="destination_area_id" required />
+                
+                <!-- Search Results Dropdown -->
+                <div id="search-results" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); z-index:100; max-height:250px; overflow-y:auto; margin-top:4px;">
+                  <!-- Results will be injected here -->
+                </div>
               </div>
-              <select name="province" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; margin-top:16px; font-size:1rem; background: #fff; outline:none; cursor:pointer;">
-                <option value="">Pilih Provinsi</option>
-                <optgroup label="Jawa & Bali">
-                  <option value="DKI Jakarta">DKI Jakarta</option>
-                  <option value="Jawa Barat">Jawa Barat</option>
-                  <option value="Jawa Tengah">Jawa Tengah</option>
-                  <option value="DI Yogyakarta">DI Yogyakarta</option>
-                  <option value="Jawa Timur">Jawa Timur</option>
-                  <option value="Banten">Banten</option>
-                  <option value="Bali">Bali</option>
-                </optgroup>
-                <optgroup label="Sumatera">
-                  <option value="Aceh">Aceh</option>
-                  <option value="Sumatera Utara">Sumatera Utara</option>
-                  <option value="Sumatera Barat">Sumatera Barat</option>
-                  <option value="Riau">Riau</option>
-                  <option value="Kepulauan Riau">Kepulauan Riau</option>
-                  <option value="Jambi">Jambi</option>
-                  <option value="Sumatera Selatan">Sumatera Selatan</option>
-                  <option value="Bangka Belitung">Bangka Belitung</option>
-                  <option value="Bengkulu">Bengkulu</option>
-                  <option value="Lampung">Lampung</option>
-                </optgroup>
-                <optgroup label="Kalimantan">
-                  <option value="Kalimantan Barat">Kalimantan Barat</option>
-                  <option value="Kalimantan Tengah">Kalimantan Tengah</option>
-                  <option value="Kalimantan Selatan">Kalimantan Selatan</option>
-                  <option value="Kalimantan Timur">Kalimantan Timur</option>
-                  <option value="Kalimantan Utara">Kalimantan Utara</option>
-                </optgroup>
-                <optgroup label="Sulawesi">
-                  <option value="Sulawesi Utara">Sulawesi Utara</option>
-                  <option value="Sulawesi Tengah">Sulawesi Tengah</option>
-                  <option value="Sulawesi Selatan">Sulawesi Selatan</option>
-                  <option value="Sulawesi Tenggara">Sulawesi Tenggara</option>
-                  <option value="Gorontalo">Gorontalo</option>
-                  <option value="Sulawesi Barat">Sulawesi Barat</option>
-                </optgroup>
-                <optgroup label="Nusa Tenggara & Maluku">
-                  <option value="Nusa Tenggara Barat">Nusa Tenggara Barat</option>
-                  <option value="Nusa Tenggara Timur">Nusa Tenggara Timur</option>
-                  <option value="Maluku">Maluku</option>
-                  <option value="Maluku Utara">Maluku Utara</option>
-                </optgroup>
-                <optgroup label="Papua">
-                  <option value="Papua">Papua</option>
-                  <option value="Papua Barat">Papua Barat</option>
-                  <option value="Papua Tengah">Papua Tengah</option>
-                  <option value="Papua Pegunungan">Papua Pegunungan</option>
-                  <option value="Papua Selatan">Papua Selatan</option>
-                  <option value="Papua Barat Daya">Papua Barat Daya</option>
-                </optgroup>
-              </select>
+
+              <textarea name="shipping_address" placeholder="Alamat Lengkap (Nama Jalan, No Rumah, RT/RW)" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; min-height:80px; margin-bottom:16px; outline:none; font-family:inherit;"></textarea>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                 <input type="text" name="city" id="checkout-city" placeholder="Kota/Kabupaten" readonly required style="width:100%; padding:14px; border:1px solid #f1f5f9; background:#f1f5f9; border-radius:8px; font-size:1rem; outline:none; color:#64748b;"/>
+                 <input type="text" name="postal_code" id="checkout-postal" placeholder="Kode Pos" required style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; outline:none;"/>
+              </div>
             </div>
 
             <!-- Metode Pengiriman -->
             <div class="checkout-section" style="background:#fff; padding:32px; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:24px;">
-              <h3 style="margin-top:0; margin-bottom:20px; font-size:1.2rem; font-weight:600;">Metode Pengiriman</h3>
-              <div id="shipping-options">
-                 <p style="color: #64748b; font-size: 0.95rem;">Silakan pilih provinsi terlebih dahulu untuk melihat pilihan ongkos kirim.</p>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0; font-size:1.2rem; font-weight:600;">Pilih Kurir Pengiriman</h3>
+                <span id="weight-info" style="font-size:0.85rem; color:#64748b; background:#f1f5f9; padding:4px 10px; border-radius:20px;">Berat: 0g</span>
+              </div>
+              <div id="shipping-options" class="shipping-options-grid" style="display:grid; gap:12px;">
+                 <p style="color: #64748b; font-size: 0.95rem;">Silakan cari dan pilih kecamatan Anda terlebih dahulu.</p>
               </div>
             </div>
 

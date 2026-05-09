@@ -82,17 +82,8 @@ export default async function handler(req, res) {
       };
     });
 
-    // Fetch shipping cost from DB
-    let shippingCost = 15000;
-    if (sanitized.shipping_method) {
-      const { data: sMethod } = await supabaseAdmin
-        .from('shipping_methods')
-        .select('base_cost')
-        .eq('code', sanitized.shipping_method)
-        .single();
-      if (sMethod) shippingCost = parseFloat(sMethod.base_cost);
-    }
-
+    // 5. SHIPPING COST (From Biteship)
+    const shippingCost = sanitized.shipping_cost || 0;
     const total = subtotal + shippingCost;
 
     // 5. STOCK CHECK
@@ -133,7 +124,15 @@ export default async function handler(req, res) {
         subtotal,
         shipping_cost: shippingCost,
         total,
-        status: 'pending'
+        status: 'pending',
+        
+        // Shipping Metadata (Biteship)
+        shipping_courier_name: sanitized.shipping_courier_name,
+        shipping_method_code: sanitized.shipping_method,
+        destination_area_id: sanitized.destination_area_id,
+        origin_area_id: sanitized.origin_area_id,
+        origin_name: sanitized.origin_name,
+        destination_name: sanitized.destination_name
       })
       .select()
       .single();

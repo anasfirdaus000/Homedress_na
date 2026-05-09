@@ -58,11 +58,21 @@ export function validateCheckoutInput(body) {
       province: (body.province || '').trim().substring(0, 100),
       notes: (body.notes || '').trim().substring(0, 500),
       payment_method: body.payment_method || 'transfer',
-      shipping_method: body.shipping_method || 'jne_reg',
+      
+      // Biteship Fields
+      shipping_method: body.shipping_method || '',
+      shipping_courier_name: body.shipping_courier_name || '',
+      shipping_cost: parseFloat(body.shipping_cost) || 0,
+      destination_area_id: body.destination_area_id || '',
+      origin_area_id: body.origin_area_id || '',
+      origin_name: body.origin_name || '',
+      destination_name: body.destination_name || '',
+
       items: (body.items || []).map(item => ({
         product_id: item.product_id,
         quantity: Math.min(Math.max(parseInt(item.quantity) || 1, 1), 100),
-        size: (item.size || '').trim().substring(0, 20)
+        size: (item.size || '').trim().substring(0, 20),
+        weight: parseInt(item.weight) || 300
       }))
     }
   };

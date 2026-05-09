@@ -55,7 +55,7 @@
                 <th>Items</th>
                 <th>Total</th>
                 <th>Pembayaran</th>
-                <th>Status</th>
+                <th>Status / Kurir</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -138,8 +138,18 @@
           <td style="max-width:200px;font-size:0.8rem;">${items || '-'}</td>
           <td>Rp ${o.total.toLocaleString('id-ID')}</td>
           <td>${o.payment_method}</td>
-          <td><span class="status-badge status-badge--${o.status}">${statusMap[o.status] || o.status}</span></td>
-          <td>${actionBtns}<br>${detailBtn} ${waBtn}</td>
+          <td>
+            <span class="status-badge status-badge--${o.status}">${statusMap[o.status] || o.status}</span><br>
+            <small style="color:var(--color-accent); font-weight:700;">${o.shipping_courier_name || '-'}</small>
+          </td>
+          <td>
+            ${actionBtns}<br>
+            <div style="margin-top:8px; display:flex; gap:4px; flex-wrap:wrap;">
+              ${detailBtn}
+              <button class="admin-btn admin-btn--outline admin-btn--small" onclick="printLabel('${o.id}')">🖨️ CETAK</button>
+              ${waBtn}
+            </div>
+          </td>
         </tr>`;
       }).join('');
     }
@@ -198,9 +208,10 @@
         </div>
 
         <div style="margin-bottom:20px;padding:16px;background:#222;border-radius:8px;">
-          <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#fff;">Alamat Pengiriman</h3>
-          <p style="margin:4px 0;">${o.shipping_address}</p>
-          <p style="margin:4px 0;">${o.city || ''}, ${o.province || ''} ${o.postal_code || ''}</p>
+          <h3 style="margin-top:0;margin-bottom:12px;font-size:1rem;color:#fff;">Alamat & Pengiriman</h3>
+          <p style="margin:4px 0;"><strong>Alamat:</strong> ${o.shipping_address}</p>
+          <p style="margin:4px 0;"><strong>Kecamatan:</strong> ${o.destination_name || (o.city + ', ' + o.province)} ${o.postal_code || ''}</p>
+          <p style="margin:4px 0;"><strong>Kurir Pilihan:</strong> <span style="color:var(--color-accent);font-weight:700;">${o.shipping_courier_name || '-'}</span></p>
           <p style="margin:12px 0 4px 0;border-top:1px dashed #444;padding-top:12px;"><strong>Catatan:</strong> ${o.notes || '-'}</p>
         </div>
 
@@ -228,6 +239,10 @@
       document.getElementById('order-modal').style.display = 'block';
     };
 
+    window.printLabel = function(orderId) {
+      window.open(`/admin/shipping-label.html?id=${orderId}`, '_blank', 'width=800,height=900');
+    };
+
     function showToast(msg) {
       const t = document.createElement('div');
       t.className = 'admin-toast';
@@ -241,4 +256,3 @@
   </script>
 </body>
 </html>
-

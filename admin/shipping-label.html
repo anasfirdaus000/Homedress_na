@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Cetak Label Pengiriman</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background: #f0f0f0; }
+    .label-container { 
+      background: #fff; 
+      width: 100%; 
+      max-width: 500px; 
+      margin: 0 auto; 
+      padding: 30px; 
+      border: 2px solid #000;
+      box-sizing: border-box;
+    }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+    .header-logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+    .header-courier { text-align: right; }
+    .courier-name { font-size: 1.2rem; font-weight: 700; color: #000; }
+    
+    .section { margin-bottom: 20px; }
+    .label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #666; margin-bottom: 5px; }
+    .info { font-size: 1.1rem; line-height: 1.4; color: #000; }
+    .name { font-size: 1.3rem; font-weight: 700; }
+    
+    .items-table { width: 100%; border-collapse: collapse; margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 20px; }
+    .items-table th { text-align: left; font-size: 0.8rem; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .items-table td { padding: 10px 0; font-size: 0.9rem; border-bottom: 1px solid #eee; }
+
+    .footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+    
+    @media print {
+      body { background: #fff; padding: 0; }
+      .label-container { border: 2px solid #000; margin: 0; width: 100%; max-width: none; }
+      .no-print { display: none; }
+    }
+    
+    .no-print { text-align: center; margin-bottom: 20px; }
+    .btn-print { padding: 10px 24px; background: #000; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="no-print">
+    <button class="btn-print" onclick="window.print()">🖨️ CETAK SEKARANG</button>
+  </div>
+
+  <div class="label-container" id="label-content">
+    <p style="text-align:center;">Memuat data...</p>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient('https://owajvfwhhdhvhrwjbkmd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YWp2ZndoaGRodmhyd2pia21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTIzODQsImV4cCI6MjA5MzQyODM4NH0.1VTziUISWA69HlhPCRnPZ2mWQmJIcVAGlMdoF3T0nO4');
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('id');
+      if (!orderId) return;
+
+      const { data: o, error } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('id', orderId)
+        .single();
+
+      if (error || !o) {
+        document.getElementById('label-content').innerHTML = '<p>Pesanan tidak ditemukan.</p>';
+        return;
+      }
+
+      document.getElementById('label-content').innerHTML = `
+        <div class="header">
+          <div class="header-logo">HOMEDRESS_NA</div>
+          <div class="header-courier">
+            <div class="label">Kurir & Layanan</div>
+            <div class="courier-name">${o.shipping_courier_name || 'Reguler'}</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="label">Penerima:</div>
+          <div class="name">${o.customer_name}</div>
+          <div class="info">
+            ${o.customer_phone}<br>
+            ${o.shipping_address}<br>
+            <strong>${o.destination_name || (o.city + ', ' + o.province)} ${o.postal_code || ''}</strong>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="label">Pengirim:</div>
+          <div class="info">
+            <strong>${o.origin_name || 'HOMEDRESS_NA (Gudang)'}</strong><br>
+            Jl. Contoh No. 123, Indonesia
+          </div>
+        </div>
+
+        <div class="section" style="background: #f9f9f9; padding: 10px; border-radius: 4px;">
+          <div class="label">Catatan Pesanan:</div>
+          <div class="info" style="font-size: 0.9rem;">${o.notes || '-'}</div>
+        </div>
+
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Produk</th>
+              <th>Qty</th>
+              <th>Ket</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${o.order_items.map(i => `
+              <tr>
+                <td>${i.product_name}</td>
+                <td>${i.quantity}</td>
+                <td>${i.size || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          Terima kasih telah berbelanja di HOMEDRESS_NA!<br>
+          Order ID: ${o.order_number}
+        </div>
+      `;
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -66,6 +66,26 @@
         </form>
       </div>
 
+      <!-- SECTION: Shipping Origin (Biteship) -->
+      <div class="settings-section">
+        <h3>🚚 Pengaturan Asal Pengiriman (Biteship)</h3>
+        <p style="color:#888;font-size:0.85rem;margin-bottom:16px;">Masukkan ID Area Biteship untuk lokasi asal pengiriman toko Anda.</p>
+        <form id="shipping-origin-form">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="admin-form__group">
+              <label class="admin-form__label">ID Area Asal (Biteship ID)</label>
+              <input class="admin-form__input" id="shipping_origin_id" placeholder="Cth: IDNP6CL10" required />
+              <small style="color:#888;">ID Area bisa didapat dari Dashboard Biteship atau dokumentasi.</small>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Nama Area / Kecamatan</label>
+              <input class="admin-form__input" id="shipping_origin_name" placeholder="Cth: Kebayoran Baru, Jakarta Selatan" required />
+            </div>
+          </div>
+          <button type="submit" class="admin-btn admin-btn--primary">💾 Simpan Lokasi Asal</button>
+        </form>
+      </div>
+
       <!-- SECTION 2: Google Maps -->
       <div class="settings-section">
         <h3>📍 Google Maps (Footer)</h3>
@@ -310,6 +330,17 @@
       alert('✅ Google Maps disimpan!');
     };
 
+    // ========== SHIPPING ORIGIN ==========
+    async function loadShippingOrigin() {
+      document.getElementById('google_maps_url').value = await loadSetting('google_maps_url') || '';
+      
+      const shipOrigin = await loadSetting('shipping_origin_data');
+      if (shipOrigin) {
+        document.getElementById('shipping_origin_id').value = shipOrigin.id || '';
+        document.getElementById('shipping_origin_name').value = shipOrigin.name || '';
+      }
+    };
+
     // ========== EDITORIAL ==========
     async function loadEditorial() {
       for (let i = 1; i <= 3; i++) {
@@ -453,8 +484,28 @@
       }
     };
 
+    document.getElementById('shipping-origin-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+      try {
+        const data = {
+          id: document.getElementById('shipping_origin_id').value.trim(),
+          name: document.getElementById('shipping_origin_name').value.trim()
+        };
+        await saveSetting('shipping_origin_data', data);
+        alert('✅ Lokasi asal pengiriman berhasil disimpan!');
+      } catch (err) {
+        alert('❌ Gagal menyimpan: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Lokasi Asal';
+      }
+    };
+
     // ========== INIT ALL ==========
-    await Promise.all([loadGeneral(), loadMaps(), loadEditorial(), loadPromoPopup()]);
+    await Promise.all([loadGeneral(), loadMaps(), loadShippingOrigin(), loadEditorial(), loadPromoPopup()]);
   </script>
 </body>
 </html>

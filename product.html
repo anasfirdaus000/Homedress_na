@@ -291,6 +291,7 @@
           img: Array.isArray(product.images) ? product.images[0] : product.images,
           size: selectedSize,
           color: selectedColor,
+          weight: product.weight || 300,
           qty: 1
         }, document.querySelector('.pdp-gallery__img')); // Fly from first gallery img
         showToast(`${product.name} berhasil ditambah!`);

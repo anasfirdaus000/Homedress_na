@@ -139,9 +139,15 @@
               <label class="admin-form__label">Social Proof</label>
               <input class="admin-form__input" id="prod-social" placeholder="🔥 Best Seller — 200+ terjual" />
             </div>
-            <div class="admin-form__group">
-              <label class="admin-form__label">Stok Produk *</label>
-              <input type="number" class="admin-form__input" id="prod-stock" value="0" required />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="admin-form__group">
+                <label class="admin-form__label">Stok Produk *</label>
+                <input type="number" class="admin-form__input" id="prod-stock" value="0" required />
+              </div>
+              <div class="admin-form__group">
+                <label class="admin-form__label">Berat Produk (gram) *</label>
+                <input type="number" class="admin-form__input" id="prod-weight" value="300" required />
+              </div>
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
               <button type="submit" class="admin-btn admin-btn--primary">Simpan</button>
@@ -373,6 +379,7 @@
       document.getElementById('prod-video').value = p.video_embed_url || '';
       document.getElementById('prod-social').value = p.social_proof || '';
       document.getElementById('prod-stock').value = p.stock || 0;
+      document.getElementById('prod-weight').value = p.weight || 300;
       document.getElementById('modal-title').textContent = 'Edit Produk';
       modal.style.display = 'block';
     };
@@ -483,6 +490,7 @@
         video_embed_url: document.getElementById('prod-video').value.trim() || null,
         social_proof: document.getElementById('prod-social').value.trim(),
         stock: parseInt(document.getElementById('prod-stock').value) || 0,
+        weight: parseInt(document.getElementById('prod-weight').value) || 300,
         is_active: true
       };
 

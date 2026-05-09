@@ -7,6 +7,7 @@
     { "source": "/api/checkout", "destination": "/api/order_ops.js" },
     { "source": "/api/track", "destination": "/api/order_ops.js" },
     { "source": "/api/webhook/(.*)", "destination": "/api/webhooks.js" },
+    { "source": "/api/shipping/(.*)", "destination": "/api/shipping.js" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/api/(.*)", "destination": "/api/storefront.js" }
   ]

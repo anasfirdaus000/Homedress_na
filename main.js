@@ -42,7 +42,7 @@ function createCard(p) {
         <p class="product-card__name" onclick="window.location.href='/product.html?slug=${slug}'" style="cursor:pointer;">${p.name}</p>
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <p class="product-card__price">${priceHtml}</p>
-          <button class="add-to-cart-quick" style="background:#000; color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:0.3s;" onclick="event.stopPropagation(); window.CART.add({id:'${p.id}', name:'${p.name.replace(/'/g, "\\'")}', price:${price}, images:${JSON.stringify(images).replace(/"/g, '&quot;')}, slug:'${slug}', size:'All Size'}, document.querySelector('#${cardId} .product-card__image'))">+</button>
+          <button class="add-to-cart-quick" style="background:#000; color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:0.3s;" onclick="event.stopPropagation(); window.CART.add({id:'${p.id}', name:'${p.name.replace(/'/g, "\\'")}', price:${price}, weight:${p.weight || 300}, images:${JSON.stringify(images).replace(/"/g, '&quot;')}, slug:'${slug}', size:'All Size'}, document.querySelector('#${cardId} .product-card__image'))">+</button>
         </div>
       </div>
     </div>
@@ -1158,95 +1158,137 @@ async function initCheckoutPage() {
   const form = document.getElementById('checkout-form');
   const summary = document.getElementById('checkout-summary');
   const shippingContainer = document.getElementById('shipping-options');
-  const provinceInput = form?.querySelector('[name="province"]');
+  const searchInput = document.getElementById('kecamatan-search');
+  const resultsDiv = document.getElementById('search-results');
+  const weightInfo = document.getElementById('weight-info');
   if (!form || !summary) return;
 
   let selectedShipping = null;
-  let shippingMethods = [];
-  let currentProvince = '';
+  let originData = null;
+  let destinationData = null;
 
-  const fetchShippingOptions = async (province = '') => {
-    if (shippingContainer) shippingContainer.innerHTML = '<p style="color: #64748b; font-size: 0.95rem;">⏳ Menghitung ongkir...</p>';
-    
+  // 1. Get Origin Data from Settings
+  const loadOrigin = async () => {
     try {
-      // Fetch base methods
-      const { data: methods, error: mError } = await window.supabase.from('shipping_methods').select('*').eq('is_active', true);
-      const { data: rates, error: rError } = await window.supabase.from('shipping_rates').select('*').eq('province', province || 'Jawa Timur');
-      
-      let finalMethods = [];
+      const { data } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
+      if (data) originData = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+    } catch (e) { console.error('Error loading origin:', e); }
+  };
+  await loadOrigin();
 
-      // If database is configured and has methods
-      if (methods && methods.length > 0) {
-        finalMethods = methods.map(m => {
-          const rate = (rates || []).find(r => r.courier_id === m.id) || (rates || []).find(r => r.province === 'Luar Jawa' && r.courier_id === m.id);
-          return {
-            ...m,
-            final_cost: parseFloat(m.base_cost) + (rate ? parseFloat(rate.additional_cost) : 0),
-            estimation: rate ? rate.estimated_days : '3-5 hari'
-          };
-        });
-      } else {
-        // FALLBACK: If database is not yet set up by admin, provide default methods
-        finalMethods = [
-          { code: 'jne_reg', name: 'JNE Reguler', final_cost: 15000, estimation: '2-3 hari' },
-          { code: 'jnt_ez', name: 'J&T Express', final_cost: 17000, estimation: '1-3 hari' }
-        ];
-        // Slight cost addition for non-java if using fallback (simple logic)
-        if (province && !province.toLowerCase().includes('jawa') && !province.toLowerCase().includes('jakarta') && !province.toLowerCase().includes('banten') && !province.toLowerCase().includes('bali')) {
-          finalMethods.forEach(m => m.final_cost += 20000);
-        }
-      }
+  // 2. Search Kecamatan Logic
+  let searchTimeout;
+  searchInput.oninput = () => {
+    clearTimeout(searchTimeout);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { resultsDiv.style.display = 'none'; return; }
 
-      shippingMethods = finalMethods;
-
-      if (shippingContainer && shippingMethods.length > 0) {
-        shippingContainer.innerHTML = shippingMethods.map((m, i) => `
-          <label class="shipping-option" style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:12px; cursor:pointer; transition: 0.2s;">
-            <input type="radio" name="shipping_method" value="${m.code}" ${i===0?'checked':''} data-cost="${m.final_cost}" style="accent-color: var(--color-accent); transform: scale(1.2);" />
-            <div style="flex:1;">
-              <p style="font-weight:600; margin:0; font-size:1.05rem;">${m.name}</p>
-              <p style="font-size:0.85rem; color:#64748b; margin:4px 0 0 0;">Estimasi pengiriman ${m.estimation}</p>
+    searchTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/shipping/areas?input=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        const areas = data.areas || [];
+        
+        if (areas.length > 0) {
+          resultsDiv.innerHTML = areas.map(a => `
+            <div class="search-item" data-id="${a.id}" data-name="${a.name}" data-city="${a.city_name}" data-postal="${a.postal_code || ''}" 
+                 style="padding:12px; cursor:pointer; border-bottom:1px solid #f1f5f9; hover:background:#f8fafc;">
+              <p style="margin:0; font-weight:600; font-size:0.95rem;">${a.name}</p>
+              <p style="margin:0; font-size:0.8rem; color:#64748b;">${a.city_name}, ${a.administrative_division_level_1_name}</p>
             </div>
-            <span style="font-weight:700; font-size:1.1rem; color:var(--color-fg);">Rp ${parseInt(m.final_cost).toLocaleString('id-ID')}</span>
+          `).join('');
+          resultsDiv.style.display = 'block';
+
+          resultsDiv.querySelectorAll('.search-item').forEach(item => {
+            item.onclick = () => {
+              destinationData = { ...item.dataset };
+              document.getElementById('destination_area_id').value = destinationData.id;
+              document.getElementById('kecamatan-search').value = destinationData.name;
+              document.getElementById('checkout-city').value = destinationData.city;
+              document.getElementById('checkout-postal').value = destinationData.postal;
+              resultsDiv.style.display = 'none';
+              fetchRates();
+            };
+          });
+        }
+      } catch (e) {}
+    }, 500);
+  };
+
+  // 3. Fetch Rates Logic
+  const fetchRates = async () => {
+    if (!destinationData || !originData) return;
+    shippingContainer.innerHTML = '<p style="color: #64748b; font-size: 0.95rem;">⏳ Menghitung ongkir...</p>';
+    
+    const items = CART.items.map(i => ({
+      name: i.name,
+      value: i.price,
+      weight: i.weight || 300,
+      quantity: i.qty
+    }));
+
+    const totalWeight = items.reduce((acc, i) => acc + (parseInt(i.weight) * parseInt(i.quantity)), 0);
+    if (weightInfo) weightInfo.textContent = `Berat Total: ${(totalWeight/1000).toFixed(2)} kg (${totalWeight}g)`;
+
+    try {
+      const res = await fetch('/api/shipping/rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          origin_area_id: originData.id,
+          destination_area_id: destinationData.id,
+          items: items
+        })
+      });
+
+      const data = await res.json();
+      const pricings = data.pricings || [];
+
+      if (pricings.length > 0) {
+        shippingContainer.innerHTML = pricings.map((p, i) => `
+          <label class="shipping-option" style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; cursor:pointer; transition: 0.2s;">
+            <input type="radio" name="shipping_method" value="${p.courier_code}_${p.courier_service_code}" ${i===0?'checked':''} 
+                   data-cost="${p.price}" data-name="${p.courier_name} ${p.courier_service_name}" style="accent-color: var(--color-accent); transform: scale(1.2);" />
+            <div style="flex:1;">
+              <p style="font-weight:600; margin:0; font-size:1.05rem;">${p.courier_name} - ${p.courier_service_name}</p>
+              <p style="font-size:0.85rem; color:#64748b; margin:4px 0 0 0;">Estimasi: ${p.duration}</p>
+            </div>
+            <span style="font-weight:700; font-size:1.1rem; color:var(--color-fg);">Rp ${p.price.toLocaleString('id-ID')}</span>
           </label>
         `).join('');
 
         shippingContainer.querySelectorAll('input').forEach(input => {
           input.onchange = () => {
-            selectedShipping = shippingMethods.find(m => m.code === input.value);
+            selectedShipping = {
+              code: input.value,
+              name: input.dataset.name,
+              price: parseInt(input.dataset.cost)
+            };
             renderSummary();
           };
         });
-        selectedShipping = shippingMethods[0];
+        
+        const first = shippingContainer.querySelector('input:checked');
+        selectedShipping = {
+          code: first.value,
+          name: first.dataset.name,
+          price: parseInt(first.dataset.cost)
+        };
         renderSummary();
+      } else {
+        shippingContainer.innerHTML = '<p style="color: #ef4444;">Tidak ada kurir yang menjangkau lokasi ini.</p>';
       }
-    } catch (e) { 
-      console.error('Error fetching shipping:', e); 
-      if (shippingContainer) shippingContainer.innerHTML = '<p style="color: #ef4444;">Gagal memuat metode pengiriman. Silakan muat ulang halaman.</p>';
+    } catch (e) {
+      shippingContainer.innerHTML = '<p style="color: #ef4444;">Gagal mengambil tarif. Pastikan koneksi internet lancar.</p>';
     }
   };
 
-  // Listen for province change
-  if (provinceInput) {
-    provinceInput.onchange = (e) => {
-      currentProvince = e.target.value;
-      fetchShippingOptions(currentProvince);
-    };
-    // Initial fetch
-    fetchShippingOptions(provinceInput.value);
-  } else {
-    fetchShippingOptions();
-  }
-
   const renderSummary = () => {
     const items = CART.items;
-    if (items.length === 0) {
-      summary.innerHTML = '<p>Keranjang kosong.</p>';
-      return;
-    }
+    if (items.length === 0) { summary.innerHTML = '<p>Keranjang kosong.</p>'; return; }
 
     const subtotal = CART.total();
-    const shippingCost = selectedShipping ? parseFloat(selectedShipping.final_cost) : 0;
+    const shippingCost = selectedShipping ? selectedShipping.price : 0;
     const total = subtotal + shippingCost;
 
     summary.innerHTML = `
@@ -1254,21 +1296,21 @@ async function initCheckoutPage() {
         ${items.map(item => `
           <div class="summary-item" style="display:flex; gap:12px; margin-bottom:16px; align-items:center;">
             <div style="position:relative;">
-              <img src="${(Array.isArray(item.images) ? item.images[0] : (item.images || item.img || '/images/placeholder.jpg'))}" style="width:64px; height:64px; object-fit:cover; border-radius:4px;" />
-              <span style="position:absolute; top:-8px; right:-8px; background:#000; color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem;">${item.qty}</span>
+              <img src="${(Array.isArray(item.images) ? item.images[0] : (item.images || '/images/placeholder.jpg'))}" style="width:64px; height:64px; object-fit:cover; border-radius:4px;" />
+              <span style="position:absolute; top:-8px; right:-8px; background:#000; color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">${item.qty}</span>
             </div>
             <div style="flex:1;">
-              <p style="font-weight:600; margin:0;">${item.name}</p>
-              <p style="font-size:1.1rem; color:#888; margin:0;">${item.size || 'N/A'}</p>
+              <p style="font-weight:600; margin:0; font-size:0.9rem; line-height:1.2;">${item.name}</p>
+              <p style="font-size:0.8rem; color:#888; margin:2px 0 0 0;">Size: ${item.size || 'N/A'}</p>
             </div>
-            <p style="font-weight:600; margin:0;">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</p>
+            <p style="font-weight:600; margin:0; font-size:0.95rem;">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</p>
           </div>
         `).join('')}
       </div>
       <div style="border-top:1px solid #eee; margin-top:20px; padding-top:20px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Subtotal</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Ongkos Kirim</span><span>Rp ${shippingCost.toLocaleString('id-ID')}</span></div>
-        <div style="display:flex; justify-content:space-between; margin-top:16px; font-weight:800; font-size:1.8rem;"><span>TOTAL</span><span>Rp ${total.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#64748b;"><span>Subtotal</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#64748b;"><span>Ongkos Kirim</span><span>Rp ${shippingCost.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-top:16px; font-weight:800; font-size:1.6rem; color:var(--color-fg);"><span>TOTAL</span><span>Rp ${total.toLocaleString('id-ID')}</span></div>
       </div>
     `;
   };
@@ -1277,14 +1319,10 @@ async function initCheckoutPage() {
 
   form.onsubmit = async (e) => {
     e.preventDefault();
+    if (!selectedShipping) { alert('Silakan pilih kurir pengiriman!'); return; }
+    
     const btn = document.getElementById('btn-submit-checkout');
     const errDiv = document.getElementById('checkout-error');
-    
-    if (CART.items.length === 0) {
-      alert('Keranjang belanja kosong!');
-      return;
-    }
-
     btn.disabled = true;
     btn.textContent = 'MEMPROSES...';
     errDiv.style.display = 'none';
@@ -1292,16 +1330,20 @@ async function initCheckoutPage() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
     
-    // Add user_id and items to payload
-    if (window.supabase) {
-      const { data: { session } } = await window.supabase.auth.getSession();
-      if (session) data.user_id = session.user.id;
-    }
+    data.shipping_method = selectedShipping.code;
+    data.shipping_courier_name = selectedShipping.name;
+    data.shipping_cost = selectedShipping.price;
+    data.origin_area_id = originData.id;
+    data.origin_name = originData.name;
+    data.destination_name = `${destinationData.name}, ${destinationData.city}`;
 
     data.items = CART.items.map(i => ({
-      product_id: i.id, // This should be the slug
+      product_id: i.id,
       size: i.size,
-      quantity: i.qty
+      quantity: i.qty,
+      weight: i.weight || 300,
+      price: i.price,
+      name: i.name
     }));
 
     try {
@@ -1315,20 +1357,15 @@ async function initCheckoutPage() {
       if (res.ok && result.success) {
         CART.items = [];
         CART.save();
-        // Redirect to success page
         window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
       } else {
-        let errorMsg = result.error || 'Gagal memproses pesanan';
-        if (result.details && Array.isArray(result.details)) {
-          errorMsg += ': ' + result.details.join(', ');
-        }
-        throw new Error(errorMsg);
+        throw new Error(result.error || 'Gagal memproses pesanan');
       }
     } catch (err) {
       errDiv.textContent = err.message;
       errDiv.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = 'BUAT PESANAN';
+      btn.textContent = 'BUAT PESANAN SEKARANG';
     }
   };
 }
