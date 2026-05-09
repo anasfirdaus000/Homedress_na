@@ -1257,6 +1257,11 @@ async function initCheckoutPage() {
       });
 
       const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || data.message || 'Gagal menghubungi server pengiriman');
+      }
+
       const pricings = data.pricings || [];
 
       if (pricings.length > 0) {
@@ -1295,18 +1300,19 @@ async function initCheckoutPage() {
       } else {
         shippingContainer.innerHTML = `
           <div style="background:#fff7ed; border:1px solid #fed7aa; padding:16px; border-radius:12px; color:#9a3412;">
-            <p style="margin:0; font-weight:700;">🚫 Tidak ada kurir tersedia untuk rute ini.</p>
-            <p style="margin:8px 0 0 0; font-size:0.85rem;">Saran perbaikan:</p>
-            <ul style="margin:4px 0 0 0; padding-left:20px; font-size:0.85rem;">
-              <li>Cek apakah Kecamatan tujuan Anda sudah benar.</li>
-              <li>Pastikan Admin sudah menyimpan "Kecamatan" (bukan Kota) di Pengaturan Web.</li>
-            </ul>
+            <p style="margin:0; font-weight:700;">🚫 Tidak ada kurir tersedia.</p>
+            <p style="margin:8px 0 0 0; font-size:0.85rem;">Alasan dari Biteship: <strong>${data.error || 'Rute tidak didukung'}</strong></p>
           </div>
         `;
       }
     } catch (e) {
       console.error('Rates Error:', e);
-      shippingContainer.innerHTML = '<p style="color: #ef4444;">❌ Gagal mengambil tarif. Silakan coba lagi.</p>';
+      shippingContainer.innerHTML = `
+        <div style="background:#fef2f2; border:1px solid #fecaca; padding:16px; border-radius:12px; color:#991b1b;">
+          <p style="margin:0; font-weight:700;">❌ Terjadi Kesalahan</p>
+          <p style="margin:8px 0 0 0; font-size:0.85rem;">Pesan: <strong>${e.message}</strong></p>
+        </div>
+      `;
     }
   };
 
