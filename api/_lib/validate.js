@@ -3,8 +3,8 @@
  * All validation happens SERVER-SIDE — never trust frontend data
  */
 
-// Indonesian phone number regex (08xxx or 628xxx, 10-15 digits)
-const PHONE_REGEX = /^(08|628)\d{8,13}$/;
+// Indonesian phone number regex (flexible: handles 08xxx, 628xxx, +628xxx)
+const PHONE_REGEX = /^(\+?62|0)8\d{8,13}$/;
 
 export function validateCheckoutInput(body) {
   const errors = [];
@@ -14,10 +14,23 @@ export function validateCheckoutInput(body) {
     errors.push('Nama lengkap wajib diisi (min 2 karakter)');
   }
 
-  // Phone validation
-  const phone = (body.customer_phone || '').replace(/[\s\-()]/g, '');
-  if (!PHONE_REGEX.test(phone)) {
-    errors.push('Nomor HP tidak valid (format: 08xxxxxxxxxx)');
+  // Phone validation - clean thoroughly first
+  let phone = (body.customer_phone || '').replace(/[\s\-\(\)\+]/g, '');
+  // Normalize: convert 08xx to 628xx
+  if (phone.startsWith('08')) {
+    phone = '62' + phone.substring(1);
+  }
+  // Remove leading 0 if leftover from +62 → 628...
+  if (!phone.startsWith('62') && !phone.startsWith('08')) {
+    // Try to salvage: if it starts with 8, prepend 62
+    if (phone.startsWith('8')) {
+      phone = '62' + phone;
+    }
+  }
+
+  // After normalization, validate: should be 628xxxxxxxxx (10-15 total digits)
+  if (!/^628\d{7,12}$/.test(phone)) {
+    errors.push('Nomor HP tidak valid (format: 08xxxxxxxxxx atau 628xxxxxxxxxx)');
   }
 
   // Address
@@ -41,7 +54,7 @@ export function validateCheckoutInput(body) {
   // Payment method
   const validPayments = ['transfer', 'ewallet', 'cod', 'qris', 'bni_va', 'bri_va', 'permata_va', 'gopay', 'shopeepay'];
   if (body.payment_method && !validPayments.includes(body.payment_method)) {
-    errors.push('Metode pembayaran tidak valid');
+    errors.push(`Metode pembayaran "${body.payment_method}" tidak valid`);
   }
 
   return {
@@ -71,7 +84,7 @@ export function validateCheckoutInput(body) {
       items: (body.items || []).map(item => ({
         product_id: item.product_id,
         quantity: Math.min(Math.max(parseInt(item.quantity) || 1, 1), 100),
-        size: (item.size || '').trim().substring(0, 20),
+        size: (item.size || 'All Size').trim().substring(0, 20),
         weight: parseInt(item.weight) || 300
       }))
     }

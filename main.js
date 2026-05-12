@@ -1393,12 +1393,18 @@ async function initCheckoutPage() {
 
       data.items = CART.items.map(i => ({
         product_id: i.id,
-        size: i.size,
+        size: i.size || 'All Size',
         quantity: parseInt(i.qty) || 1,
         weight: parseInt(i.weight) || 300,
         price: i.price,
         name: i.name
       }));
+
+      // Include user_id if logged in
+      try {
+        const { data: { session } } = await window.supabase.auth.getSession();
+        if (session?.user?.id) data.user_id = session.user.id;
+      } catch (e) { /* ignore auth errors */ }
 
       // Fetch with timeout (30 seconds max)
       const controller = new AbortController();
@@ -1420,7 +1426,7 @@ async function initCheckoutPage() {
         window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
         return; // Don't reset button on success - page is navigating
       } else {
-        throw new Error(result.error || result.details?.[0] || 'Gagal memproses pesanan');
+        throw new Error(result.error || 'Gagal memproses pesanan');
       }
     } catch (err) {
       let msg = err.message;

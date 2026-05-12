@@ -38,28 +38,49 @@ export default async function handler(req, res) {
     // 2. VALIDATE INPUT
     const { valid, errors, sanitized } = validateCheckoutInput(req.body);
     if (!valid) {
-      return res.status(400).json({ error: 'Validasi gagal', details: errors });
+      return res.status(400).json({ error: errors.join('. '), details: errors });
     }
 
     // 3. GET REAL PRICES FROM DATABASE
-    const productIds = sanitized.items.map(i => i.product_id); // frontend sends UUID as product_id
-    const { data: dbProducts, error: prodError } = await supabaseAdmin
-      .from('products')
-      .select('id, slug, name, price, images, is_active')
-      .in('id', productIds);
-
-    if (prodError) throw new Error('Gagal mengambil data produk: ' + prodError.message);
+    // Frontend sends product_id which could be UUID (from DB) or slug (from static pages)
+    const productIds = sanitized.items.map(i => i.product_id);
+    
+    // Try lookup by UUID first, fallback to slug
+    const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+    const uuids = productIds.filter(isUUID);
+    const slugs = productIds.filter(id => !isUUID(id));
+    
+    let dbProducts = [];
+    
+    if (uuids.length > 0) {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('id, slug, name, price, images, is_active, stock')
+        .in('id', uuids);
+      if (error) throw new Error('Gagal mengambil data produk: ' + error.message);
+      if (data) dbProducts.push(...data);
+    }
+    
+    if (slugs.length > 0) {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('id, slug, name, price, images, is_active, stock')
+        .in('slug', slugs);
+      if (error) throw new Error('Gagal mengambil data produk: ' + error.message);
+      if (data) dbProducts.push(...data);
+    }
 
     // Check all products exist and are active
     const productMap = {};
-    for (const p of (dbProducts || [])) {
-      productMap[p.id] = p; // Map by id
+    for (const p of dbProducts) {
+      productMap[p.id] = p;
+      productMap[p.slug] = p; // Also map by slug for easy lookup
     }
 
     for (const item of sanitized.items) {
       const dbProd = productMap[item.product_id];
       if (!dbProd) {
-        return res.status(400).json({ error: `Produk "${item.product_id}" tidak ditemukan` });
+        return res.status(400).json({ error: `Produk "${item.product_id}" tidak ditemukan di database` });
       }
       if (!dbProd.is_active) {
         return res.status(400).json({ error: `Produk "${dbProd.name}" sedang tidak tersedia` });
@@ -86,15 +107,10 @@ export default async function handler(req, res) {
     const shippingCost = sanitized.shipping_cost || 0;
     const total = subtotal + shippingCost;
 
-    // 5. STOCK CHECK
-    const { data: stockCheck } = await supabaseAdmin
-      .from('products')
-      .select('id, name, stock')
-      .in('id', productIds);
-    
+    // 5. STOCK CHECK (using data already fetched above)
     for (const item of sanitized.items) {
-      const dbProd = (stockCheck || []).find(p => p.id === productMap[item.product_id]?.id);
-      if (dbProd && dbProd.stock < item.quantity) {
+      const dbProd = productMap[item.product_id];
+      if (dbProd && dbProd.stock !== null && dbProd.stock !== undefined && dbProd.stock < item.quantity) {
         return res.status(400).json({ error: `Maaf, stok "${dbProd.name}" tidak mencukupi (Tersisa: ${dbProd.stock})` });
       }
     }
@@ -106,36 +122,52 @@ export default async function handler(req, res) {
     if (orderNumError) throw new Error('Gagal membuat nomor order: ' + orderNumError.message);
     const orderNumber = orderNumData;
 
-    // 6. INSERT ORDER
-    const { data: newOrder, error: orderError } = await supabaseAdmin
+    // 6. INSERT ORDER (with fallback if shipping columns don't exist yet)
+    const baseOrderData = {
+      user_id: sanitized.user_id,
+      order_number: orderNumber,
+      customer_name: sanitized.customer_name,
+      customer_phone: sanitized.customer_phone,
+      customer_email: sanitized.customer_email,
+      shipping_address: sanitized.shipping_address,
+      city: sanitized.city,
+      postal_code: sanitized.postal_code,
+      province: sanitized.province,
+      notes: sanitized.notes,
+      payment_method: sanitized.payment_method,
+      subtotal,
+      shipping_cost: shippingCost,
+      total,
+      status: 'pending'
+    };
+
+    const shippingMetadata = {
+      shipping_courier_name: sanitized.shipping_courier_name,
+      shipping_method_code: sanitized.shipping_method,
+      destination_area_id: sanitized.destination_area_id,
+      origin_area_id: sanitized.origin_area_id,
+      origin_name: sanitized.origin_name,
+      destination_name: sanitized.destination_name
+    };
+
+    let newOrder, orderError;
+
+    // Try with shipping metadata first
+    ({ data: newOrder, error: orderError } = await supabaseAdmin
       .from('orders')
-      .insert({
-        user_id: sanitized.user_id,
-        order_number: orderNumber,
-        customer_name: sanitized.customer_name,
-        customer_phone: sanitized.customer_phone,
-        customer_email: sanitized.customer_email,
-        shipping_address: sanitized.shipping_address,
-        city: sanitized.city,
-        postal_code: sanitized.postal_code,
-        province: sanitized.province,
-        notes: sanitized.notes,
-        payment_method: sanitized.payment_method,
-        subtotal,
-        shipping_cost: shippingCost,
-        total,
-        status: 'pending',
-        
-        // Shipping Metadata (Biteship)
-        shipping_courier_name: sanitized.shipping_courier_name,
-        shipping_method_code: sanitized.shipping_method,
-        destination_area_id: sanitized.destination_area_id,
-        origin_area_id: sanitized.origin_area_id,
-        origin_name: sanitized.origin_name,
-        destination_name: sanitized.destination_name
-      })
+      .insert({ ...baseOrderData, ...shippingMetadata })
       .select()
-      .single();
+      .single());
+
+    // If failed (possibly missing columns), try without shipping metadata
+    if (orderError && orderError.message?.includes('column')) {
+      console.warn('Shipping columns not found, inserting without them:', orderError.message);
+      ({ data: newOrder, error: orderError } = await supabaseAdmin
+        .from('orders')
+        .insert(baseOrderData)
+        .select()
+        .single());
+    }
 
     if (orderError) throw new Error('Gagal menyimpan order: ' + orderError.message);
 
