@@ -1158,9 +1158,10 @@ async function initCheckoutPage() {
   const form = document.getElementById('checkout-form');
   const summary = document.getElementById('checkout-summary');
   const shippingContainer = document.getElementById('shipping-options');
-  let originAreaId = '';
+  let originData = null; // Full origin object {id, name, ...}
   let destinationData = null;
   let selectedShipping = null;
+  let isSubmitting = false; // Double-submit protection
 
   const searchInput = document.getElementById('kecamatan-search');
   const resultsDiv = document.getElementById('search-results');
@@ -1174,8 +1175,8 @@ async function initCheckoutPage() {
       const { data } = await window.supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
       if (data) {
         const val = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
-        originAreaId = val.id;
-        console.log('✅ Origin ID Loaded:', originAreaId);
+        originData = val; // Store full object
+        console.log('✅ Origin Loaded:', originData.id, originData.name || '');
       }
     } catch (e) { console.error('Error loading origin:', e); }
   };
@@ -1223,7 +1224,7 @@ async function initCheckoutPage() {
   // 3. Fetch Rates Logic
   const fetchRates = async () => {
     if (!destinationData) return;
-    if (!originAreaId) {
+    if (!originData || !originData.id) {
       shippingContainer.innerHTML = `
         <div style="background:#fff1f2; border:1px solid #fda4af; padding:16px; border-radius:12px; color:#9f1239;">
           <strong>⚠️ Konfigurasi Toko Belum Lengkap</strong><br>
@@ -1250,7 +1251,7 @@ async function initCheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          origin_area_id: originAreaId,
+          origin_area_id: originData.id,
           destination_area_id: destinationData.id,
           items: items
         })
@@ -1352,51 +1353,87 @@ async function initCheckoutPage() {
 
   form.onsubmit = async (e) => {
     e.preventDefault();
-    if (!selectedShipping) { alert('Silakan pilih kurir pengiriman!'); return; }
+    
+    // Double-submit protection
+    if (isSubmitting) return;
     
     const btn = document.getElementById('btn-submit-checkout');
     const errDiv = document.getElementById('checkout-error');
+    
+    // Validate prerequisites before locking UI
+    if (!selectedShipping) { alert('Silakan pilih kurir pengiriman terlebih dahulu!'); return; }
+    if (!destinationData) { alert('Silakan pilih kecamatan tujuan terlebih dahulu!'); return; }
+    if (!originData || !originData.id) { 
+      errDiv.textContent = 'Konfigurasi toko belum lengkap. Mohon hubungi admin.';
+      errDiv.style.display = 'block';
+      return;
+    }
+    if (CART.items.length === 0) {
+      errDiv.textContent = 'Keranjang belanja kosong.';
+      errDiv.style.display = 'block';
+      return;
+    }
+    
+    // Lock UI
+    isSubmitting = true;
     btn.disabled = true;
     btn.textContent = 'MEMPROSES...';
     errDiv.style.display = 'none';
 
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    
-    data.shipping_method = selectedShipping.code;
-    data.shipping_courier_name = selectedShipping.name;
-    data.shipping_cost = selectedShipping.price;
-    data.origin_area_id = originData.id;
-    data.origin_name = originData.name;
-    data.destination_name = `${destinationData.name}, ${destinationData.city}`;
-
-    data.items = CART.items.map(i => ({
-      product_id: i.id,
-      size: i.size,
-      quantity: i.qty,
-      weight: i.weight || 300,
-      price: i.price,
-      name: i.name
-    }));
-
     try {
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      data.shipping_method = selectedShipping.code;
+      data.shipping_courier_name = selectedShipping.name;
+      data.shipping_cost = selectedShipping.price;
+      data.origin_area_id = originData.id;
+      data.origin_name = originData.name || '';
+      data.destination_name = `${destinationData.name}, ${destinationData.city}`;
+
+      data.items = CART.items.map(i => ({
+        product_id: i.id,
+        size: i.size,
+        quantity: parseInt(i.qty) || 1,
+        weight: parseInt(i.weight) || 300,
+        price: i.price,
+        name: i.name
+      }));
+
+      // Fetch with timeout (30 seconds max)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const result = await res.json();
       if (res.ok && result.success) {
         CART.items = [];
         CART.save();
         window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
+        return; // Don't reset button on success - page is navigating
       } else {
-        throw new Error(result.error || 'Gagal memproses pesanan');
+        throw new Error(result.error || result.details?.[0] || 'Gagal memproses pesanan');
       }
     } catch (err) {
-      errDiv.textContent = err.message;
+      let msg = err.message;
+      if (err.name === 'AbortError') {
+        msg = 'Koneksi timeout. Silakan coba lagi.';
+      }
+      errDiv.textContent = msg;
       errDiv.style.display = 'block';
+      // Scroll error into view on mobile
+      errDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } finally {
+      // ALWAYS reset button state (unless page is navigating away)
+      isSubmitting = false;
       btn.disabled = false;
       btn.textContent = 'BUAT PESANAN SEKARANG';
     }

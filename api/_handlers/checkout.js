@@ -151,81 +151,109 @@ export default async function handler(req, res) {
 
     if (itemsError) throw new Error('Gagal menyimpan detail order: ' + itemsError.message);
 
-    // 8. SEND NOTIFICATIONS (non-blocking, failures are logged)
+    // 8. SEND NOTIFICATIONS (fire-and-forget, never block checkout response)
     const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
 
+    // Run notifications in background - don't await them
+    const notifyPromises = [];
+
     // Notify Admin
-    const adminMsg = formatAdminNotification(newOrder, orderItemsData);
-    const adminResult = await sendWhatsApp(adminPhone, adminMsg);
-    await supabaseAdmin.from('notifications_log').insert({
-      order_id: newOrder.id,
-      channel: 'whatsapp',
-      provider: 'fonnte',
-      recipient: adminPhone,
-      status: adminResult.success ? 'sent' : 'failed',
-      error_message: adminResult.error || null
-    });
+    notifyPromises.push(
+      (async () => {
+        try {
+          const adminMsg = formatAdminNotification(newOrder, orderItemsData);
+          const adminResult = await sendWhatsApp(adminPhone, adminMsg);
+          await supabaseAdmin.from('notifications_log').insert({
+            order_id: newOrder.id,
+            channel: 'whatsapp',
+            provider: 'fonnte',
+            recipient: adminPhone,
+            status: adminResult.success ? 'sent' : 'failed',
+            error_message: adminResult.error || null
+          });
+        } catch (e) { console.error('Admin WA notification failed:', e.message); }
+      })()
+    );
 
     // Notify Customer
     if (sanitized.customer_phone) {
-      const custMsg = formatCustomerNotification(newOrder, orderItemsData);
-      const custResult = await sendWhatsApp(sanitized.customer_phone, custMsg);
-      await supabaseAdmin.from('notifications_log').insert({
-        order_id: newOrder.id,
-        channel: 'whatsapp',
-        provider: 'fonnte',
-        recipient: sanitized.customer_phone,
-        status: custResult.success ? 'sent' : 'failed',
-        error_message: custResult.error || null
-      });
+      notifyPromises.push(
+        (async () => {
+          try {
+            const custMsg = formatCustomerNotification(newOrder, orderItemsData);
+            const custResult = await sendWhatsApp(sanitized.customer_phone, custMsg);
+            await supabaseAdmin.from('notifications_log').insert({
+              order_id: newOrder.id,
+              channel: 'whatsapp',
+              provider: 'fonnte',
+              recipient: sanitized.customer_phone,
+              status: custResult.success ? 'sent' : 'failed',
+              error_message: custResult.error || null
+            });
+          } catch (e) { console.error('Customer WA notification failed:', e.message); }
+        })()
+      );
     }
 
-    // 9. INITIALIZE LOUVIN TRANSACTION (Automatic Payment)
+    // 9. INITIALIZE LOUVIN TRANSACTION (with 10s timeout, non-critical)
     let louvinData = null;
 
     if (process.env.LOUVIN_API_KEY && sanitized.payment_method !== 'cod') {
-      try {
-        const louvinRes = await fetch('https://api.louvin.dev/create-transaction', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.LOUVIN_API_KEY
-          },
-          body: JSON.stringify({
-            amount: total,
-            payment_type: sanitized.payment_method,
-            customer_name: sanitized.customer_name,
-            customer_email: sanitized.customer_email || 'customer@homedressna.com',
-            description: `Order ${orderNumber}`,
-            reference: orderNumber
-          })
-        });
+      notifyPromises.push(
+        (async () => {
+          try {
+            const louvinController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const louvinTimeout = louvinController ? setTimeout(() => louvinController.abort(), 10000) : null;
 
-        if (louvinRes.ok) {
-          louvinData = await louvinRes.json();
-          
-          if (louvinData.success) {
-            // Update order with Louvin details
-            await supabaseAdmin.from('orders')
-              .update({ 
-                louvin_transaction_id: louvinData.transaction.id,
-                payment_qr_string: louvinData.payment.qr_string || null,
-                payment_va_number: louvinData.payment.va_number || null,
-                payment_expiry: louvinData.payment.expired_at || null,
-                status: 'pending' // ensure status is pending
-              })
-              .eq('id', newOrder.id);
+            const louvinRes = await fetch('https://api.louvin.dev/create-transaction', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.LOUVIN_API_KEY
+              },
+              body: JSON.stringify({
+                amount: total,
+                payment_type: sanitized.payment_method,
+                customer_name: sanitized.customer_name,
+                customer_email: sanitized.customer_email || 'customer@homedressna.com',
+                description: `Order ${orderNumber}`,
+                reference: orderNumber
+              }),
+              ...(louvinController ? { signal: louvinController.signal } : {})
+            });
+
+            if (louvinTimeout) clearTimeout(louvinTimeout);
+
+            if (louvinRes.ok) {
+              louvinData = await louvinRes.json();
+              
+              if (louvinData.success) {
+                await supabaseAdmin.from('orders')
+                  .update({ 
+                    louvin_transaction_id: louvinData.transaction.id,
+                    payment_qr_string: louvinData.payment.qr_string || null,
+                    payment_va_number: louvinData.payment.va_number || null,
+                    payment_expiry: louvinData.payment.expired_at || null,
+                    status: 'pending'
+                  })
+                  .eq('id', newOrder.id);
+              }
+            } else {
+              const errData = await louvinRes.json().catch(() => ({}));
+              console.error('Louvin Error Details:', errData);
+            }
+          } catch (louError) {
+            console.error('Louvin Connection Error:', louError.message);
           }
-        } else {
-          const errData = await louvinRes.json();
-          console.error('Louvin Error Details:', errData);
-        }
-      } catch (louError) {
-        console.error('Louvin Connection Error:', louError);
-      }
+        })()
+      );
     }
 
-    // 10. RETURN SUCCESS
+    // Fire background tasks, but don't wait for them to finish
+    // This ensures the checkout response returns immediately
+    Promise.allSettled(notifyPromises).catch(() => {});
+
+    // 10. RETURN SUCCESS IMMEDIATELY
     return res.status(200).json({
       success: true,
       order: {
@@ -234,13 +262,7 @@ export default async function handler(req, res) {
         status: newOrder.status,
         created_at: newOrder.created_at,
         payment_method: sanitized.payment_method,
-        louvin: louvinData ? {
-          transaction_id: louvinData.transaction.id,
-          qr_string: louvinData.payment.qr_string,
-          va_number: louvinData.payment.va_number,
-          total_payment: louvinData.payment.total_payment,
-          expired_at: louvinData.payment.expired_at
-        } : null
+        louvin: null // Louvin data will be available via track page after background processing
       }
     });
 
@@ -248,7 +270,6 @@ export default async function handler(req, res) {
     console.error('Checkout error:', err);
     return res.status(500).json({
       error: 'Terjadi kesalahan saat memproses pesanan: ' + err.message,
-      details: err.stack,
       fallback_wa: true
     });
   }
