@@ -41,6 +41,7 @@ export default defineConfig({
         adminHero: 'admin/hero.html',
         adminNewsletter: 'admin/newsletter.html',
         adminShipping: 'admin/shipping.html',
+        adminShippingLabel: 'admin/shipping-label.html',
         adminAbout: 'admin/about.html',
       }
     }

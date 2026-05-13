@@ -114,6 +114,12 @@
             </div>
           </div>
 
+          <div id="result-tracking" style="display:none; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:12px; padding:16px; margin-bottom:20px; text-align:center;">
+            <div style="font-size:0.8rem; color:#2e7d32; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Nomor Resi</div>
+            <div id="result-resi" style="font-size:1.3rem; font-weight:800; color:#1b5e20; font-family:monospace; letter-spacing:1px;"></div>
+            <div id="result-courier" style="font-size:0.85rem; color:#388e3c; margin-top:4px;"></div>
+          </div>
+
           <h3 style="margin-bottom:12px;">Detail Pesanan</h3>
           <div id="result-items"></div>
 
@@ -202,6 +208,16 @@
         document.getElementById('result-subtotal').textContent = 'Rp ' + order.subtotal.toLocaleString('id-ID');
         document.getElementById('result-shipping').textContent = 'Rp ' + order.shipping_cost.toLocaleString('id-ID');
         document.getElementById('result-total').textContent = 'Rp ' + order.total.toLocaleString('id-ID');
+
+        // Show tracking/resi info if available
+        const trackingEl = document.getElementById('result-tracking');
+        if (order.tracking_number) {
+          document.getElementById('result-resi').textContent = order.tracking_number;
+          document.getElementById('result-courier').textContent = order.courier_name ? `Kurir: ${order.courier_name}` : '';
+          trackingEl.style.display = 'block';
+        } else {
+          trackingEl.style.display = 'none';
+        }
 
         resultEl.classList.add('is-visible');
       } catch (err) {
