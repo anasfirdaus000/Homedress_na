@@ -19,8 +19,25 @@ export default async function handler(req, res) {
   const user = await verifyAdmin(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  // GET: List orders
+  // GET: List orders (or single order by ?id=)
   if (req.method === 'GET') {
+    // Check if requesting single order
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const singleId = url.searchParams.get('id');
+
+    if (singleId) {
+      // Return single order
+      const { data: order, error } = await supabaseAdmin
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('id', singleId)
+        .single();
+
+      if (error || !order) return res.status(404).json({ error: 'Order tidak ditemukan' });
+      return res.status(200).json({ order });
+    }
+
+    // Return all orders
     const { data, error } = await supabaseAdmin
       .from('orders')
       .select('*, order_items(*)')

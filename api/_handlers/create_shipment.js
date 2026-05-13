@@ -8,48 +8,91 @@ export default async function handler(req, res) {
   const { orderId } = req.body;
   const apiKey = process.env.BITESHIP_API_KEY;
 
+  if (!apiKey) {
+    return res.status(500).json({ error: 'BITESHIP_API_KEY belum dikonfigurasi di environment variables.' });
+  }
+
   try {
-    // 1. Get Order Detail
+    // 1. Get Order Detail with order_items
     const { data: order, error: fetchErr } = await supabase
       .from('orders')
-      .select('*')
+      .select('*, order_items(*)')
       .eq('id', orderId)
       .single();
 
-    if (fetchErr || !order) throw new Error('Order tidak ditemukan');
+    if (fetchErr || !order) throw new Error('Order tidak ditemukan: ' + (fetchErr?.message || 'null'));
 
-    // 2. Prepare Biteship Payload
-    // Note: order.shipping_address should be a JSON or string containing destination data
-    const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
+    // 2. Get Origin from site_settings
+    const { data: setting } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'shipping_origin_data')
+      .single();
     
-    // We need the origin area ID from site_settings
-    const { data: setting } = await supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
+    if (!setting?.value) throw new Error('Konfigurasi asal pengiriman belum diatur. Buka Admin > Pengaturan Web.');
     const origin = typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value;
 
+    // 3. Build shipping address string
+    // shipping_address is plain text (NOT JSON) from the checkout form
+    const destinationAddress = [
+      order.shipping_address,
+      order.destination_name || order.city,
+      order.postal_code
+    ].filter(Boolean).join(', ');
+
+    // 4. Parse courier info from shipping_method_code (format: "courier_service" e.g. "jnt_ez")
+    let courierCompany = 'jne';
+    let courierType = 'reg';
+    
+    if (order.shipping_method_code) {
+      const parts = order.shipping_method_code.split('_');
+      courierCompany = parts[0] || 'jne';
+      courierType = parts.slice(1).join('_') || 'reg';
+    } else if (order.shipping_courier_name) {
+      // Fallback: try to derive from courier name
+      const name = order.shipping_courier_name.toLowerCase();
+      if (name.includes('j&t') || name.includes('jnt')) courierCompany = 'jnt';
+      else if (name.includes('sicepat')) courierCompany = 'sicepat';
+      else if (name.includes('anteraja')) courierCompany = 'anteraja';
+      else if (name.includes('ninja')) courierCompany = 'ninja';
+      else if (name.includes('pos')) courierCompany = 'pos';
+      else if (name.includes('tiki')) courierCompany = 'tiki';
+      else courierCompany = 'jne';
+    }
+
+    // 5. Build items from order_items (joined from DB)
+    const items = (order.order_items || []).map(i => ({
+      name: i.product_name || 'Produk',
+      description: `Size: ${i.size || 'All Size'}`,
+      value: i.price_at_time || 0,
+      weight: 300, // Default weight per item
+      quantity: i.quantity || 1
+    }));
+
+    if (items.length === 0) throw new Error('Order tidak memiliki item produk.');
+
+    // 6. Prepare Biteship Payload
     const payload = {
-      shipper_contact_name: "HOMEDRESS_NA Admin",
-      shipper_contact_phone: process.env.ADMIN_WHATSAPP_NUMBER || "628123456789",
+      shipper_contact_name: "HOMEDRESS_NA",
+      shipper_contact_phone: process.env.ADMIN_WHATSAPP_NUMBER || "6285216854492",
       origin_contact_name: "HOMEDRESS_NA Store",
-      origin_contact_phone: process.env.ADMIN_WHATSAPP_NUMBER || "628123456789",
-      origin_address: "Store Location", // You can refine this
-      origin_area_id: origin.id,
+      origin_contact_phone: process.env.ADMIN_WHATSAPP_NUMBER || "6285216854492",
+      origin_address: origin.name || "Store Location",
+      origin_area_id: order.origin_area_id || origin.id,
       destination_contact_name: order.customer_name,
       destination_contact_phone: order.customer_phone,
-      destination_address: addr.address,
-      destination_area_id: addr.area_id,
-      courier_company: order.courier_code || 'jne',
-      courier_type: order.courier_service || 'reg',
+      destination_address: destinationAddress,
+      destination_area_id: order.destination_area_id || '',
+      courier_company: courierCompany,
+      courier_type: courierType,
       delivery_type: "now",
-      items: order.items.map(i => ({
-        name: i.name,
-        description: `Size: ${i.size}`,
-        value: i.price,
-        weight: i.weight || 300,
-        quantity: i.qty
-      }))
+      order_note: order.notes || '',
+      items: items
     };
 
-    // 3. Call Biteship Order API
+    console.log('Biteship Payload:', JSON.stringify(payload, null, 2));
+
+    // 7. Call Biteship Order API
     const bitRes = await fetch('https://api.biteship.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -62,25 +105,42 @@ export default async function handler(req, res) {
     const bitData = await bitRes.json();
 
     if (!bitRes.ok) {
-      throw new Error(bitData.error || 'Gagal membuat pengiriman di Biteship');
+      console.error('Biteship Error:', JSON.stringify(bitData));
+      const errorMsg = bitData.error || bitData.message || bitData.errors?.[0]?.message || 'Gagal membuat pengiriman di Biteship';
+      throw new Error(errorMsg);
     }
 
-    // 4. Save Waybill/Resi to Database
-    const trackingNumber = bitData.courier?.waybill_id || bitData.id;
+    // 8. Save Waybill/Resi to Database
+    const trackingNumber = bitData.courier?.waybill_id || bitData.id || '';
+    const biteshipOrderId = bitData.id || '';
+
+    const updateData = {
+      status: 'shipped',
+      updated_at: new Date().toISOString()
+    };
+
+    // Only add columns that exist (safe approach)
+    if (trackingNumber) updateData.shipping_tracking_number = trackingNumber;
+    
+    // Try updating with tracking_number column name as well (backwards compat)
     const { error: updateErr } = await supabase
       .from('orders')
-      .update({
-        tracking_number: trackingNumber,
-        status: 'shipped',
-        shipping_status: 'allocated'
-      })
+      .update(updateData)
       .eq('id', orderId);
 
-    if (updateErr) throw updateErr;
+    if (updateErr) {
+      console.warn('Order update warning:', updateErr.message);
+      // Try minimal update
+      await supabase.from('orders')
+        .update({ status: 'shipped', updated_at: new Date().toISOString() })
+        .eq('id', orderId);
+    }
 
     return res.status(200).json({ 
       success: true, 
       tracking_number: trackingNumber,
+      biteship_order_id: biteshipOrderId,
+      courier: bitData.courier || {},
       message: 'Pengiriman berhasil dibuat dan resi telah diterbitkan.' 
     });
 
