@@ -90,6 +90,10 @@ export default async function handler(req, res) {
       items: items
     };
 
+    if (order.payment_method === 'cod') {
+      payload.destination_cash_on_delivery = order.total;
+    }
+
     console.log('Biteship Payload:', JSON.stringify(payload, null, 2));
 
     // 7. Call Biteship Order API
