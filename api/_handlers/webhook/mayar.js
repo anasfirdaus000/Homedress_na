@@ -63,8 +63,29 @@ export default async function handler(req, res) {
 
       if (!order) {
         console.error(`[Mayar Webhook] Order not found: ${orderRef} (invoiceId: ${invoiceId})`);
+        try {
+          await supabaseAdmin.from('notifications_log').insert({
+            channel: 'webhook',
+            provider: 'mayar',
+            recipient: event || 'payment.received',
+            status: 'failed',
+            error_message: `Order not found for ref ${orderRef} (invoiceId: ${invoiceId}). Payload: ${JSON.stringify(data).substring(0, 300)}`
+          });
+        } catch (e) {}
         return res.status(200).json({ success: true, message: 'Order not found' });
       }
+
+      // Log receipt of webhook
+      try {
+        await supabaseAdmin.from('notifications_log').insert({
+          order_id: order.id,
+          channel: 'webhook',
+          provider: 'mayar',
+          recipient: event || 'payment.received',
+          status: 'processing',
+          error_message: `Processing webhook. Payload: ${JSON.stringify(data).substring(0, 400)}`
+        });
+      } catch (e) {}
 
       if (order.status === 'shipped' || order.status === 'completed') {
         return res.status(200).json({ success: true, message: 'Already processed' });
@@ -84,11 +105,13 @@ export default async function handler(req, res) {
 
       // 3. Generate Auto Resi (Biteship)
       let resi = null;
+      let shipErrorLog = '';
       try {
         resi = await autoCreateShipment(order.id);
         console.log(`[Biteship] Auto Resi generated: ${resi}`);
       } catch (shipErr) {
         console.error('[Biteship Error] Failed auto-shipment:', shipErr.message);
+        shipErrorLog = `Auto-resi failed: ${shipErr.message}`;
       }
 
       // 4. Update Status to Shipped (if resi success) or Confirmed
@@ -103,6 +126,18 @@ export default async function handler(req, res) {
       if (updateError) {
         console.error('[Mayar Webhook] Failed to update order status:', updateError.message);
       }
+
+      // Log success or resi warning
+      try {
+        await supabaseAdmin.from('notifications_log').insert({
+          order_id: order.id,
+          channel: 'webhook',
+          provider: 'mayar',
+          recipient: event || 'payment.received',
+          status: updateError ? 'failed' : (resi ? 'sent' : 'warning'),
+          error_message: updateError ? `DB Update Error: ${updateError.message}` : (shipErrorLog || 'Webhook processed successfully, status updated to confirmed')
+        });
+      } catch (e) {}
 
       // 5. Notify Customer via WhatsApp
       if (order.customer_phone) {
@@ -126,6 +161,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('[Mayar Webhook Error]:', err.message);
+    try {
+      await supabaseAdmin.from('notifications_log').insert({
+        channel: 'webhook',
+        provider: 'mayar',
+        recipient: event || 'error',
+        status: 'failed',
+        error_message: `General Error: ${err.message}. Data: ${JSON.stringify(data || {}).substring(0, 300)}`
+      });
+    } catch (e) {}
     // Always return 200 to prevent Mayar from retrying indefinitely
     return res.status(200).json({ success: false, error: err.message });
   }
