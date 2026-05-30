@@ -20,23 +20,56 @@ export async function autoCreateShipment(orderId) {
     if (order.tracking_number) return order.tracking_number; // Already has resi
 
     // 2. Prepare Biteship Payload
-    const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
+    let destinationAddress = '';
+    let destinationAreaId = '';
+
+    try {
+      const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
+      destinationAddress = (addr && typeof addr === 'object' && addr.address) ? addr.address : order.shipping_address;
+      destinationAreaId = (addr && typeof addr === 'object' && addr.area_id) ? addr.area_id : (order.destination_area_id || '');
+    } catch (e) {
+      destinationAddress = [
+        order.shipping_address,
+        order.destination_name || order.city,
+        order.postal_code
+      ].filter(Boolean).join(', ');
+      destinationAreaId = order.destination_area_id || '';
+    }
+
     const { data: setting } = await supabase.from('site_settings').select('value').eq('key', 'shipping_origin_data').single();
     const origin = typeof setting.value === 'string' ? JSON.parse(setting.value) : setting.value;
+
+    let courierCompany = 'jne';
+    let courierType = 'reg';
+    
+    if (order.shipping_method_code) {
+      const parts = order.shipping_method_code.split('_');
+      courierCompany = parts[0] || 'jne';
+      courierType = parts.slice(1).join('_') || 'reg';
+    } else if (order.shipping_courier_name) {
+      const name = order.shipping_courier_name.toLowerCase();
+      if (name.includes('j&t') || name.includes('jnt')) courierCompany = 'jnt';
+      else if (name.includes('sicepat')) courierCompany = 'sicepat';
+      else if (name.includes('anteraja')) courierCompany = 'anteraja';
+      else if (name.includes('ninja')) courierCompany = 'ninja';
+      else if (name.includes('pos')) courierCompany = 'pos';
+      else if (name.includes('tiki')) courierCompany = 'tiki';
+      else courierCompany = 'jne';
+    }
 
     const payload = {
       shipper_contact_name: "HOMEDRESS_NA Admin",
       shipper_contact_phone: process.env.ADMIN_WHATSAPP_NUMBER || "62895405204744",
       origin_contact_name: "HOMEDRESS_NA Store",
       origin_contact_phone: process.env.ADMIN_WHATSAPP_NUMBER || "62895405204744",
-      origin_address: "Sindangmulih RT.004/004, sukamenak, purbaratu, kota tasikmalaya",
-      origin_area_id: origin.id,
+      origin_address: origin.name || "Store Location",
+      origin_area_id: order.origin_area_id || origin.id,
       destination_contact_name: order.customer_name,
       destination_contact_phone: order.customer_phone,
-      destination_address: addr.address,
-      destination_area_id: addr.area_id,
-      courier_company: order.shipping_courier_code || 'jne',
-      courier_type: order.shipping_courier_service || 'reg',
+      destination_address: destinationAddress,
+      destination_area_id: destinationAreaId,
+      courier_company: courierCompany,
+      courier_type: courierType,
       delivery_type: "now",
       items: order.order_items.map(i => ({
         name: i.product_name,

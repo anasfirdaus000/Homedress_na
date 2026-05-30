@@ -17,7 +17,16 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { event, data } = req.body;
+  let body = req.body;
+  if (body && typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      console.error('[Mayar Webhook] Failed to parse body string:', e.message);
+    }
+  }
+
+  const { event, data } = body || {};
   console.log(`[Mayar Webhook] Event: ${event}`, JSON.stringify(data).substring(0, 200));
 
   try {
