@@ -52,7 +52,7 @@ export function validateCheckoutInput(body) {
   }
 
   // Payment method
-  const validPayments = ['transfer', 'ewallet', 'cod', 'qris', 'bni_va', 'bri_va', 'permata_va', 'gopay', 'shopeepay'];
+  const validPayments = ['online', 'cod', 'transfer', 'ewallet', 'qris', 'bni_va', 'bri_va', 'permata_va', 'gopay', 'shopeepay'];
   if (body.payment_method && !validPayments.includes(body.payment_method)) {
     errors.push(`Metode pembayaran "${body.payment_method}" tidak valid`);
   }

@@ -227,65 +227,77 @@ export default async function handler(req, res) {
       );
     }
 
-    // 9. INITIALIZE LOUVIN TRANSACTION (with 10s timeout, non-critical)
-    let louvinData = null;
+    // 9. INITIALIZE MAYAR PAYMENT (synchronous for non-COD orders)
+    let paymentUrl = null;
+    let mayarInvoiceId = null;
 
-    if (process.env.LOUVIN_API_KEY && sanitized.payment_method !== 'cod') {
-      notifyPromises.push(
-        (async () => {
-          try {
-            const louvinController = typeof AbortController !== 'undefined' ? new AbortController() : null;
-            const louvinTimeout = louvinController ? setTimeout(() => louvinController.abort(), 10000) : null;
+    if (process.env.MAYAR_API_KEY && sanitized.payment_method !== 'cod') {
+      try {
+        const mayarBaseUrl = process.env.MAYAR_IS_PRODUCTION === 'true'
+          ? 'https://api.mayar.id'
+          : 'https://api.mayar.club';
 
-            const louvinRes = await fetch('https://api.louvin.dev/create-transaction', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.LOUVIN_API_KEY
-              },
-              body: JSON.stringify({
-                amount: total,
-                payment_type: sanitized.payment_method,
-                customer_name: sanitized.customer_name,
-                customer_email: sanitized.customer_email || 'customer@homedressna.com',
-                description: `Order ${orderNumber}`,
-                reference: orderNumber
-              }),
-              ...(louvinController ? { signal: louvinController.signal } : {})
-            });
+        const mayarController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const mayarTimeout = mayarController ? setTimeout(() => mayarController.abort(), 15000) : null;
 
-            if (louvinTimeout) clearTimeout(louvinTimeout);
+        // Determine redirect URL based on environment
+        const siteUrl = process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : (process.env.SITE_URL || 'https://homedressna.com');
 
-            if (louvinRes.ok) {
-              louvinData = await louvinRes.json();
-              
-              if (louvinData.success) {
-                await supabaseAdmin.from('orders')
-                  .update({ 
-                    louvin_transaction_id: louvinData.transaction.id,
-                    payment_qr_string: louvinData.payment.qr_string || null,
-                    payment_va_number: louvinData.payment.va_number || null,
-                    payment_expiry: louvinData.payment.expired_at || null,
-                    status: 'pending'
-                  })
-                  .eq('id', newOrder.id);
-              }
-            } else {
-              const errData = await louvinRes.json().catch(() => ({}));
-              console.error('Louvin Error Details:', errData);
-            }
-          } catch (louError) {
-            console.error('Louvin Connection Error:', louError.message);
+        const mayarRes = await fetch(`${mayarBaseUrl}/hl/v1/invoice/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.MAYAR_API_KEY}`
+          },
+          body: JSON.stringify({
+            name: sanitized.customer_name,
+            email: sanitized.customer_email || 'customer@homedressna.com',
+            mobile: sanitized.customer_phone,
+            amount: total,
+            description: `Order ${orderNumber}`,
+            redirectUrl: `${siteUrl}/order-confirmation.html?order=${orderNumber}`,
+            expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          }),
+          ...(mayarController ? { signal: mayarController.signal } : {})
+        });
+
+        if (mayarTimeout) clearTimeout(mayarTimeout);
+
+        if (mayarRes.ok) {
+          const mayarData = await mayarRes.json();
+          console.log('[Mayar] Invoice created:', JSON.stringify(mayarData).substring(0, 300));
+
+          // Extract payment URL and invoice ID from response
+          mayarInvoiceId = mayarData?.data?.id || mayarData?.id || null;
+          paymentUrl = mayarData?.data?.link || mayarData?.data?.paymentUrl || mayarData?.link || null;
+
+          if (mayarInvoiceId || paymentUrl) {
+            // Update order with Mayar payment data
+            const updateFields = {};
+            if (mayarInvoiceId) updateFields.mayar_invoice_id = mayarInvoiceId;
+            if (paymentUrl) updateFields.mayar_payment_url = paymentUrl;
+
+            await supabaseAdmin.from('orders')
+              .update(updateFields)
+              .eq('id', newOrder.id);
           }
-        })()
-      );
+        } else {
+          const errData = await mayarRes.text().catch(() => 'Unknown error');
+          console.error('[Mayar] Error creating invoice:', mayarRes.status, errData);
+        }
+      } catch (mayarError) {
+        console.error('[Mayar] Connection Error:', mayarError.message);
+        // Payment gateway failure is non-critical - order is still created
+        // Customer can be redirected to manual payment instructions
+      }
     }
 
-    // Fire background tasks, but don't wait for them to finish
-    // This ensures the checkout response returns immediately
+    // Fire background notification tasks
     Promise.allSettled(notifyPromises).catch(() => {});
 
-    // 10. RETURN SUCCESS IMMEDIATELY
+    // 10. RETURN SUCCESS
     return res.status(200).json({
       success: true,
       order: {
@@ -293,9 +305,9 @@ export default async function handler(req, res) {
         total: newOrder.total,
         status: newOrder.status,
         created_at: newOrder.created_at,
-        payment_method: sanitized.payment_method,
-        louvin: null // Louvin data will be available via track page after background processing
-      }
+        payment_method: sanitized.payment_method
+      },
+      payment_url: paymentUrl
     });
 
   } catch (err) {

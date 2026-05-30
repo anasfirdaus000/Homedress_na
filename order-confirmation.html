@@ -25,7 +25,13 @@
     .confirmation__btn--primary { background: var(--color-fg); color: var(--color-bg); }
     .confirmation__btn--outline { background: transparent; color: var(--color-fg); border: 2px solid var(--color-fg); }
     .confirmation__btn:hover { opacity: 0.85; }
+    .confirmation__btn--pay { background: #16a34a; color: #fff; font-size: 1.1rem; padding: 16px 32px; animation: pulse-pay 2s infinite; }
+    @keyframes pulse-pay { 0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 50% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } }
     .confirmation__wa { background: #25d366; color: #fff; border-radius: 6px; padding: 12px 24px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+    .payment-pending-notice { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center; }
+    .payment-pending-notice h3 { color: #b45309; margin-bottom: 12px; }
+    .payment-success-notice { background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center; }
+    .payment-success-notice h3 { color: #166534; margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -65,20 +71,26 @@
         </div>
       </div>
 
-      <!-- PAYMENT INSTRUCTIONS (Dynamic) -->
-      <div id="payment-instructions" style="display:none; background: #fff; border: 2px solid var(--color-accent); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-        <h3 style="margin-bottom:16px; font-size:1.4rem;">Instruksi Pembayaran</h3>
-        <div id="qris-container" style="display:none; text-align:center;">
-          <p style="margin-bottom:12px;">Scan QRIS di bawah ini:</p>
-          <img id="qris-image" src="" style="width:200px; height:200px; margin:0 auto 12px; display:block;"/>
-          <p style="font-size:0.8rem; color:#888;">QRIS dapat digunakan untuk GoPay, OVO, Dana, LinkAja, dan Mobile Banking.</p>
-        </div>
-        <div id="va-container" style="display:none;">
-          <p style="margin-bottom:8px;">Silakan transfer ke Virtual Account:</p>
-          <div style="background:#f0f0f0; padding:16px; border-radius:8px; font-size:1.8rem; font-weight:800; text-align:center; letter-spacing:2px; margin-bottom:12px;" id="va-number"></div>
-          <p style="font-size:0.9rem; color:#666;">Bank: <strong id="va-bank-name">—</strong></p>
-          <p style="font-size:0.8rem; color:#888; margin-top:12px;">Batas waktu pembayaran: <span id="va-expiry">—</span></p>
-        </div>
+      <!-- PAYMENT PENDING NOTICE (for online payments via Mayar) -->
+      <div id="payment-pending" class="payment-pending-notice" style="display:none;">
+        <h3>⏳ Menunggu Pembayaran</h3>
+        <p style="margin-bottom:16px; color:#92400e;">Silakan selesaikan pembayaran Anda melalui halaman pembayaran Mayar.</p>
+        <a id="pay-now-btn" href="#" class="confirmation__btn confirmation__btn--pay" target="_blank" rel="noopener">
+          💳 BAYAR SEKARANG
+        </a>
+        <p style="font-size:0.8rem; color:#92400e; margin-top:12px;">Anda akan diarahkan ke halaman pembayaran aman dari Mayar.id</p>
+      </div>
+
+      <!-- PAYMENT SUCCESS NOTICE -->
+      <div id="payment-success" class="payment-success-notice" style="display:none;">
+        <h3>✅ Pembayaran Berhasil!</h3>
+        <p style="color:#166534;">Pesanan Anda sedang diproses dan akan segera dikirim.</p>
+      </div>
+
+      <!-- COD NOTICE -->
+      <div id="cod-notice" style="display:none; background:#f0f9ff; border:2px solid #3b82f6; border-radius:12px; padding:24px; margin-bottom:24px; text-align:center;">
+        <h3 style="color:#1e40af; margin-bottom:8px;">🚚 Pesanan COD</h3>
+        <p style="color:#1e40af;">Siapkan pembayaran tunai saat kurir mengantarkan paket Anda.</p>
       </div>
 
       <div class="confirmation__actions">
@@ -102,49 +114,81 @@
         const order = data.order;
         document.getElementById('conf-order-number').textContent = order.order_number;
         document.getElementById('conf-total').textContent = 'Rp ' + order.total.toLocaleString('id-ID');
-        
-        if (order.status === 'paid') {
-          document.getElementById('conf-status-text').innerHTML = '✅ Pembayaran Berhasil';
-          document.getElementById('conf-status-icon').textContent = '🛍️';
-          document.getElementById('payment-instructions').style.display = 'none';
-        } else {
-          // Show instructions
-          const instr = document.getElementById('payment-instructions');
-          if (order.payment_qr) {
-            instr.style.display = 'block';
-            document.getElementById('qris-container').style.display = 'block';
-            document.getElementById('qris-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(order.payment_qr)}`;
-          } else if (order.payment_va) {
-            instr.style.display = 'block';
-            document.getElementById('va-container').style.display = 'block';
-            document.getElementById('va-number').textContent = order.payment_va;
-            document.getElementById('va-bank-name').textContent = order.payment_method.split('_')[0].toUpperCase();
-            if (order.payment_expiry) {
-              document.getElementById('va-expiry').textContent = new Date(order.payment_expiry).toLocaleString('id-ID');
-            }
-          }
-        }
+
+        updateStatusUI(order);
       } catch (e) {
         console.error('Failed to load order:', e);
       }
     }
 
+    function updateStatusUI(order) {
+      const isPaid = ['paid', 'confirmed', 'shipped', 'completed'].includes(order.status);
+      const isCOD = order.payment_method === 'cod';
+
+      if (isPaid) {
+        // Payment confirmed
+        document.getElementById('conf-status-text').innerHTML = '✅ Pembayaran Berhasil';
+        document.getElementById('conf-status-icon').textContent = '🛍️';
+        document.getElementById('payment-pending').style.display = 'none';
+        document.getElementById('payment-success').style.display = 'block';
+        document.getElementById('cod-notice').style.display = 'none';
+      } else if (isCOD) {
+        // COD order
+        document.getElementById('conf-status-text').innerHTML = '🚚 Bayar di Tempat (COD)';
+        document.getElementById('conf-status-icon').textContent = '📦';
+        document.getElementById('cod-notice').style.display = 'block';
+        document.getElementById('payment-pending').style.display = 'none';
+      } else {
+        // Online payment pending - show Mayar pay button
+        document.getElementById('conf-status-text').innerHTML = '⏳ Menunggu Pembayaran';
+        const pendingDiv = document.getElementById('payment-pending');
+        const payBtn = document.getElementById('pay-now-btn');
+
+        if (order.payment_url) {
+          pendingDiv.style.display = 'block';
+          payBtn.href = order.payment_url;
+        } else {
+          // No payment URL yet (still being created), show waiting message
+          pendingDiv.style.display = 'block';
+          payBtn.style.display = 'none';
+          pendingDiv.querySelector('p').textContent = 'Link pembayaran sedang disiapkan, mohon tunggu sebentar...';
+        }
+      }
+    }
+
     loadOrderDetails();
 
-    // Polling status
+    // Poll for status updates every 5 seconds
     if (orderNumber) {
       const poll = setInterval(async () => {
         try {
           const res = await fetch(`/api/track?order=${orderNumber}`);
           const data = await res.json();
-          if (data.order && data.order.status === 'paid') {
-            document.getElementById('conf-status-text').innerHTML = '✅ Pembayaran Berhasil';
-            document.getElementById('conf-status-icon').textContent = '🛍️';
-            document.getElementById('payment-instructions').style.display = 'none';
+          if (!data.success || !data.order) return;
+
+          const order = data.order;
+          updateStatusUI(order);
+
+          // Update pay button if payment URL becomes available
+          if (order.payment_url) {
+            const payBtn = document.getElementById('pay-now-btn');
+            if (payBtn) {
+              payBtn.href = order.payment_url;
+              payBtn.style.display = '';
+              const pendingDiv = document.getElementById('payment-pending');
+              if (pendingDiv) pendingDiv.querySelector('p').textContent = 'Silakan selesaikan pembayaran Anda melalui halaman pembayaran Mayar.';
+            }
+          }
+
+          // Stop polling when paid
+          if (['paid', 'confirmed', 'shipped', 'completed'].includes(order.status)) {
             clearInterval(poll);
           }
         } catch (e) {}
       }, 5000);
+
+      // Stop polling after 30 minutes
+      setTimeout(() => clearInterval(poll), 30 * 60 * 1000);
     }
   </script>
   <script type="module" src="/main.js"></script>

@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     // Find order by number + phone (if provided)
     let query = supabaseAdmin
       .from('orders')
-      .select('id, order_number, customer_name, status, shipping_status, shipping_tracking_number, shipping_courier_name, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry')
+      .select('id, order_number, customer_name, status, shipping_status, shipping_tracking_number, shipping_courier_name, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry, mayar_invoice_id, mayar_payment_url')
       .eq('order_number', finalOrderNumber);
 
     if (phone) {
@@ -105,6 +105,7 @@ export default async function handler(req, res) {
         payment_qr: order.payment_qr_string,
         payment_va: order.payment_va_number,
         payment_expiry: order.payment_expiry,
+        payment_url: order.mayar_payment_url || null,
         items: items || []
       }
     });

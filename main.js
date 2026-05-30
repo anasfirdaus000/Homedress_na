@@ -1423,7 +1423,14 @@ async function initCheckoutPage() {
       if (res.ok && result.success) {
         CART.items = [];
         CART.save();
-        window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
+        
+        // For online payments with Mayar: redirect to payment page
+        // For COD or if payment URL not available: go to order confirmation
+        if (result.payment_url && result.order.payment_method !== 'cod') {
+          window.location.href = result.payment_url;
+        } else {
+          window.location.href = `/order-confirmation.html?order=${result.order.order_number}`;
+        }
         return; // Don't reset button on success - page is navigating
       } else {
         throw new Error(result.error || 'Gagal memproses pesanan');

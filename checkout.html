@@ -121,26 +121,17 @@
               
               <h3 style="margin-top:24px; margin-bottom:16px; font-size:1.1rem; font-weight:600;">Metode Pembayaran</h3>
               <div class="checkout-payment-opt" style="display:flex; flex-direction:column; gap:12px;">
-                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
-                  <input type="radio" name="payment_method" value="qris" checked style="accent-color:var(--color-accent);"/>
-                  <span style="font-weight:500;">QRIS (Otomatis)</span>
+                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:16px; border:2px solid var(--color-accent); border-radius:8px; transition:0.2s; background:#f0fdf4;">
+                  <input type="radio" name="payment_method" value="online" checked style="accent-color:var(--color-accent);"/>
+                  <div>
+                    <div style="font-weight:700; color:#166534;">💳 Pembayaran Online</div>
+                    <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">QRIS, Transfer Bank (VA), GoPay, OVO, DANA, ShopeePay, Kartu Kredit</div>
+                  </div>
                 </label>
-                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
-                  <input type="radio" name="payment_method" value="bni_va" style="accent-color:var(--color-accent);"/>
-                  <span style="font-weight:500;">BNI Virtual Account</span>
-                </label>
-                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
-                  <input type="radio" name="payment_method" value="bri_va" style="accent-color:var(--color-accent);"/>
-                  <span style="font-weight:500;">BRI Virtual Account</span>
-                </label>
-                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s;">
-                  <input type="radio" name="payment_method" value="gopay" style="accent-color:var(--color-accent);"/>
-                  <span style="font-weight:500;">GoPay</span>
-                </label>
-                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s; background:#f8fafc;">
+                <label class="payment-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:16px; border:1px solid #cbd5e1; border-radius:8px; transition:0.2s; background:#f8fafc;">
                   <input type="radio" name="payment_method" value="cod" style="accent-color:var(--color-accent);"/>
                   <div>
-                    <div style="font-weight:700; color:var(--color-accent);">Bayar di Tempat (COD)</div>
+                    <div style="font-weight:700; color:var(--color-accent);">🚚 Bayar di Tempat (COD)</div>
                     <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">Bayar cash ke kurir saat paket tiba</div>
                   </div>
                 </label>
