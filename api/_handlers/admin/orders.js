@@ -113,6 +113,38 @@ export default async function handler(req, res) {
       if (order.customer_phone) await sendWhatsApp(order.customer_phone, msg);
     }
 
+    // 4. Biteship Shipment Cancellation
+    if (status === 'cancelled') {
+      const biteshipOrderId = order.tracking_number || (order.shipping_tracking_number?.length > 15 ? order.shipping_tracking_number : null);
+      const apiKey = process.env.BITESHIP_API_KEY;
+
+      if (biteshipOrderId && apiKey) {
+        try {
+          console.log(`[Biteship] Attempting to cancel shipment for order ${order.order_number} (ID: ${biteshipOrderId})...`);
+          const cancelRes = await fetch(`https://api.biteship.com/v1/orders/${biteshipOrderId}/cancel`, {
+            method: 'POST',
+            headers: {
+              'Authorization': apiKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              cancellation_reason_code: 'others',
+              cancellation_reason: 'Pesanan dibatalkan oleh admin toko'
+            })
+          });
+
+          const cancelData = await cancelRes.json();
+          if (cancelRes.ok) {
+            console.log(`[Biteship] Shipment cancelled successfully for order ${order.order_number}`);
+          } else {
+            console.error(`[Biteship Error] Failed to cancel shipment:`, cancelData.error || cancelData.message || (cancelData.errors && cancelData.errors[0]?.message));
+          }
+        } catch (shipErr) {
+          console.error('[Biteship Error] Connection error during cancellation:', shipErr.message);
+        }
+      }
+    }
+
     return res.status(200).json({ success: true, order });
   }
 

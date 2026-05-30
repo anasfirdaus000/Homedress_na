@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     // Mayar sends order reference in the description field ("Order HDN-XXXX")
     // or in custom metadata. We extract the order number.
     const description = data?.description || data?.name || '';
-    const orderRefMatch = description.match(/(HDN-\d+)/i);
+    const orderRefMatch = description.match(/(HDN-[\w-]+)/i);
     const orderRef = orderRefMatch ? orderRefMatch[1] : (data?.reference || data?.id);
 
     if (!orderRef) {
@@ -35,15 +35,25 @@ export default async function handler(req, res) {
     console.log(`[Mayar Webhook] Processing order: ${orderRef}`);
 
     if (event === 'payment.received') {
-      // 1. Fetch Order with Items
+      // 1. Fetch Order with Items (match by order number OR invoice ID OR payment URL)
+      let orConditions = `order_number.eq.${orderRef}`;
+      const invoiceId = data?.invoiceId || data?.id;
+      if (invoiceId) {
+        orConditions += `,mayar_invoice_id.eq.${invoiceId}`;
+      }
+      const paymentUrl = data?.link || data?.paymentUrl || data?.payment_link;
+      if (paymentUrl) {
+        orConditions += `,mayar_payment_url.eq.${paymentUrl}`;
+      }
+
       const { data: order } = await supabaseAdmin
         .from('orders')
         .select('*, order_items(*)')
-        .eq('order_number', orderRef)
+        .or(orConditions)
         .single();
 
       if (!order) {
-        console.error(`[Mayar Webhook] Order not found: ${orderRef}`);
+        console.error(`[Mayar Webhook] Order not found: ${orderRef} (invoiceId: ${invoiceId})`);
         return res.status(200).json({ success: true, message: 'Order not found' });
       }
 

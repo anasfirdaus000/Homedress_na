@@ -48,8 +48,26 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Nomor HP wajib diisi untuk pelacakan penuh' });
   }
 
-  // Sanitize phone if provided
-  const phone = customer_phone ? customer_phone.replace(/[\s\-()]/g, '') : null;
+  // Generate phone number variations (+62, 62, 08) for robust lookup
+  let phoneVariations = [];
+  if (customer_phone) {
+    const cleanDigits = customer_phone.replace(/[^\d+]/g, '');
+    let base = '';
+    if (cleanDigits.startsWith('+62')) {
+      base = cleanDigits.substring(3);
+    } else if (cleanDigits.startsWith('62')) {
+      base = cleanDigits.substring(2);
+    } else if (cleanDigits.startsWith('0')) {
+      base = cleanDigits.substring(1);
+    } else {
+      base = cleanDigits;
+    }
+    phoneVariations = [
+      `0${base}`,
+      `62${base}`,
+      `+62${base}`
+    ];
+  }
 
   try {
     // Find order by number + phone (if provided)
@@ -58,8 +76,8 @@ export default async function handler(req, res) {
       .select('id, order_number, customer_name, status, shipping_status, shipping_tracking_number, shipping_courier_name, subtotal, shipping_cost, total, payment_method, created_at, payment_qr_string, payment_va_number, payment_expiry, mayar_invoice_id, mayar_payment_url')
       .eq('order_number', finalOrderNumber);
 
-    if (phone) {
-      query = query.eq('customer_phone', phone);
+    if (phoneVariations.length > 0) {
+      query = query.in('customer_phone', phoneVariations);
     }
 
     const { data: order, error } = await query.single();

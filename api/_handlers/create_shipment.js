@@ -125,6 +125,7 @@ export default async function handler(req, res) {
 
     // Only add columns that exist (safe approach)
     if (trackingNumber) updateData.shipping_tracking_number = trackingNumber;
+    if (biteshipOrderId) updateData.tracking_number = biteshipOrderId;
     
     // Try updating with tracking_number column name as well (backwards compat)
     const { error: updateErr } = await supabase

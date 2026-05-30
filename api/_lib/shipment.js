@@ -64,10 +64,12 @@ export async function autoCreateShipment(orderId) {
     if (!bitRes.ok) throw new Error(bitData.error || 'Biteship API Error');
 
     const trackingNumber = bitData.courier?.waybill_id || bitData.id;
+    const biteshipOrderId = bitData.id;
 
     // 4. Update Database
     await supabase.from('orders').update({
-      tracking_number: trackingNumber,
+      shipping_tracking_number: trackingNumber,
+      tracking_number: biteshipOrderId,
       status: 'shipped',
       shipping_status: 'allocated'
     }).eq('id', orderId);
