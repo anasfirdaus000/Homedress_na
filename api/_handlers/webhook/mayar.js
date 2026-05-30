@@ -69,7 +69,7 @@ export default async function handler(req, res) {
             provider: 'mayar',
             recipient: event || 'payment.received',
             status: 'failed',
-            error_message: `Order not found for ref ${orderRef} (invoiceId: ${invoiceId}). Payload: ${JSON.stringify(data).substring(0, 300)}`
+            error_message: `Order not found for ref ${orderRef} (invoiceId: ${invoiceId}). Payload: ${JSON.stringify(body)}`
           });
         } catch (e) {}
         return res.status(200).json({ success: true, message: 'Order not found' });
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
           provider: 'mayar',
           recipient: event || 'payment.received',
           status: 'processing',
-          error_message: `Processing webhook. Payload: ${JSON.stringify(data).substring(0, 400)}`
+          error_message: `Processing webhook. Payload: ${JSON.stringify(body)}`
         });
       } catch (e) {}
 
@@ -167,7 +167,7 @@ export default async function handler(req, res) {
         provider: 'mayar',
         recipient: event || 'error',
         status: 'failed',
-        error_message: `General Error: ${err.message}. Data: ${JSON.stringify(data || {}).substring(0, 300)}`
+        error_message: `General Error: ${err.message}. Body: ${JSON.stringify(body || {})}`
       });
     } catch (e) {}
     // Always return 200 to prevent Mayar from retrying indefinitely
