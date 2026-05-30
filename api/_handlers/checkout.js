@@ -245,6 +245,21 @@ export default async function handler(req, res) {
           ? `https://${process.env.VERCEL_URL}`
           : (process.env.SITE_URL || 'https://homedressna.com');
 
+        // Build items list for Mayar invoice API
+        const mayarItems = orderItemsData.map(item => ({
+          quantity: item.quantity,
+          rate: item.price_at_time,
+          description: `${item.product_name}${item.size ? ` (Size: ${item.size})` : ''}`
+        }));
+
+        if (shippingCost > 0) {
+          mayarItems.push({
+            quantity: 1,
+            rate: shippingCost,
+            description: `Ongkos Kirim (${sanitized.shipping_courier_name || 'Kurir'})`
+          });
+        }
+
         const mayarRes = await fetch(`${mayarBaseUrl}/hl/v1/invoice/create`, {
           method: 'POST',
           headers: {
@@ -255,10 +270,10 @@ export default async function handler(req, res) {
             name: sanitized.customer_name,
             email: sanitized.customer_email || 'customer@homedressna.com',
             mobile: sanitized.customer_phone,
-            amount: total,
             description: `Order ${orderNumber}`,
             redirectUrl: `${siteUrl}/order-confirmation.html?order=${orderNumber}`,
-            expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            items: mayarItems
           }),
           ...(mayarController ? { signal: mayarController.signal } : {})
         });
