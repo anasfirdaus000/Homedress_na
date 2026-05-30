@@ -30,23 +30,25 @@ export default async function handler(req, res) {
   console.log(`[Mayar Webhook] Event: ${event}`, JSON.stringify(data).substring(0, 200));
 
   try {
-    // Mayar sends order reference in the description field ("Order HDN-XXXX")
-    // or in custom metadata. We extract the order number.
-    const description = data?.description || data?.name || '';
+    // Mayar sends order reference in productDescription ("Order HDN-XXXX")
+    const description = data?.productDescription || data?.description || data?.name || '';
     const orderRefMatch = description.match(/(HDN-[\w-]+)/i);
-    const orderRef = orderRefMatch ? orderRefMatch[1] : (data?.reference || data?.id);
+    
+    // Mayar passes the Invoice ID under productId in payment.received webhook
+    const invoiceId = data?.productId || data?.invoiceId || data?.id;
+    
+    const orderRef = orderRefMatch ? orderRefMatch[1] : (data?.reference || invoiceId);
 
     if (!orderRef) {
       console.log('[Mayar Webhook] No order reference found in payload');
       return res.status(200).json({ success: true, message: 'No reference found' });
     }
 
-    console.log(`[Mayar Webhook] Processing order: ${orderRef}`);
+    console.log(`[Mayar Webhook] Processing order: ${orderRef} (invoiceId: ${invoiceId})`);
 
     if (event === 'payment.received') {
       // 1. Fetch Order with Items (match by order number OR invoice ID OR payment URL)
       let orConditions = `order_number.eq.${orderRef}`;
-      const invoiceId = data?.invoiceId || data?.id;
       if (invoiceId) {
         orConditions += `,mayar_invoice_id.eq.${invoiceId}`;
       }
